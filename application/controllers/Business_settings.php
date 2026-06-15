@@ -104,6 +104,10 @@ class Business_settings extends EA_Controller
             $settings = request('business_settings', []);
 
             foreach ($settings as $setting) {
+                if (($setting['name'] ?? null) === 'appointment_status_options') {
+                    continue;
+                }
+
                 $existing_setting = $this->settings_model->query()->where('name', $setting['name'])->get()->row_array();
 
                 if (!empty($existing_setting)) {
@@ -136,13 +140,17 @@ class Business_settings extends EA_Controller
             }
 
             check('working_plan', 'json');
+            check('appointment_type', 'string|null');
 
             $working_plan = request('working_plan');
+            $appointment_type = request('appointment_type', APPOINTMENT_TYPE_BOOKING);
+            $setting_name =
+                $appointment_type === APPOINTMENT_TYPE_WALKIN ? 'working_plan_walkin' : 'working_plan';
 
             $providers = $this->providers_model->get();
 
             foreach ($providers as $provider) {
-                $this->providers_model->set_setting($provider['id'], 'working_plan', $working_plan);
+                $this->providers_model->set_setting($provider['id'], $setting_name, $working_plan);
             }
 
             response();

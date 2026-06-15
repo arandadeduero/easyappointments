@@ -262,6 +262,17 @@ class Providers_model extends EA_Model
         $exceptions = $this->working_plan_exceptions_model->get_all_by_provider($provider_id);
         $settings['working_plan_exceptions'] = json_encode($exceptions);
 
+        if (empty($settings['working_plan_walkin'])) {
+            $settings['working_plan_walkin'] = $settings['working_plan'] ?? setting(
+                'company_working_plan_walkin',
+                setting('company_working_plan'),
+            );
+        }
+
+        if (empty($settings['working_plan_walkin_exceptions'])) {
+            $settings['working_plan_walkin_exceptions'] = '[]';
+        }
+
         return $settings;
     }
 

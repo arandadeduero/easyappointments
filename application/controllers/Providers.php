@@ -50,6 +50,8 @@ class Providers extends EA_Controller
         'password',
         'working_plan',
         'working_plan_exceptions',
+        'working_plan_walkin',
+        'working_plan_walkin_exceptions',
         'notifications',
         'calendar_view',
     ];
@@ -57,6 +59,8 @@ class Providers extends EA_Controller
     public array $optional_provider_setting_fields = [
         'working_plan' => null,
         'working_plan_exceptions' => '{}',
+        'working_plan_walkin' => null,
+        'working_plan_walkin_exceptions' => '[]',
     ];
 
     public array $allowed_service_fields = ['id', 'name'];
@@ -77,6 +81,10 @@ class Providers extends EA_Controller
         $this->load->library('webhooks_client');
 
         $this->optional_provider_setting_fields['working_plan'] = setting('company_working_plan');
+        $this->optional_provider_setting_fields['working_plan_walkin'] = setting(
+            'company_working_plan_walkin',
+            setting('company_working_plan'),
+        );
     }
 
     /**
@@ -115,6 +123,7 @@ class Providers extends EA_Controller
             'user_id' => $user_id,
             'role_slug' => $role_slug,
             'company_working_plan' => setting('company_working_plan'),
+            'company_working_plan_walkin' => setting('company_working_plan_walkin', setting('company_working_plan')),
             'date_format' => setting('date_format'),
             'time_format' => setting('time_format'),
             'first_weekday' => setting('first_weekday'),

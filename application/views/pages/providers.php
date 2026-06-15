@@ -290,6 +290,22 @@
                         <?= lang('working_plan') ?>
                     </h4>
 
+                    <div class="mb-3">
+                        <label class="form-label d-block"><?= lang('appointment_type') ?></label>
+                        <ul class="nav nav-pills" id="appointment-plan-tabs">
+                            <li class="nav-item">
+                                <button type="button" class="nav-link appointment-plan-tab active" data-type="<?= APPOINTMENT_TYPE_BOOKING ?>" disabled>
+                                    <?= lang('appointment_type_booking') ?>
+                                </button>
+                            </li>
+                            <li class="nav-item ms-2">
+                                <button type="button" class="nav-link appointment-plan-tab" data-type="<?= APPOINTMENT_TYPE_WALKIN ?>" disabled>
+                                    <?= lang('appointment_type_walkin') ?>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
                     <button id="reset-working-plan" class="btn btn-primary"
                             data-tippy-content="<?= lang('reset_working_plan') ?>">
                         <i class="fas fa-undo-alt me-2"></i>

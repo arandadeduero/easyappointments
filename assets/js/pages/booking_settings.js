@@ -17,7 +17,7 @@
 App.Pages.BookingSettings = (function () {
     const $bookingSettings = $('#booking-settings');
     const $saveSettings = $('#save-settings');
-    const $disableBooking = $('#disable-booking');
+    const $disableBookingAppointments = $('#disable-booking-appointments');
     const $disableBookingMessage = $('#disable-booking-message');
 
     /**
@@ -71,7 +71,19 @@ App.Pages.BookingSettings = (function () {
      * @param {Object} bookingSettings
      */
     function deserialize(bookingSettings) {
+        let hasDisableBookingAppointments = false;
+        let legacyDisableBooking = null;
+
         bookingSettings.forEach((bookingSetting) => {
+            if (bookingSetting.name === 'disable_booking_appointments') {
+                hasDisableBookingAppointments = true;
+            }
+
+            if (bookingSetting.name === 'disable_booking') {
+                legacyDisableBooking = bookingSetting.value;
+                return;
+            }
+
             if (bookingSetting.name === 'disable_booking_message') {
                 $disableBookingMessage.trumbowyg('html', bookingSetting.value);
                 return;
@@ -85,6 +97,10 @@ App.Pages.BookingSettings = (function () {
                 $field.val(bookingSetting.value);
             }
         });
+
+        if (!hasDisableBookingAppointments && legacyDisableBooking !== null) {
+            $disableBookingAppointments.prop('checked', Boolean(Number(legacyDisableBooking)));
+        }
     }
 
     /**
@@ -161,7 +177,7 @@ App.Pages.BookingSettings = (function () {
             updateRequireSwitch($requireSwitch);
         });
 
-        $disableBookingMessage.closest('.form-group').prop('hidden', !$disableBooking.prop('checked'));
+        $disableBookingMessage.closest('.form-group').prop('hidden', !$disableBookingAppointments.prop('checked'));
     }
 
     /**
@@ -205,7 +221,7 @@ App.Pages.BookingSettings = (function () {
      * Toggle the message container.
      */
     function onDisableBookingClick() {
-        $disableBookingMessage.closest('.form-group').prop('hidden', !$disableBooking.prop('checked'));
+        $disableBookingMessage.closest('.form-group').prop('hidden', !$disableBookingAppointments.prop('checked'));
     }
 
     /**
@@ -216,7 +232,7 @@ App.Pages.BookingSettings = (function () {
 
         $saveSettings.on('click', onSaveSettingsClick);
 
-        $disableBooking.on('click', onDisableBookingClick);
+        $disableBookingAppointments.on('click', onDisableBookingClick);
 
         $bookingSettings
             .on('click', '.display-switch', onDisplaySwitchClick)

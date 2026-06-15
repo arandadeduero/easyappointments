@@ -20,6 +20,13 @@
  */
 class Calendar extends EA_Controller
 {
+    private const APPOINTMENT_STATUS_COLORS = [
+        'Reservado' => '#7cbae8',
+        'En proceso' => '#ff9800',
+        'Finalizado' => '#adb5bd',
+        'Finalizada' => '#adb5bd',
+    ];
+
     public array $allowed_customer_fields = [
         'id',
         'first_name',
@@ -53,6 +60,9 @@ class Calendar extends EA_Controller
         'notes',
         'color',
         'status',
+        'appointment_type',
+        'queue_number',
+        'id_users_caller',
         'is_unavailability',
         'id_users_provider',
         'id_users_customer',
@@ -191,7 +201,7 @@ class Calendar extends EA_Controller
 
         $calendar_view = request('view', $user['settings']['calendar_view']);
 
-        $appointment_status_options = setting('appointment_status_options');
+        $appointment_status_options = $this->get_appointment_status_options();
 
         $customers = $this->customers_model->get(null, 50, null, 'update_datetime DESC');
 
@@ -228,6 +238,8 @@ class Calendar extends EA_Controller
                 setting('google_sync_feature') ?: config('google_sync_feature'),
                 FILTER_VALIDATE_BOOLEAN,
             ),
+            'realtime_ws_enabled' => config('realtime_ws_enabled', false),
+            'realtime_ws_url' => config('realtime_ws_url', ''),
             'customers' => $customers,
             'default_language' => setting('default_language'),
             'default_timezone' => setting('default_timezone'),
@@ -245,7 +257,7 @@ class Calendar extends EA_Controller
             'available_providers' => filter_sensitive_users_data($available_providers),
             'available_services' => $available_services,
             'secretary_providers' => $secretary_providers,
-            'appointment_status_options' => json_decode($appointment_status_options, true) ?? [],
+            'appointment_status_options' => $appointment_status_options,
             'require_first_name' => setting('require_first_name'),
             'require_last_name' => setting('require_last_name'),
             'require_email' => setting('require_email'),
@@ -257,6 +269,162 @@ class Calendar extends EA_Controller
         ]);
 
         $this->load->view('pages/calendar');
+    }
+
+    /**
+     * Get appointment status options from existing appointments (status + color).
+     *
+     * @return array
+     */
+    protected function get_appointment_status_options(): array
+    {
+        $options = [];
+
+        $add_option = function (string $value, ?string $color = null) use (&$options): void {
+            if ($value === '' || $value === '[object Object]' || isset($options[$value])) {
+                return;
+            }
+
+            $options[$value] = [
+                'value' => $value,
+                'label' => $value,
+                'color' => self::APPOINTMENT_STATUS_COLORS[$value] ?? $color,
+            ];
+        };
+
+        $raw_options = setting('appointment_status_options', '[]');
+        $decoded_options = is_string($raw_options) ? json_decode($raw_options, true) ?? [] : (array) $raw_options;
+
+        foreach ($decoded_options as $decoded_option) {
+            if (is_array($decoded_option)) {
+                $value =
+                    (string) ($decoded_option['value'] ?? $decoded_option['label'] ?? $decoded_option['name'] ?? '');
+                $color = $decoded_option['color'] ?? null;
+            } else {
+                $value = is_scalar($decoded_option) ? (string) $decoded_option : '';
+                $color = null;
+            }
+
+            $add_option($value, $color);
+        }
+
+        foreach (self::APPOINTMENT_STATUS_COLORS as $status => $color) {
+            $add_option($status, $color);
+        }
+
+        $rows = $this->appointments_model
+            ->query()
+            ->select('status, color')
+            ->where('status IS NOT NULL')
+            ->where("status <> ''")
+            ->where("status <> '[object Object]'")
+            ->where('is_unavailability', false)
+            ->order_by('update_datetime', 'DESC')
+            ->order_by('id', 'DESC')
+            ->get()
+            ->result_array();
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            $status = (string) ($row['status'] ?? '');
+            $add_option($status, $row['color'] ?: null);
+        }
+
+        return array_values($options);
+    }
+
+    /**
+     * Get the color assigned to an appointment status.
+     */
+    protected function get_appointment_status_color(string $status): ?string
+    {
+        if (isset(self::APPOINTMENT_STATUS_COLORS[$status])) {
+            return self::APPOINTMENT_STATUS_COLORS[$status];
+        }
+
+        foreach ($this->get_appointment_status_options() as $status_option) {
+            $status_value = (string) ($status_option['value'] ?? '');
+            $status_color = $status_option['color'] ?? null;
+
+            if ($status_value === $status && !empty($status_color)) {
+                return $status_color;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve the finished status label already used in this installation.
+     *
+     * Prefer an existing value in DB/options to avoid creating duplicate states
+     * such as "Finalizado" and "Finalizada".
+     */
+    protected function get_finished_status(): string
+    {
+        $rows = $this->appointments_model
+            ->query()
+            ->select('status')
+            ->where('status IS NOT NULL')
+            ->where("status <> ''")
+            ->where('is_unavailability', false)
+            ->like('status', 'Finalizad', 'after')
+            ->get()
+            ->result_array();
+
+        $existing_statuses = array_values(
+            array_unique(
+                array_filter(
+                    array_map(static function (array $row): string {
+                        return trim((string) ($row['status'] ?? ''));
+                    }, $rows),
+                ),
+            ),
+        );
+
+        if (in_array('Finalizado', $existing_statuses, true)) {
+            return 'Finalizado';
+        }
+
+        if (in_array('Finalizada', $existing_statuses, true)) {
+            return 'Finalizada';
+        }
+
+        $status_options = $this->get_appointment_status_options();
+        $option_values = array_map(static function (array $option): string {
+            return trim((string) ($option['value'] ?? ''));
+        }, $status_options);
+
+        if (in_array('Finalizado', $option_values, true)) {
+            return 'Finalizado';
+        }
+
+        if (in_array('Finalizada', $option_values, true)) {
+            return 'Finalizada';
+        }
+
+        // Fallback to the historical default used in core.
+        return 'Finalizada';
+    }
+
+    /**
+     * Normalize finished statuses in DB to a single label to avoid duplicates
+     * in status dropdowns and reports.
+     */
+    protected function normalize_finished_statuses(string $target_status): void
+    {
+        $alternate_status = $target_status === 'Finalizado' ? 'Finalizada' : 'Finalizado';
+
+        $alternate_color = $this->get_appointment_status_color($alternate_status) ?? '#adb5bd';
+        $target_color = $this->get_appointment_status_color($target_status) ?? $alternate_color;
+
+        $this->db
+            ->set('status', $target_status)
+            ->set('color', $target_color)
+            ->where('status', $alternate_status)
+            ->where('is_unavailability', 0)
+            ->update('appointments');
     }
 
     /**
@@ -311,6 +479,7 @@ class Calendar extends EA_Controller
 
             if ($appointment_data) {
                 $appointment = $appointment_data;
+                $previous_appointment = null;
 
                 $required_permissions = !empty($appointment['id'])
                     ? can('add', PRIV_APPOINTMENTS)
@@ -324,6 +493,10 @@ class Calendar extends EA_Controller
 
                 if (!isset($appointment['id_users_customer'])) {
                     $appointment['id_users_customer'] = $customer['id'] ?? $customer_data['id'];
+                }
+
+                if (!empty($appointment['id'])) {
+                    $previous_appointment = $this->appointments_model->find((int) $appointment['id']);
                 }
 
                 // Check if the provider has a conflicting appointment at the selected time
@@ -352,6 +525,27 @@ class Calendar extends EA_Controller
                 // Jitsi integration: if enabled and meeting_link is empty, generate a Jitsi meeting link
                 if (setting('jitsi_enabled') === '1' && empty($appointment['meeting_link'])) {
                     $appointment['meeting_link'] = $this->jitsi_client->generate_link();
+                }
+
+                if (!empty($appointment['status'])) {
+                    $status_color = $this->get_appointment_status_color($appointment['status']);
+
+                    if (!empty($status_color)) {
+                        $appointment['color'] = $status_color;
+                    }
+                }
+
+                if (empty($appointment['appointment_type'])) {
+                    $appointment['appointment_type'] = APPOINTMENT_TYPE_BOOKING;
+                }
+
+                $this->appointments_model->ensure_queue_number($appointment);
+
+                $previous_status = $previous_appointment['status'] ?? null;
+                $current_status = $appointment['status'] ?? null;
+
+                if ($current_status === 'En proceso' && $previous_status !== 'En proceso') {
+                    $appointment['id_users_caller'] = (int) session('user_id');
                 }
 
                 $this->appointments_model->only($appointment, $this->allowed_appointment_fields);
@@ -488,6 +682,50 @@ class Calendar extends EA_Controller
             $this->synchronization->sync_appointment_deleted($appointment, $provider);
 
             $this->webhooks_client->trigger(WEBHOOK_APPOINTMENT_DELETE, $appointment);
+
+            json_response([
+                'success' => true,
+            ]);
+        } catch (Throwable $e) {
+            json_exception($e);
+        }
+    }
+
+    /**
+     * Mark an appointment as in process and store the user that called it.
+     */
+    public function call_appointment(): void
+    {
+        try {
+            method('post');
+
+            if (cannot('edit', PRIV_APPOINTMENTS)) {
+                throw new RuntimeException('You do not have the required permissions for this task.');
+            }
+
+            check('appointment_id', 'numeric');
+
+            $appointment_id = (int) request('appointment_id');
+
+            if (empty($appointment_id)) {
+                throw new InvalidArgumentException('No appointment id provided.');
+            }
+
+            $appointment = $this->appointments_model->find($appointment_id);
+
+            $this->check_event_permissions((int) $appointment['id_users_provider']);
+
+            $appointment['status'] = 'En proceso';
+            $appointment['color'] = $this->get_appointment_status_color('En proceso');
+            $appointment['id_users_caller'] = (int) session('user_id');
+
+            $this->appointments_model->only($appointment, $this->allowed_appointment_fields);
+
+            $this->appointments_model->save($appointment);
+
+            $appointment = $this->appointments_model->find($appointment_id);
+
+            $this->webhooks_client->trigger(WEBHOOK_APPOINTMENT_SAVE, $appointment);
 
             json_response([
                 'success' => true,
@@ -671,6 +909,14 @@ class Calendar extends EA_Controller
             ];
 
             foreach ($response['appointments'] as &$appointment) {
+                if (!empty($appointment['status'])) {
+                    $status_color = $this->get_appointment_status_color($appointment['status']);
+
+                    if (!empty($status_color)) {
+                        $appointment['color'] = $status_color;
+                    }
+                }
+
                 $appointment['provider'] = $this->providers_model->find($appointment['id_users_provider']);
                 $appointment['service'] = $this->services_model->find($appointment['id_services']);
                 $appointment['customer'] = $this->customers_model->find($appointment['id_users_customer']);
@@ -826,6 +1072,14 @@ class Calendar extends EA_Controller
             $response['appointments'] = $this->db->get()->result_array();
 
             foreach ($response['appointments'] as &$appointment) {
+                if (!empty($appointment['status'])) {
+                    $status_color = $this->get_appointment_status_color($appointment['status']);
+
+                    if (!empty($status_color)) {
+                        $appointment['color'] = $status_color;
+                    }
+                }
+
                 $appointment['provider'] = $this->providers_model->find($appointment['id_users_provider']);
                 $appointment['service'] = $this->services_model->find($appointment['id_services']);
                 $appointment['customer'] = $this->customers_model->find($appointment['id_users_customer']);
@@ -923,6 +1177,215 @@ class Calendar extends EA_Controller
             $response['blocked_periods'] = $this->blocked_periods_model->get_for_period($start_date, $end_date);
 
             json_response($response);
+        } catch (Throwable $e) {
+            json_exception($e);
+        }
+    }
+
+    /**
+     * Get all "En proceso" appointments for today with full customer/provider/service data.
+     */
+    public function get_active_calls(): void
+    {
+        try {
+            method('get');
+
+            if (cannot('view', PRIV_APPOINTMENTS)) {
+                throw new RuntimeException('You do not have the required permissions for this task.');
+            }
+
+            check('provider_id', 'numeric|null');
+
+            $today = date('Y-m-d');
+            $requested_provider_id = (int) request('provider_id', 0);
+
+            $this->db->select('appointments.*');
+            $this->db->from('appointments');
+            $this->db->where('DATE(start_datetime) = ' . $this->db->escape($today), null, false);
+            $this->db->where('appointments.is_unavailability', 0);
+            $this->db->where('appointments.status', 'En proceso');
+
+            if ($requested_provider_id > 0) {
+                $this->db->where('appointments.id_users_provider', $requested_provider_id);
+            }
+
+            $this->db->order_by('appointments.start_datetime', 'ASC');
+
+            $appointments = $this->db->get()->result_array();
+
+            $user_id = (int) session('user_id');
+            $role_slug = session('role_slug');
+
+            // Providers only see their own appointments.
+            if ($role_slug === DB_SLUG_PROVIDER) {
+                $appointments = array_values(
+                    array_filter($appointments, static function ($a) use ($user_id) {
+                        return (int) $a['id_users_provider'] === $user_id;
+                    }),
+                );
+            }
+
+            // Secretaries only see appointments of their providers.
+            if ($role_slug === DB_SLUG_SECRETARY) {
+                $secretary_providers = $this->secretaries_model->find($user_id)['providers'] ?? [];
+                $appointments = array_values(
+                    array_filter($appointments, static function ($a) use ($secretary_providers) {
+                        return in_array((int) $a['id_users_provider'], $secretary_providers, true);
+                    }),
+                );
+            }
+
+            foreach ($appointments as &$appointment) {
+                $appointment['color'] = $this->get_appointment_status_color('En proceso');
+                $appointment['provider'] = $this->providers_model->find($appointment['id_users_provider']);
+                $appointment['service'] = $this->services_model->find($appointment['id_services']);
+                $appointment['customer'] = $this->customers_model->find($appointment['id_users_customer']);
+                $appointment['caller'] =
+                    !empty($appointment['id_users_caller'])
+                    ? $this->users_model->find((int) $appointment['id_users_caller'])
+                    : null;
+            }
+
+            unset($appointment);
+
+            json_response(['active_calls' => array_values($appointments)]);
+        } catch (Throwable $e) {
+            json_exception($e);
+        }
+    }
+
+    /**
+     * Finish an appointment using the existing finished status label.
+     */
+    public function finish_appointment(): void
+    {
+        try {
+            method('post');
+
+            if (cannot('edit', PRIV_APPOINTMENTS)) {
+                throw new RuntimeException('You do not have the required permissions for this task.');
+            }
+
+            check('appointment_id', 'numeric');
+
+            $appointment_id = (int) request('appointment_id');
+
+            if (empty($appointment_id)) {
+                throw new InvalidArgumentException('No appointment id provided.');
+            }
+
+            $appointment = $this->appointments_model->find($appointment_id);
+
+            $this->check_event_permissions((int) $appointment['id_users_provider']);
+
+            $finished_status = $this->get_finished_status();
+
+            $appointment['status'] = $finished_status;
+            $appointment['color'] = $this->get_appointment_status_color($finished_status);
+
+            $this->appointments_model->only($appointment, $this->allowed_appointment_fields);
+            $this->appointments_model->save($appointment);
+
+            $appointment = $this->appointments_model->find($appointment_id);
+
+            $this->webhooks_client->trigger(WEBHOOK_APPOINTMENT_SAVE, $appointment);
+
+            json_response(['success' => true]);
+        } catch (Throwable $e) {
+            json_exception($e);
+        }
+    }
+
+    /**
+     * Finish the current appointment and atomically call the next "Reservado" one for the same provider.
+     *
+     * Uses a DB transaction with SELECT ... FOR UPDATE to prevent race conditions when multiple
+     * staff members are attending the queue simultaneously.
+     */
+    public function finish_and_call_next(): void
+    {
+        try {
+            method('post');
+
+            if (cannot('edit', PRIV_APPOINTMENTS)) {
+                throw new RuntimeException('You do not have the required permissions for this task.');
+            }
+
+            check('appointment_id', 'numeric');
+
+            $appointment_id = (int) request('appointment_id');
+
+            if (empty($appointment_id)) {
+                throw new InvalidArgumentException('No appointment id provided.');
+            }
+
+            $appointment = $this->appointments_model->find($appointment_id);
+
+            $this->check_event_permissions((int) $appointment['id_users_provider']);
+
+            $provider_id = (int) $appointment['id_users_provider'];
+            $today = date('Y-m-d');
+            $finished_status = $this->get_finished_status();
+
+            $this->db->trans_start();
+
+            // Mark current appointment as finished.
+            $appointment['status'] = $finished_status;
+            $appointment['color'] = $this->get_appointment_status_color($finished_status);
+            $this->appointments_model->only($appointment, $this->allowed_appointment_fields);
+            $this->appointments_model->save($appointment);
+
+            // Lock and retrieve the next queued appointment atomically to prevent double-calling.
+            $table = $this->db->dbprefix . 'appointments';
+            $next_row = $this->db->query(
+                "SELECT id FROM {$table}"
+                . ' WHERE id_users_provider = ?'
+                . ' AND DATE(start_datetime) = ?'
+                . ' AND is_unavailability = 0'
+                . " AND status = 'Reservado'"
+                . ' ORDER BY queue_number ASC, start_datetime ASC'
+                . ' LIMIT 1 FOR UPDATE',
+                [$provider_id, $today],
+            )->row_array();
+
+            $next_called = false;
+            $next_id = null;
+
+            if (!empty($next_row)) {
+                $next_id = (int) $next_row['id'];
+                $next_appointment = $this->appointments_model->find($next_id);
+
+                // Double-check status inside the transaction to be safe.
+                if ($next_appointment['status'] === 'Reservado') {
+                    $next_appointment['status'] = 'En proceso';
+                    $next_appointment['color'] = $this->get_appointment_status_color('En proceso');
+                    $next_appointment['id_users_caller'] = (int) session('user_id');
+                    $this->appointments_model->only($next_appointment, $this->allowed_appointment_fields);
+                    $this->appointments_model->save($next_appointment);
+                    $next_called = true;
+                }
+            }
+
+            $this->db->trans_complete();
+
+            if ($this->db->trans_status() === false) {
+                throw new RuntimeException('La transacción falló. Por favor, inténtelo de nuevo.');
+            }
+
+            $this->normalize_finished_statuses($finished_status);
+
+            // Trigger webhooks outside the transaction.
+            $finished = $this->appointments_model->find($appointment_id);
+            $this->webhooks_client->trigger(WEBHOOK_APPOINTMENT_SAVE, $finished);
+
+            if ($next_called && $next_id !== null) {
+                $this->webhooks_client->trigger(WEBHOOK_APPOINTMENT_SAVE, $this->appointments_model->find($next_id));
+            }
+
+            json_response([
+                'success' => true,
+                'next_called' => $next_called,
+            ]);
         } catch (Throwable $e) {
             json_exception($e);
         }

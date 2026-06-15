@@ -131,6 +131,10 @@ class Booking_settings extends EA_Controller
                 $this->settings_model->optional($setting, $this->optional_setting_fields);
 
                 $this->settings_model->save($setting);
+
+                if (($setting['name'] ?? null) === 'disable_booking_appointments') {
+                    setting(['disable_booking' => $setting['value']]);
+                }
             }
 
             response();

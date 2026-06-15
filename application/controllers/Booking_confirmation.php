@@ -64,6 +64,8 @@ class Booking_confirmation extends EA_Controller
             'matomo_analytics_site_id' => setting('matomo_analytics_site_id'),
             'add_to_google_url' => $add_to_google_url,
             'display_add_to_google_calendar' => setting('display_add_to_google_calendar', '1'),
+            'is_walkin' => ($appointment['appointment_type'] ?? APPOINTMENT_TYPE_BOOKING) === APPOINTMENT_TYPE_WALKIN,
+            'queue_number' => $appointment['queue_number'] ?? null,
         ]);
 
         $this->load->view('pages/booking_confirmation');

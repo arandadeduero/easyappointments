@@ -23,6 +23,12 @@
  */
 class Booking extends EA_Controller
 {
+    private const APPOINTMENT_STATUS_COLORS = [
+        'Reservado' => '#7cbae8',
+        'En proceso' => '#ff9800',
+        'Finalizada' => '#adb5bd',
+    ];
+
     public array $allowed_customer_fields = [
         'id',
         'first_name',
@@ -51,6 +57,8 @@ class Booking extends EA_Controller
         'notes',
         'color',
         'status',
+        'appointment_type',
+        'queue_number',
         'is_unavailability',
         'id_users_provider',
         'id_users_customer',
@@ -99,6 +107,149 @@ class Booking extends EA_Controller
     }
 
     /**
+     * Normalize appointment type to one of the supported values.
+     */
+    private function normalize_appointment_type(?string $appointment_type): string
+    {
+        if ($appointment_type === APPOINTMENT_TYPE_WALKIN) {
+            return APPOINTMENT_TYPE_WALKIN;
+        }
+
+        return APPOINTMENT_TYPE_BOOKING;
+    }
+
+    /**
+     * Check whether public online bookings are disabled.
+     */
+    private function are_booking_appointments_disabled(): bool
+    {
+        return filter_var(setting('disable_booking_appointments', setting('disable_booking')), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Check whether public in-person appointments are disabled.
+     */
+    private function are_walkin_appointments_disabled(): bool
+    {
+        return filter_var(setting('disable_walkin_appointments', '0'), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Resolve the default appointment status from settings.
+     */
+    private function get_default_appointment_status(): ?string
+    {
+        $raw_options = setting('appointment_status_options', '[]');
+        $options = is_string($raw_options) ? json_decode($raw_options, true) ?? [] : (array) $raw_options;
+        $first_option = $options[0] ?? null;
+
+        if (is_array($first_option)) {
+            $first_option =
+                $first_option['value'] ??
+                $first_option['label'] ??
+                $first_option['name'] ??
+                reset($first_option);
+        }
+
+        if (is_scalar($first_option) && $first_option !== '' && $first_option !== '[object Object]') {
+            return (string) $first_option;
+        }
+
+        return 'Reservado';
+    }
+
+    /**
+     * Get the color assigned to an appointment status.
+     */
+    private function get_appointment_status_color(?string $status): ?string
+    {
+        return $status !== null ? self::APPOINTMENT_STATUS_COLORS[$status] ?? null : null;
+    }
+
+    /**
+     * Generate next queue number for walk-in appointments.
+     */
+    protected function get_next_walkin_queue_number(int $provider_id, string $date): int
+    {
+        return $this->appointments_model->get_random_queue_number($provider_id, $date);
+    }
+
+    /**
+     * Find the closest available walk-in slot for a specific provider.
+     */
+    protected function find_next_walkin_slot_for_provider(array $provider, array $service): ?array
+    {
+        $provider_timezone = new DateTimeZone($provider['timezone']);
+        $provider_now = new DateTime('now', $provider_timezone);
+        $future_booking_limit = (int) setting('future_booking_limit');
+
+        for ($day_offset = 0; $day_offset <= $future_booking_limit; $day_offset++) {
+            $date = (clone $provider_now)->modify('+' . $day_offset . ' days')->format('Y-m-d');
+
+            $available_hours = $this->availability->get_available_hours(
+                $date,
+                $service,
+                $provider,
+                null,
+                APPOINTMENT_TYPE_WALKIN,
+            );
+
+            if (empty($available_hours)) {
+                continue;
+            }
+
+            foreach ($available_hours as $available_hour) {
+                $slot_start = new DateTime($date . ' ' . $available_hour . ':00', $provider_timezone);
+
+                if ($slot_start < $provider_now) {
+                    continue;
+                }
+
+                return [
+                    'provider_id' => (int) $provider['id'],
+                    'start_datetime' => $slot_start->format('Y-m-d H:i:s'),
+                    'timestamp' => $slot_start->getTimestamp(),
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Find the closest available walk-in slot amongst all service providers.
+     */
+    protected function find_next_walkin_slot_any_provider(int $service_id): ?array
+    {
+        $service = $this->services_model->find($service_id);
+
+        if (empty($service)) {
+            return null;
+        }
+
+        $available_providers = $this->providers_model->get_available_providers(true);
+        $nearest_slot = null;
+
+        foreach ($available_providers as $provider) {
+            if (!in_array($service_id, $provider['services'])) {
+                continue;
+            }
+
+            $provider_slot = $this->find_next_walkin_slot_for_provider($provider, $service);
+
+            if (empty($provider_slot)) {
+                continue;
+            }
+
+            if (empty($nearest_slot) || $provider_slot['timestamp'] < $nearest_slot['timestamp']) {
+                $nearest_slot = $provider_slot;
+            }
+        }
+
+        return $nearest_slot;
+    }
+
+    /**
      * Render the booking page and display the selected appointment.
      *
      * This method will call the "index" callback to handle the page rendering.
@@ -130,7 +281,7 @@ class Booking extends EA_Controller
         $company_name = setting('company_name');
         $company_logo = setting('company_logo');
         $company_color = setting('company_color');
-        $disable_booking = setting('disable_booking');
+        $disable_booking = $this->are_booking_appointments_disabled();
         $google_analytics_code = setting('google_analytics_code');
         $matomo_analytics_url = setting('matomo_analytics_url');
         $matomo_analytics_site_id = setting('matomo_analytics_site_id');
@@ -197,17 +348,7 @@ class Booking extends EA_Controller
         $book_advance_timeout = setting('book_advance_timeout');
         $legal_notice_url = setting('legal_notice_url');
         $imprint_url = setting('imprint_url');
-        $theme = request('theme', setting('theme', 'default'));
-
-        // Sanitize theme parameter to prevent directory traversal
-        if (!empty($theme)) {
-            // Only allow alphanumeric characters, underscores, and hyphens
-            $theme = preg_replace('/[^a-zA-Z0-9_\-]/', '', $theme);
-        }
-
-        if (empty($theme) || !file_exists(__DIR__ . '/../../assets/css/themes/' . $theme . '.min.css')) {
-            $theme = 'default';
-        }
+        $theme = 'minty';
 
         $timezones = $this->timezones->to_array();
         $grouped_timezones = $this->timezones->to_grouped_array();
@@ -293,6 +434,9 @@ class Booking extends EA_Controller
             $customer = null;
         }
 
+        $appointment_type = APPOINTMENT_TYPE_BOOKING;
+        $confirmation_controller = 'booking_confirmation';
+
         script_vars([
             'manage_mode' => $manage_mode,
             'available_services' => $available_services,
@@ -309,6 +453,8 @@ class Booking extends EA_Controller
             'customer_token' => $customer_token,
             'default_language' => setting('default_language'),
             'default_timezone' => setting('default_timezone'),
+            'appointment_type' => $appointment_type,
+            'confirmation_controller' => $confirmation_controller,
         ]);
 
         html_vars([
@@ -373,12 +519,6 @@ class Booking extends EA_Controller
             // Verify CSRF token for booking submissions
             $this->verify_csrf_token();
 
-            $disable_booking = setting('disable_booking');
-
-            if ($disable_booking) {
-                abort(403);
-            }
-
             check('post_data', 'array');
             check('captcha', 'string|null');
 
@@ -393,6 +533,17 @@ class Booking extends EA_Controller
             $appointment = $post_data['appointment'] ?? [];
             $customer = $post_data['customer'] ?? [];
             $manage_mode = filter_var($post_data['manage_mode'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+            $appointment_type = $this->normalize_appointment_type($appointment['appointment_type'] ?? null);
+            $appointment['appointment_type'] = $appointment_type;
+
+            if ($appointment_type === APPOINTMENT_TYPE_BOOKING && $this->are_booking_appointments_disabled()) {
+                abort(403);
+            }
+
+            if ($appointment_type === APPOINTMENT_TYPE_WALKIN && $this->are_walkin_appointments_disabled()) {
+                throw new RuntimeException(lang('walkin_appointments_are_disabled'));
+            }
 
             // Validate required appointment fields
             if (empty($appointment) || !is_array($appointment)) {
@@ -435,16 +586,41 @@ class Booking extends EA_Controller
                 $customer['phone_number'] = '';
             }
 
-            // Check appointment availability before registering it to the database.
-            $appointment['id_users_provider'] = $this->check_datetime_availability();
+            $service = $this->services_model->find($appointment['id_services']);
 
-            if (!$appointment['id_users_provider']) {
-                throw new RuntimeException(lang('requested_hour_is_unavailable'));
+            if (empty($service)) {
+                throw new RuntimeException(lang('invalid_service_selection'));
+            }
+
+            if ($appointment_type === APPOINTMENT_TYPE_WALKIN) {
+                if ($appointment['id_users_provider'] === ANY_PROVIDER) {
+                    $walkin_slot = $this->find_next_walkin_slot_any_provider((int) $appointment['id_services']);
+                } else {
+                    $provider = $this->providers_model->find($appointment['id_users_provider']);
+
+                    if (empty($provider)) {
+                        throw new RuntimeException(lang('invalid_provider_selection'));
+                    }
+
+                    $walkin_slot = $this->find_next_walkin_slot_for_provider($provider, $service);
+                }
+
+                if (empty($walkin_slot)) {
+                    throw new RuntimeException(lang('walkin_no_slots_available'));
+                }
+
+                $appointment['id_users_provider'] = $walkin_slot['provider_id'];
+                $appointment['start_datetime'] = $walkin_slot['start_datetime'];
+            } else {
+                // Check appointment availability before registering it to the database.
+                $appointment['id_users_provider'] = $this->check_datetime_availability($appointment_type);
+
+                if (!$appointment['id_users_provider']) {
+                    throw new RuntimeException(lang('requested_hour_is_unavailable'));
+                }
             }
 
             $provider = $this->providers_model->find($appointment['id_users_provider']);
-
-            $service = $this->services_model->find($appointment['id_services']);
 
             $require_captcha = (bool) setting('require_captcha');
 
@@ -502,10 +678,6 @@ class Booking extends EA_Controller
                 $appointment['location'] = $service['location'];
             }
 
-            if (empty($appointment['color']) && !empty($service['color'])) {
-                $appointment['color'] = $service['color'];
-            }
-
             $customer_ip = $this->input->ip_address();
 
             // Create the consents (if needed).
@@ -538,12 +710,11 @@ class Booking extends EA_Controller
 
             $appointment['id_users_customer'] = $customer_id;
             $appointment['is_unavailability'] = false;
-            $appointment['color'] = $service['color'];
 
-            $appointment_status_options_json = setting('appointment_status_options', '[]');
-            $appointment_status_options = json_decode($appointment_status_options_json, true) ?? [];
-            $appointment['status'] = $appointment_status_options[0] ?? null;
+            $appointment['status'] = $this->get_default_appointment_status();
+            $appointment['color'] = $this->get_appointment_status_color($appointment['status']);
             $appointment['end_datetime'] = $this->appointments_model->calculate_end_datetime($appointment);
+            $this->appointments_model->ensure_queue_number($appointment);
 
             $this->appointments_model->only($appointment, $this->allowed_appointment_fields);
 
@@ -578,6 +749,7 @@ class Booking extends EA_Controller
             $response = [
                 'appointment_id' => $appointment['id'],
                 'appointment_hash' => $appointment['hash'],
+                'queue_number' => $appointment['queue_number'] ?? null,
             ];
 
             json_response($response);
@@ -600,7 +772,7 @@ class Booking extends EA_Controller
      *
      * @throws Exception
      */
-    protected function check_datetime_availability(): ?int
+    protected function check_datetime_availability(string $appointment_type = APPOINTMENT_TYPE_BOOKING): ?int
     {
         $post_data = request('post_data');
 
@@ -613,7 +785,12 @@ class Booking extends EA_Controller
         $hour = $appointment_start->format('H:i');
 
         if ($appointment['id_users_provider'] === ANY_PROVIDER) {
-            $appointment['id_users_provider'] = $this->search_any_provider($appointment['id_services'], $date, $hour);
+            $appointment['id_users_provider'] = $this->search_any_provider(
+                $appointment['id_services'],
+                $date,
+                $hour,
+                $appointment_type,
+            );
 
             return $appointment['id_users_provider'];
         }
@@ -629,6 +806,7 @@ class Booking extends EA_Controller
             $service,
             $provider,
             $exclude_appointment_id,
+            $appointment_type,
         );
 
         $is_still_available = false;
@@ -658,7 +836,12 @@ class Booking extends EA_Controller
      *
      * @throws Exception
      */
-    protected function search_any_provider(int $service_id, string $date, ?string $hour = null): ?int
+    protected function search_any_provider(
+        int $service_id,
+        string $date,
+        ?string $hour = null,
+        string $appointment_type = APPOINTMENT_TYPE_BOOKING,
+    ): ?int
     {
         $available_providers = $this->providers_model->get_available_providers(true);
 
@@ -672,7 +855,13 @@ class Booking extends EA_Controller
             foreach ($provider['services'] as $provider_service_id) {
                 if ($provider_service_id == $service_id) {
                     // Check if the provider is available for the requested date.
-                    $available_hours = $this->availability->get_available_hours($date, $service, $provider);
+                    $available_hours = $this->availability->get_available_hours(
+                        $date,
+                        $service,
+                        $provider,
+                        null,
+                        $appointment_type,
+                    );
 
                     if (
                         count($available_hours) > $max_hours_count &&
@@ -700,12 +889,6 @@ class Booking extends EA_Controller
         try {
             method('post');
 
-            $disable_booking = setting('disable_booking');
-
-            if ($disable_booking) {
-                abort(403);
-            }
-
             check('provider_id', 'string|numeric|null');
             check('service_id', 'numeric');
             check('selected_date', 'date');
@@ -715,6 +898,15 @@ class Booking extends EA_Controller
             $provider_id = request('provider_id');
             $service_id = request('service_id');
             $selected_date = request('selected_date');
+            $appointment_type = $this->normalize_appointment_type(request('appointment_type'));
+
+            if ($appointment_type === APPOINTMENT_TYPE_BOOKING && $this->are_booking_appointments_disabled()) {
+                abort(403);
+            }
+
+            if ($appointment_type === APPOINTMENT_TYPE_WALKIN && $this->are_walkin_appointments_disabled()) {
+                abort(403);
+            }
 
             // Do not continue if there was no provider selected (more likely there is no provider in the system).
 
@@ -749,6 +941,7 @@ class Booking extends EA_Controller
                         $service,
                         $provider,
                         $exclude_appointment_id,
+                        $appointment_type,
                     );
 
                     $available_hours = array_merge($available_hours, $provider_available_hours);
@@ -767,6 +960,7 @@ class Booking extends EA_Controller
                     $service,
                     $provider,
                     $exclude_appointment_id,
+                    $appointment_type,
                 );
             }
 
@@ -790,12 +984,6 @@ class Booking extends EA_Controller
         try {
             method('get');
 
-            $disable_booking = setting('disable_booking');
-
-            if ($disable_booking) {
-                abort(403);
-            }
-
             check('provider_id', 'string|numeric|null');
             check('service_id', 'numeric');
             check('appointment_id', 'numeric|null');
@@ -807,6 +995,15 @@ class Booking extends EA_Controller
             $appointment_id = request('appointment_id');
             $manage_mode = filter_var(request('manage_mode'), FILTER_VALIDATE_BOOLEAN);
             $selected_date_string = request('selected_date');
+            $appointment_type = $this->normalize_appointment_type(request('appointment_type'));
+
+            if ($appointment_type === APPOINTMENT_TYPE_BOOKING && $this->are_booking_appointments_disabled()) {
+                abort(403);
+            }
+
+            if ($appointment_type === APPOINTMENT_TYPE_WALKIN && $this->are_walkin_appointments_disabled()) {
+                abort(403);
+            }
             $selected_date = new DateTime($selected_date_string);
             $number_of_days_in_month = (int) $selected_date->format('t');
             $unavailable_dates = [];
@@ -837,6 +1034,7 @@ class Booking extends EA_Controller
                         $service,
                         $provider,
                         $exclude_appointment_id,
+                        $appointment_type,
                     );
 
                     if (!empty($available_hours)) {

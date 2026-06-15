@@ -159,6 +159,16 @@
                 <textarea id="description" rows="4" class="form-control" disabled></textarea>
             </div>
 
+            <div class="mb-3">
+                <label class="form-label" for="documentation-requirements">
+                    <?= lang('documentation_requirements') ?>
+                </label>
+                <textarea id="documentation-requirements" rows="4" class="form-control" disabled></textarea>
+                <div class="form-text text-muted">
+                    <small><?= lang('documentation_requirements_hint') ?></small>
+                </div>
+            </div>
+
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <label class="form-label mb-0">
                     <?= lang('providers') ?>

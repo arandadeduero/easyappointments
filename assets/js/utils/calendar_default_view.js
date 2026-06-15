@@ -133,6 +133,49 @@ App.Utils.CalendarDefaultView = (function () {
         return eventData?.workingPlanException !== undefined;
     }
 
+    /**
+     * Render calendar event content with the queue code aligned to the right.
+     *
+     * @param {Object} info - FullCalendar event content info.
+     * @returns {{domNodes: HTMLElement[]}}
+     */
+    function renderEventContent(info) {
+        const eventData = info.event.extendedProps.data || {};
+        const queueNumber = !isUnavailability(eventData) ? eventData.queue_number : null;
+        const title = info.event.title || '';
+
+        const $content = $('<div/>', {
+            class: 'aad-calendar-event-content',
+        });
+
+        if (info.timeText || queueNumber) {
+            const $header = $('<div/>', {
+                class: 'aad-calendar-event-header',
+            }).appendTo($content);
+
+            $('<span/>', {
+                class: 'aad-calendar-event-time',
+                text: info.timeText,
+            }).appendTo($header);
+
+            if (queueNumber) {
+                $('<span/>', {
+                    class: 'aad-calendar-event-code',
+                    text: queueNumber,
+                }).appendTo($header);
+            }
+        }
+
+        $('<div/>', {
+            class: 'aad-calendar-event-title',
+            text: title,
+        }).appendTo($content);
+
+        return {
+            domNodes: [$content[0]],
+        };
+    }
+
     // Appointment Modal Helpers
 
     /**
@@ -180,9 +223,8 @@ App.Utils.CalendarDefaultView = (function () {
         // Appointment fields
         $appointmentsModal.find('#appointment-location').val(appointment.location);
         $appointmentsModal.find('#appointment-meeting-link').val(appointment.meeting_link);
-        $appointmentsModal.find('#appointment-status').val(appointment.status);
+        $appointmentsModal.find('#appointment-status').val(appointment.status).trigger('change');
         $appointmentsModal.find('#appointment-notes').val(appointment.notes);
-        App.Components.ColorSelection.setColor($appointmentsModal.find('#appointment-color'), appointment.color);
 
         $appointmentsModal.modal('show');
     }
@@ -341,6 +383,24 @@ App.Utils.CalendarDefaultView = (function () {
                 $reloadAppointments.trigger('click');
             });
         }
+    }
+
+    /**
+     * Handle call popover button click.
+     */
+    function onCallPopoverClick() {
+        const data = lastFocusedEventData.extendedProps.data;
+
+        if (!data?.id || isUnavailability(data) || isWorkingPlanException(data)) {
+            return;
+        }
+
+        closePopover();
+
+        App.Http.Calendar.callAppointment(data.id).done(() => {
+            App.Layouts.Backend.displayNotification(lang('appointment_updated'));
+            $reloadAppointments.trigger('click');
+        });
     }
 
     /**
@@ -1208,6 +1268,9 @@ App.Utils.CalendarDefaultView = (function () {
         // Popover delete button
         $calendarPage.on('click', '.delete-popover', onDeletePopoverClick);
 
+        // Popover call button
+        $calendarPage.on('click', '.call-popover', onCallPopoverClick);
+
         // Filter change
         $selectFilterItem.on('change', () => {
             const providerId = $selectFilterItem.val();
@@ -1344,6 +1407,7 @@ App.Utils.CalendarDefaultView = (function () {
             eventResize: onEventResize,
             eventDrop: onEventDrop,
             select: onSelect,
+            eventContent: renderEventContent,
         });
 
         fullCalendar.render();
@@ -1404,6 +1468,7 @@ App.Utils.CalendarDefaultView = (function () {
 
     return {
         initialize,
+        populateAppointmentModal,
         FILTER_TYPE_ALL,
         FILTER_TYPE_PROVIDER,
         FILTER_TYPE_SERVICE,

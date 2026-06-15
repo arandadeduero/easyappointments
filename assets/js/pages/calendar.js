@@ -150,6 +150,10 @@ App.Pages.Calendar = (function () {
             App.Utils.CalendarDefaultView.initialize();
         }
 
+        if (App.Utils.CalendarRealtime) {
+            App.Utils.CalendarRealtime.initialize();
+        }
+
         App.Pages.Calendar.addEventListeners();
     }
 

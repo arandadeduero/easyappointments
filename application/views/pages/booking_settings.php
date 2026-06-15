@@ -394,18 +394,36 @@
                                         </div>
                                     </div>
 
-                                    <div>
+                                    <div class="mb-3">
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="disable-booking"
-                                                   data-field="disable_booking">
-                                            <label class="form-check-label" for="disable-booking">
-                                                <?= lang('disable_booking') ?>
+                                            <input class="form-check-input" type="checkbox"
+                                                   id="disable-booking-appointments"
+                                                   data-field="disable_booking_appointments">
+                                            <label class="form-check-label" for="disable-booking-appointments">
+                                                <?= lang('disable_booking_appointments') ?>
                                             </label>
                                         </div>
 
                                         <div class="form-text text-muted">
                                             <small>
-                                                <?= lang('disable_booking_hint') ?>
+                                                <?= lang('disable_booking_appointments_hint') ?>
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox"
+                                                   id="disable-walkin-appointments"
+                                                   data-field="disable_walkin_appointments">
+                                            <label class="form-check-label" for="disable-walkin-appointments">
+                                                <?= lang('disable_walkin_appointments') ?>
+                                            </label>
+                                        </div>
+
+                                        <div class="form-text text-muted">
+                                            <small>
+                                                <?= lang('disable_walkin_appointments_hint') ?>
                                             </small>
                                         </div>
                                     </div>
@@ -436,6 +454,5 @@
 <script src="<?= asset_url('assets/js/pages/booking_settings.js') ?>"></script>
 
 <?php end_section('scripts'); ?>
-
 
 

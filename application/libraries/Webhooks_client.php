@@ -41,6 +41,7 @@ class Webhooks_client
         $this->CI->load->model('appointments_model');
         $this->CI->load->model('settings_model');
         $this->CI->load->model('webhooks_model');
+        $this->CI->load->library('realtime_events');
     }
 
     /**
@@ -62,6 +63,81 @@ class Webhooks_client
                 $this->call($webhook, $action, $payload);
             }
         }
+
+        $this->emit_realtime_event($action, $payload);
+    }
+
+    /**
+     * Publish calendar realtime event if action affects the calendar.
+     */
+    private function emit_realtime_event(string $action, array $payload): void
+    {
+        $event_name = null;
+        $event_data = [];
+
+        switch ($action) {
+            case WEBHOOK_APPOINTMENT_SAVE:
+                $event_name = 'calendar.appointment_saved';
+                $event_data = [
+                    'appointment_id' => $payload['id'] ?? null,
+                    'provider_id' => $payload['id_users_provider'] ?? null,
+                    'service_id' => $payload['id_services'] ?? null,
+                    'status' => $payload['status'] ?? null,
+                    'start_datetime' => $payload['start_datetime'] ?? null,
+                    'end_datetime' => $payload['end_datetime'] ?? null,
+                ];
+                break;
+            case WEBHOOK_APPOINTMENT_DELETE:
+                $event_name = 'calendar.appointment_deleted';
+                $event_data = [
+                    'appointment_id' => $payload['id'] ?? null,
+                    'provider_id' => $payload['id_users_provider'] ?? null,
+                    'service_id' => $payload['id_services'] ?? null,
+                    'start_datetime' => $payload['start_datetime'] ?? null,
+                    'end_datetime' => $payload['end_datetime'] ?? null,
+                ];
+                break;
+            case WEBHOOK_UNAVAILABILITY_SAVE:
+                $event_name = 'calendar.unavailability_saved';
+                $event_data = [
+                    'unavailability_id' => $payload['id'] ?? null,
+                    'provider_id' => $payload['id_users_provider'] ?? null,
+                    'start_datetime' => $payload['start_datetime'] ?? null,
+                    'end_datetime' => $payload['end_datetime'] ?? null,
+                ];
+                break;
+            case WEBHOOK_UNAVAILABILITY_DELETE:
+                $event_name = 'calendar.unavailability_deleted';
+                $event_data = [
+                    'unavailability_id' => $payload['id'] ?? null,
+                    'provider_id' => $payload['id_users_provider'] ?? null,
+                    'start_datetime' => $payload['start_datetime'] ?? null,
+                    'end_datetime' => $payload['end_datetime'] ?? null,
+                ];
+                break;
+            case WEBHOOK_BLOCKED_PERIOD_SAVE:
+                $event_name = 'calendar.blocked_period_saved';
+                $event_data = [
+                    'blocked_period_id' => $payload['id'] ?? null,
+                    'provider_id' => $payload['id_users_provider'] ?? null,
+                    'start_datetime' => $payload['start_datetime'] ?? null,
+                    'end_datetime' => $payload['end_datetime'] ?? null,
+                ];
+                break;
+            case WEBHOOK_BLOCKED_PERIOD_DELETE:
+                $event_name = 'calendar.blocked_period_deleted';
+                $event_data = [
+                    'blocked_period_id' => $payload['id'] ?? null,
+                    'provider_id' => $payload['id_users_provider'] ?? null,
+                    'start_datetime' => $payload['start_datetime'] ?? null,
+                    'end_datetime' => $payload['end_datetime'] ?? null,
+                ];
+                break;
+            default:
+                return;
+        }
+
+        $this->CI->realtime_events->emit($event_name, $event_data);
     }
 
     /**

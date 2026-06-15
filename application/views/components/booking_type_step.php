@@ -8,11 +8,23 @@
 
 <div id="wizard-frame-1" class="wizard-frame p-3 p-md-4" style="visibility: hidden;">
     <div class="frame-container py-3" style="min-height: 500px;">
-        <h2 class="frame-title fw-light text-center mb-4 text-muted mt-md-5"><?= lang('service_and_provider') ?></h2>
+        <h2 class="frame-title fw-light text-center mb-4 text-muted mt-md-5"><?= lang('provider') ?> &amp; <?= lang('service') ?></h2>
 
         <div class="row frame-content">
             <div class="col col-lg-8 offset-md-2">
                 <div class="mb-3">
+                    <label for="select-provider" class="fs-5 mb-2">
+                        <strong><?= lang('provider') ?></strong>
+                    </label>
+
+                    <select id="select-provider" class="form-select mb-4">
+                        <option value="">
+                            <?= lang('please_select') ?>
+                        </option>
+                    </select>
+                </div>
+
+                <div class="mb-3" hidden>
                     <label for="select-service" class="fs-5 mb-2">
                         <strong><?= lang('service') ?></strong>
                     </label>
@@ -75,18 +87,6 @@
                             }
                         }
                         ?>
-                    </select>
-                </div>
-
-                <div class="mb-3" hidden>
-                    <label for="select-provider" class="fs-5 mb-2">
-                        <strong><?= lang('provider') ?></strong>
-                    </label>
-
-                    <select id="select-provider" class="form-select mb-4">
-                        <option value="">
-                            <?= lang('please_select') ?>
-                        </option>
                     </select>
                 </div>
 

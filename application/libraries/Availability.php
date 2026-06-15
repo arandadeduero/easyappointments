@@ -62,15 +62,27 @@ class Availability
         array $service,
         array $provider,
         ?int $exclude_appointment_id = null,
+        string $appointment_type = APPOINTMENT_TYPE_BOOKING,
     ): array {
         if ($this->CI->blocked_periods_model->is_entire_date_blocked($date)) {
             return [];
         }
 
         if ($service['attendants_number'] > 1) {
-            $available_hours = $this->consider_multiple_attendants($date, $service, $provider, $exclude_appointment_id);
+            $available_hours = $this->consider_multiple_attendants(
+                $date,
+                $service,
+                $provider,
+                $exclude_appointment_id,
+                $appointment_type,
+            );
         } else {
-            $available_periods = $this->get_available_periods($date, $provider, $exclude_appointment_id);
+            $available_periods = $this->get_available_periods(
+                $date,
+                $provider,
+                $exclude_appointment_id,
+                $appointment_type,
+            );
 
             $available_hours = $this->generate_available_hours($date, $service, $available_periods);
         }
@@ -99,6 +111,7 @@ class Availability
         array $service,
         array $provider,
         ?int $exclude_appointment_id = null,
+        string $appointment_type = APPOINTMENT_TYPE_BOOKING,
     ): array {
         $unavailability_events = $this->CI->unavailabilities_model->get([
             'is_unavailability' => true,
@@ -107,9 +120,9 @@ class Availability
             'id_users_provider' => $provider['id'],
         ]);
 
-        $working_plan = json_decode($provider['settings']['working_plan'], true);
+        $working_plan = $this->get_working_plan_by_type($provider, $appointment_type);
 
-        $working_plan_exceptions = $this->CI->working_plan_exceptions_model->get_by_provider($provider['id']);
+        $working_plan_exceptions = $this->get_working_plan_exceptions_by_type($provider, $appointment_type);
 
         $working_day = strtolower(date('l', strtotime($date)));
 
@@ -331,13 +344,17 @@ class Availability
      *
      * @throws Exception
      */
-    public function get_available_periods(string $date, array $provider, ?int $exclude_appointment_id = null): array
+    public function get_available_periods(
+        string $date,
+        array $provider,
+        ?int $exclude_appointment_id = null,
+        string $appointment_type = APPOINTMENT_TYPE_BOOKING,
+    ): array
     {
         // Get the service, provider's working plan and provider appointments.
-        $working_plan = json_decode($provider['settings']['working_plan'], true);
+        $working_plan = $this->get_working_plan_by_type($provider, $appointment_type);
 
-        // Get the provider's working plan exceptions from the new table.
-        $working_plan_exceptions = $this->CI->working_plan_exceptions_model->get_by_provider($provider['id']);
+        $working_plan_exceptions = $this->get_working_plan_exceptions_by_type($provider, $appointment_type);
 
         // Validate and sanitize inputs before building query
         $provider_id = (int) $provider['id'];
@@ -643,5 +660,68 @@ class Availability
         }
 
         return $threshold > $selected_date_time ? $available_hours : [];
+    }
+
+    /**
+     * Get provider working plan by appointment type.
+     */
+    protected function get_working_plan_by_type(array $provider, string $appointment_type): array
+    {
+        $settings = $provider['settings'] ?? [];
+
+        if ($appointment_type === APPOINTMENT_TYPE_WALKIN) {
+            $raw_working_plan = $settings['working_plan_walkin'] ?? ($settings['working_plan'] ?? '{}');
+        } else {
+            $raw_working_plan = $settings['working_plan'] ?? '{}';
+        }
+
+        $working_plan = json_decode($raw_working_plan, true);
+
+        return is_array($working_plan) ? $working_plan : [];
+    }
+
+    /**
+     * Get provider working plan exceptions by appointment type.
+     */
+    protected function get_working_plan_exceptions_by_type(array $provider, string $appointment_type): array
+    {
+        if ($appointment_type === APPOINTMENT_TYPE_WALKIN) {
+            $settings = $provider['settings'] ?? [];
+            $raw_exceptions = $settings['working_plan_walkin_exceptions'] ?? '[]';
+            $exceptions = json_decode($raw_exceptions, true);
+
+            if (!is_array($exceptions)) {
+                return [];
+            }
+
+            $map = [];
+
+            foreach ($exceptions as $exception) {
+                if (empty($exception['startDate']) || empty($exception['endDate'])) {
+                    continue;
+                }
+
+                $start_date = new DateTime($exception['startDate']);
+                $end_date = new DateTime($exception['endDate']);
+
+                while ($start_date <= $end_date) {
+                    $has_time_window = !empty($exception['startTime']) && !empty($exception['endTime']);
+
+                    $map[$start_date->format('Y-m-d')] = $has_time_window
+                        ? [
+                            'start' => $exception['startTime'],
+                            'end' => $exception['endTime'],
+                            'breaks' => $exception['breaks'] ?? [],
+                        ]
+                        : null;
+
+                    $start_date->modify('+1 day');
+                }
+            }
+
+            return $map;
+        }
+
+        return $this->CI->working_plan_exceptions_model->get_by_provider($provider['id']);
     }
 }

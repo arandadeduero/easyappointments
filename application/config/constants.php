@@ -83,6 +83,8 @@ const TIME_FORMAT_MILITARY = 'military';
 const MIN_PASSWORD_LENGTH = 7;
 const MAX_PASSWORD_LENGTH = 100;
 const ANY_PROVIDER = 'any-provider';
+const APPOINTMENT_TYPE_BOOKING = 'booking';
+const APPOINTMENT_TYPE_WALKIN = 'walkin';
 
 const CALENDAR_VIEW_DEFAULT = 'default';
 const CALENDAR_VIEW_TABLE = 'table';

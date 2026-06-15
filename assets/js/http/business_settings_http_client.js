@@ -40,12 +40,13 @@ App.Http.BusinessSettings = (function () {
      *
      * @return {Object}
      */
-    function applyGlobalWorkingPlan(workingPlan) {
+    function applyGlobalWorkingPlan(workingPlan, appointmentType) {
         const url = App.Utils.Url.siteUrl('business_settings/apply_global_working_plan');
 
         const data = {
             csrf_token: vars('csrf_token'),
             working_plan: JSON.stringify(workingPlan),
+            appointment_type: appointmentType,
         };
 
         return $.post(url, data);

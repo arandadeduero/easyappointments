@@ -41,6 +41,7 @@ class Services_model extends EA_Model
         'price' => 'price',
         'currency' => 'currency',
         'description' => 'description',
+        'documentationRequirements' => 'documentation_requirements',
         'location' => 'location',
         'color' => 'color',
         'slotInterval' => 'slot_interval',

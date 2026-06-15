@@ -70,6 +70,7 @@ App.Http.Booking = (function () {
             service_id: $selectService.val(),
             provider_id: $selectProvider.val(),
             selected_date: selectedDate,
+            appointment_type: vars('appointment_type') || 'booking',
             service_duration: serviceDuration,
             manage_mode: Number(vars('manage_mode') || 0),
             appointment_id: appointmentId,
@@ -137,6 +138,11 @@ App.Http.Booking = (function () {
                 } else {
                     // Set the first available hour as the default selection.
                     $('.available-hour:eq(0)').addClass('selected-hour');
+                }
+
+                if ((vars('appointment_type') || 'booking') === 'walkin' && !vars('manage_mode')) {
+                    $availableHours.find('.available-hour:not(.selected-hour)').remove();
+                    $availableHours.find('.available-hour').prop('disabled', true);
                 }
 
                 App.Pages.Booking.updateConfirmFrame();
@@ -248,7 +254,11 @@ App.Http.Booking = (function () {
                     return false;
                 }
 
-                window.location.href = App.Utils.Url.siteUrl('booking_confirmation/of/' + response.appointment_hash);
+                const confirmationController = vars('confirmation_controller') || 'booking_confirmation';
+
+                window.location.href = App.Utils.Url.siteUrl(
+                    confirmationController + '/of/' + response.appointment_hash,
+                );
             })
             .fail(() => {
                 $captchaTitle.find('button').trigger('click');
@@ -287,6 +297,7 @@ App.Http.Booking = (function () {
             provider_id: providerId,
             service_id: serviceId,
             selected_date: encodeURIComponent(selectedDateString),
+            appointment_type: vars('appointment_type') || 'booking',
             csrf_token: vars('csrf_token'),
             manage_mode: Number(App.Pages.Booking.manageMode),
             appointment_id: appointmentId,

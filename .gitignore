@@ -1,19 +1,14 @@
-/*.zip
-/.idea/
-/.tmp-package/
-/build/
-/docs/apigen/html
-/docs/jsdoc/html
-/docs/plato/html
-/docker/mysql/
-/docker/baikal/
-/docker/openldap/
-/node_modules/
-/npm-debug.log
-/assets/js/**/*.min.js
-/assets/css/**/*.css
-/assets/vendor
+# Local application configuration
 /config.php
+/.env
+/.env.*
+!/.env.example
+
+# Installed dependencies
+/vendor/
+/realtime-server/node_modules/
+
+# Runtime data
 /storage/backups/*
 !/storage/backups/.htaccess
 !/storage/backups/index.html
@@ -27,7 +22,27 @@
 !/storage/sessions/.htaccess
 !/storage/sessions/index.html
 /storage/uploads/*
+!/storage/uploads/.htaccess
 !/storage/uploads/index.html
-/vendor/
-/metafile
+
+# Test and coverage output
+/.phpunit.cache/
+/.phpunit.result.cache
+/coverage/
+
+# IDE settings
+/.idea/
+/.vscode/
+*.code-workspace
+
+# Operating system files
 .DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+*.log
+*.tmp
+*.temp
+*.swp
+*~

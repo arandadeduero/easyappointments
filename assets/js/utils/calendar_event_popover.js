@@ -149,20 +149,24 @@ App.Utils.CalendarEventPopover = (function () {
      *
      * @param {string} displayEdit - CSS class to show/hide edit button.
      * @param {string} displayDelete - CSS class to show/hide delete button.
+     * @param {Boolean} includeCall - Whether to include the call action button.
      * @returns {jQuery} Button container element.
      */
-    function createPopoverButtons(displayEdit, displayDelete) {
+    function createPopoverButtons(displayEdit, displayDelete, includeCall = false) {
+        const buttons = [
+            createPopoverButton('close-popover btn btn-outline-secondary me-2', 'fas fa-ban', 'close'),
+            createPopoverButton('delete-popover btn btn-outline-secondary ' + displayDelete, 'fas fa-trash-alt', 'delete'),
+        ];
+
+        if (includeCall) {
+            buttons.push(createPopoverButton('call-popover btn btn-success me-2 ' + displayEdit, 'fas fa-bullhorn', 'call'));
+        }
+
+        buttons.push(createPopoverButton('edit-popover btn btn-primary ' + displayEdit, 'fas fa-edit', 'edit'));
+
         return $('<div/>', {
             class: 'd-flex justify-content-center',
-            html: [
-                createPopoverButton('close-popover btn btn-outline-secondary me-2', 'fas fa-ban', 'close'),
-                createPopoverButton(
-                    'delete-popover btn btn-outline-secondary ' + displayDelete,
-                    'fas fa-trash-alt',
-                    'delete',
-                ),
-                createPopoverButton('edit-popover btn btn-primary ' + displayEdit, 'fas fa-edit', 'edit'),
-            ],
+            html: buttons,
         });
     }
 
@@ -300,7 +304,7 @@ App.Utils.CalendarEventPopover = (function () {
                 ...createPopoverRow('notes', getEventNotes(info.event)),
                 renderCustomContent(info),
                 $('<hr/>'),
-                createPopoverButtons(displayEdit, displayDelete),
+                createPopoverButtons(displayEdit, displayDelete, true),
             ],
         });
     }

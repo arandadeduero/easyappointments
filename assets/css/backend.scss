@@ -626,3 +626,33 @@ body .modal.full-screen .modal-push {
         min-width: 0;
     }
 }
+
+.aad-calendar-event-content {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.aad-calendar-event-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
+    font-weight: 700;
+}
+
+.aad-calendar-event-time,
+.aad-calendar-event-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.aad-calendar-event-code {
+    flex: 0 0 auto;
+    margin-left: auto;
+    font-weight: 800;
+}

@@ -1,0 +1,173 @@
+/* ----------------------------------------------------------------------------
+ * Easy!Appointments - Online Appointment Scheduler
+ * ---------------------------------------------------------------------------- */
+
+/**
+ * Calendar real-time websocket utility.
+ *
+ * Keeps backend calendars in sync across multiple desks without page reload.
+ */
+App.Utils.CalendarRealtime = (function () {
+    const $reloadAppointments = $('#reload-appointments');
+
+    const REALTIME_EVENT_NAME = 'aad:calendar-realtime-update';
+
+    let socket = null;
+    let reconnectTimer = null;
+    let reloadTimer = null;
+
+    function scheduleReload() {
+        if (reloadTimer) {
+            return;
+        }
+
+        reloadTimer = setTimeout(() => {
+            reloadTimer = null;
+            $reloadAppointments.trigger('click');
+        }, 350);
+    }
+
+    function emitRealtimeUpdate(detail = {}) {
+        document.dispatchEvent(
+            new CustomEvent(REALTIME_EVENT_NAME, {
+                detail,
+            }),
+        );
+    }
+
+    function fallbackReload() {
+        scheduleReload();
+    }
+
+    function isDefaultCalendarView() {
+        return vars('calendar_view') !== 'table';
+    }
+
+    function handleAppointmentSaved(payload) {
+        const appointmentId = payload?.data?.appointment_id;
+
+        emitRealtimeUpdate({type: 'appointment_saved', payload});
+
+        if (!appointmentId) {
+            fallbackReload();
+            return;
+        }
+
+        if (!isDefaultCalendarView() || !App.Utils.CalendarDefaultView?.upsertAppointmentEvent) {
+            fallbackReload();
+            return;
+        }
+
+        App.Utils.CalendarDefaultView?.setLastUpdateLoading?.(true);
+
+        App.Http.Calendar.getAppointment(appointmentId)
+            .done((appointment) => {
+                App.Utils.CalendarDefaultView.upsertAppointmentEvent(appointment);
+            })
+            .fail(() => {
+                fallbackReload();
+            })
+            .always(() => {
+                App.Utils.CalendarDefaultView?.setLastUpdateLoading?.(false);
+            });
+    }
+
+    function handleAppointmentDeleted(payload) {
+        const appointmentId = payload?.data?.appointment_id;
+
+        emitRealtimeUpdate({type: 'appointment_deleted', payload});
+
+        if (!appointmentId) {
+            fallbackReload();
+            return;
+        }
+
+        if (!isDefaultCalendarView() || !App.Utils.CalendarDefaultView?.removeAppointmentEvent) {
+            fallbackReload();
+            return;
+        }
+
+        App.Utils.CalendarDefaultView.removeAppointmentEvent(appointmentId);
+    }
+
+    function handleMessage(event) {
+        try {
+            const payload = JSON.parse(event.data || '{}');
+            const eventName = payload.event || '';
+
+            if (!eventName.startsWith('calendar.')) {
+                return;
+            }
+
+            if (eventName === 'calendar.appointment_saved') {
+                handleAppointmentSaved(payload);
+                return;
+            }
+
+            if (eventName === 'calendar.appointment_deleted') {
+                handleAppointmentDeleted(payload);
+                return;
+            }
+
+            fallbackReload();
+        } catch (error) {
+            console.error('Realtime calendar message parse error:', error);
+        }
+    }
+
+    function connect() {
+        const isEnabled = Boolean(Number(vars('realtime_ws_enabled')));
+        const wsUrl = vars('realtime_ws_url');
+
+        if (!isEnabled || !wsUrl) {
+            return;
+        }
+
+        if (!('WebSocket' in window)) {
+            console.warn('Realtime calendar is not supported by this browser.');
+            return;
+        }
+
+        try {
+            socket = new WebSocket(wsUrl);
+        } catch (error) {
+            console.error('Realtime calendar websocket init failed:', error);
+            return;
+        }
+
+        socket.addEventListener('open', () => {
+            if (reconnectTimer) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = null;
+            }
+        });
+
+        socket.addEventListener('message', handleMessage);
+
+        socket.addEventListener('close', () => {
+            if (reconnectTimer) {
+                return;
+            }
+
+            reconnectTimer = setTimeout(() => {
+                reconnectTimer = null;
+                connect();
+            }, 2000);
+        });
+
+        socket.addEventListener('error', () => {
+            if (socket) {
+                socket.close();
+            }
+        });
+    }
+
+    function initialize() {
+        connect();
+    }
+
+    return {
+        initialize,
+        REALTIME_EVENT_NAME,
+    };
+})();

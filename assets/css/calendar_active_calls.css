@@ -1,0 +1,158 @@
+/* ============================================================
+ * Active Calls Fixed Bottom Bar – Calendar page
+ * Prefix: aad-calls-bar  (Aranda de Duero custom)
+ * ============================================================ */
+
+/* ---------- Bar container ---------- */
+#aad-active-calls-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1045; /* above Bootstrap modals backdrop (1040) */
+    background: var(--bs-body-bg);
+    border-top: 2px solid var(--bs-primary);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.45);
+    font-size: 0.85rem;
+    /* Push page content up so the bar never hides calendar events */
+}
+
+/* Add bottom padding to the calendar page when the bar is shown */
+body:has(#aad-active-calls-bar:not([hidden])) #calendar-page {
+    padding-bottom: 130px;
+}
+
+/* Fallback for browsers without :has() support */
+.aad-bar-open #calendar-page {
+    padding-bottom: 130px;
+}
+
+/* ---------- Header row (title + chips) ---------- */
+.aad-calls-bar__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.aad-calls-bar__title {
+    color: var(--bs-primary);
+    font-weight: 700;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    flex-shrink: 0;
+}
+
+/* ---------- Chips ---------- */
+.aad-calls-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+.aad-call-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--bs-secondary);
+    border: 1px solid var(--bs-secondary);
+    color: var(--bs-body-bg);
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    transition: background 0.15s, border-color 0.15s;
+    line-height: 1.4;
+    opacity: 0.7;
+}
+
+.aad-call-chip:hover {
+    background: var(--bs-primary);
+    border: 1px solid var(--bs-primary);
+}
+
+.aad-call-chip.active {
+    background: var(--bs-primary);
+    border-color: var(--bs-primary);
+    opacity: 1;
+}
+
+.aad-chip-queue {
+    font-size: 0.7rem;
+}
+
+/* ---------- Detail panel ---------- */
+.aad-calls-bar__detail {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 6px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.aad-calls-bar__detail-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.aad-calls-bar__detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 90px;
+}
+
+.aad-calls-bar__detail-label {
+    font-size: 0.65rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.aad-calls-bar__detail-value {
+    font-size: 0.85rem;
+    color: var(--bs-body-color);
+    font-weight: 500;
+}
+
+/* ---------- Footer (action buttons) ---------- */
+.aad-calls-bar__footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* Make buttons slightly smaller inside the bar */
+#aad-active-calls-bar .btn {
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    white-space: nowrap;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+    .aad-calls-bar__detail {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .aad-calls-bar__footer {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    #aad-active-calls-bar .btn {
+        flex: 1 1 auto;
+    }
+}

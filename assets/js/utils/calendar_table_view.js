@@ -217,9 +217,8 @@ App.Utils.CalendarTableView = (function () {
 
         $appointmentsModal.find('#appointment-location').val(appointment.location);
         $appointmentsModal.find('#appointment-meeting-link').val(appointment.meeting_link);
-        $appointmentsModal.find('#appointment-status').val(appointment.status);
+        $appointmentsModal.find('#appointment-status').val(appointment.status).trigger('change');
         $appointmentsModal.find('#appointment-notes').val(appointment.notes);
-        App.Components.ColorSelection.setColor($appointmentsModal.find('#appointment-color'), appointment.color);
         $appointmentsModal.modal('show');
     }
 
@@ -1674,5 +1673,6 @@ App.Utils.CalendarTableView = (function () {
 
     return {
         initialize,
+        populateAppointmentModal,
     };
 })();

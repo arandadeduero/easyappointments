@@ -27,6 +27,8 @@ class Appointments_model extends EA_Model
         'id_users_provider' => 'integer',
         'id_users_customer' => 'integer',
         'id_services' => 'integer',
+        'queue_number' => 'integer',
+        'id_users_caller' => 'integer',
     ];
 
     /**
@@ -41,6 +43,9 @@ class Appointments_model extends EA_Model
         'meetingLink' => 'meeting_link',
         'color' => 'color',
         'status' => 'status',
+        'type' => 'appointment_type',
+        'queueNumber' => 'queue_number',
+        'callerUserId' => 'id_users_caller',
         'notes' => 'notes',
         'hash' => 'hash',
         'serviceId' => 'id_services',
@@ -67,6 +72,163 @@ class Appointments_model extends EA_Model
             return $this->insert($appointment);
         } else {
             return $this->update($appointment);
+        }
+    }
+
+    /**
+     * Check whether a daily queue number is available for a provider.
+     */
+    private function is_queue_number_available(
+        int $provider_id,
+        string $date,
+        int $queue_number,
+        ?int $exclude_appointment_id = null,
+    ): bool {
+        $this->db
+            ->select('id')
+            ->from('appointments')
+            ->where('id_users_provider', $provider_id)
+            ->where('DATE(start_datetime)', $date)
+            ->where('queue_number', $queue_number)
+            ->where('is_unavailability', false);
+
+        if ($exclude_appointment_id) {
+            $this->db->where('id !=', $exclude_appointment_id);
+        }
+
+        return $this->db->get()->num_rows() === 0;
+    }
+
+    /**
+     * Generate the next available daily queue number for a provider.
+     */
+    public function get_next_queue_number(
+        int $provider_id,
+        string $date,
+        ?int $exclude_appointment_id = null,
+    ): int {
+        for ($queue_number = 1; $queue_number <= 999; $queue_number++) {
+            if ($this->is_queue_number_available($provider_id, $date, $queue_number, $exclude_appointment_id)) {
+                return $queue_number;
+            }
+        }
+
+        throw new RuntimeException('There are no available queue numbers for this provider and date.');
+    }
+
+    /**
+     * Generate a random daily queue number for an online booking.
+     */
+    public function get_random_queue_number(
+        int $provider_id,
+        string $date,
+        ?int $exclude_appointment_id = null,
+    ): int {
+        for ($attempt = 0; $attempt < 200; $attempt++) {
+            $queue_number = random_int(1, 999);
+
+            if ($this->is_queue_number_available($provider_id, $date, $queue_number, $exclude_appointment_id)) {
+                return $queue_number;
+            }
+        }
+
+        return $this->get_next_queue_number($provider_id, $date, $exclude_appointment_id);
+    }
+
+    /**
+     * Assign a stable queue number once; never refresh it during normal edits.
+     */
+    public function ensure_queue_number(array &$appointment): void
+    {
+        if (filter_var($appointment['is_unavailability'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+            return;
+        }
+
+        if (empty($appointment['start_datetime']) || empty($appointment['id_users_provider'])) {
+            return;
+        }
+
+        $appointment_type = $appointment['appointment_type'] ?? APPOINTMENT_TYPE_BOOKING;
+
+        if (!in_array($appointment_type, [APPOINTMENT_TYPE_BOOKING, APPOINTMENT_TYPE_WALKIN], true)) {
+            $appointment_type = APPOINTMENT_TYPE_BOOKING;
+        }
+
+        $appointment['appointment_type'] = $appointment_type;
+
+        if (!empty($appointment['id'])) {
+            $current_appointment = $this->find((int) $appointment['id']);
+
+            if (!empty($current_appointment['queue_number'])) {
+                $appointment['queue_number'] = $current_appointment['queue_number'];
+                return;
+            }
+        }
+
+        $appointment_date = substr((string) $appointment['start_datetime'], 0, 10);
+
+        if (!empty($appointment['queue_number'])) {
+            return;
+        }
+
+        $exclude_appointment_id = isset($appointment['id']) ? (int) $appointment['id'] : null;
+
+        $appointment['queue_number'] = $this->get_random_queue_number(
+            (int) $appointment['id_users_provider'],
+            $appointment_date,
+            $exclude_appointment_id,
+        );
+    }
+
+    /**
+     * Backfill today's missing queue numbers for the display screen.
+     */
+    public function ensure_daily_queue_numbers(int $provider_id, string $date): void
+    {
+        foreach ([APPOINTMENT_TYPE_BOOKING, APPOINTMENT_TYPE_WALKIN] as $appointment_type) {
+            $this->db
+                ->select('*')
+                ->from('appointments')
+                ->where('id_users_provider', $provider_id)
+                ->where('DATE(start_datetime)', $date)
+                ->where('is_unavailability', false);
+
+            if ($appointment_type === APPOINTMENT_TYPE_BOOKING) {
+                $this->db
+                    ->group_start()
+                    ->where('appointment_type', APPOINTMENT_TYPE_BOOKING)
+                    ->or_where('appointment_type IS NULL')
+                    ->or_where('appointment_type', '')
+                    ->group_end();
+            } else {
+                $this->db->where('appointment_type', $appointment_type);
+            }
+
+            $appointments = $this->db
+                ->group_start()
+                ->where('queue_number IS NULL')
+                ->or_where('queue_number <=', 0)
+                ->group_end()
+                ->order_by('start_datetime', 'ASC')
+                ->order_by('id', 'ASC')
+                ->get()
+                ->result_array();
+
+            foreach ($appointments as $appointment) {
+                $queue_number = $this->get_random_queue_number($provider_id, $date, (int) $appointment['id']);
+
+                $this->db->update(
+                    'appointments',
+                    [
+                        'appointment_type' => $appointment_type,
+                        'queue_number' => $queue_number,
+                        'update_datetime' => date('Y-m-d H:i:s'),
+                    ],
+                    [
+                        'id' => $appointment['id'],
+                    ],
+                );
+            }
         }
     }
 

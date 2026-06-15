@@ -116,25 +116,7 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label" for="theme">
-                                        <?= lang('theme') ?>
-                                    </label>
-
-                                    <select id="theme" data-field="theme" class="form-select">
-                                        <?php foreach (vars('available_themes') as $available_theme): ?>
-                                            <option value="<?= $available_theme ?>">
-                                                <?= ucfirst($available_theme) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-
-                                    <div class="form-text text-muted">
-                                        <small>
-                                            <?= lang('company_color_hint') ?>
-                                        </small>
-                                    </div>
-                                </div>
+                                
 
                             </div>
                         </div>

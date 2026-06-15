@@ -18,21 +18,14 @@
             <?= lang('check_spam_folder') ?>
         </p>
 
-        <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center mt-4">
-            <a href="<?= site_url() ?>" class="btn btn-primary px-4 py-2">
-                <i class="fas fa-calendar-alt me-2"></i>
-                <?= lang('go_to_booking_page') ?>
-            </a>
-
-            <?php if (vars('display_add_to_google_calendar') === '1'): ?>
-            <a href="<?= vars(
-                'add_to_google_url',
-            ) ?>" id="add-to-google-calendar" class="btn btn-outline-primary px-4 py-2" target="_blank">
-                <i class="fab fa-google me-2"></i>
-                <?= lang('add_to_google_calendar') ?>
-            </a>
-            <?php endif; ?>
+        <?php if (!empty(vars('queue_number'))): ?>
+        <div class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary bg-opacity-10 text-primary px-4 py-3 mb-4">
+            <div>
+                <div class="small text-uppercase fw-semibold mb-1"><?= lang('walkin_number_generated') ?></div>
+                <div class="display-6 fw-bold mb-0">#<?= e((string) vars('queue_number')) ?></div>
+            </div>
         </div>
+        <?php endif; ?>
     </div>
 </div>
 

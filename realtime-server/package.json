@@ -1,0 +1,13 @@
+{
+  "name": "easyappointments-realtime-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WebSocket bridge for Easy!Appointments calendar realtime updates",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

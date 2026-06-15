@@ -27,6 +27,7 @@ class Services extends EA_Controller
         'price',
         'currency',
         'description',
+        'documentation_requirements',
         'color',
         'location',
         'slot_interval',

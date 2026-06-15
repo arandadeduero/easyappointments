@@ -27,6 +27,7 @@ App.Pages.Services = (function () {
     const $isPrivate = $('#is-private');
     const $location = $('#location');
     const $description = $('#description');
+    const $documentationRequirements = $('#documentation-requirements');
     const $filterServices = $('#filter-services');
     const $color = $('#color');
     let filterResults = {};
@@ -155,6 +156,7 @@ App.Pages.Services = (function () {
                 price: $price.val(),
                 currency: $currency.val(),
                 description: $description.val(),
+                documentation_requirements: $documentationRequirements.val(),
                 location: $location.val(),
                 color: App.Components.ColorSelection.getColor($color),
                 slot_interval: $slotInterval.val(),
@@ -344,6 +346,7 @@ App.Pages.Services = (function () {
         $price.val(service.price);
         $currency.val(service.currency);
         $description.val(service.description);
+        $documentationRequirements.val(service.documentation_requirements || '');
         $location.val(service.location);
         $slotInterval.val(service.slot_interval);
         $attendantsNumber.val(service.attendants_number);

@@ -30,6 +30,22 @@
                             <?= lang('edit_working_plan_hint') ?>
                         </p>
 
+                        <div class="mb-3">
+                            <label class="form-label d-block"><?= lang('appointment_type') ?></label>
+                            <ul class="nav nav-pills" id="appointment-plan-tabs">
+                                <li class="nav-item">
+                                    <button type="button" class="nav-link appointment-plan-tab active" data-type="<?= APPOINTMENT_TYPE_BOOKING ?>">
+                                        <?= lang('appointment_type_booking') ?>
+                                    </button>
+                                </li>
+                                <li class="nav-item ms-2">
+                                    <button type="button" class="nav-link appointment-plan-tab" data-type="<?= APPOINTMENT_TYPE_WALKIN ?>">
+                                        <?= lang('appointment_type_walkin') ?>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
                         <div class="table-responsive">
                             <table class="working-plan table table-striped">
                                 <thead>
@@ -125,20 +141,6 @@
                                 </small>
                             </div>
                         </div>
-
-                        <div class="d-flex justify-content-start align-items-center mb-3">
-                            <h5 class="mb-0 me-3 fw-light">
-                                <?= lang('appointment_status_options') ?>
-                            </h5>
-                        </div>
-
-                        <p class="form-text text-muted mb-4">
-                            <?= lang('appointment_status_options_info') ?>
-                        </p>
-
-                        <?php component('appointment_status_options', [
-                            'attributes' => 'id="appointment-status-options"',
-                        ]); ?>
 
                     </fieldset>
                 </form>

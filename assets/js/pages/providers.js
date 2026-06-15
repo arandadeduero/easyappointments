@@ -15,6 +15,9 @@
  * This module implements the functionality of the providers page.
  */
 App.Pages.Providers = (function () {
+    const APPOINTMENT_TYPE_BOOKING = 'booking';
+    const APPOINTMENT_TYPE_WALKIN = 'walkin';
+
     const $providers = $('#providers');
     const $id = $('#id');
     const $firstName = $('#first-name');
@@ -37,9 +40,66 @@ App.Pages.Providers = (function () {
     const $notifications = $('#notifications');
     const $calendarView = $('#calendar-view');
     const $filterProviders = $('#filter-providers');
+    const $appointmentPlanTabs = $('.appointment-plan-tab');
     let filterResults = {};
     let filterLimit = 20;
     let workingPlanManager;
+    let workingPlanByType = {};
+    let workingPlanExceptionsByType = {};
+    let currentPlanType = APPOINTMENT_TYPE_BOOKING;
+
+    function setPlanType(type) {
+        currentPlanType = type || APPOINTMENT_TYPE_BOOKING;
+
+        $appointmentPlanTabs.removeClass('active');
+        $appointmentPlanTabs.filter('[data-type="' + currentPlanType + '"]').addClass('active');
+
+        renderPlanTypeState(currentPlanType);
+        workingPlanManager.timepickers(false);
+    }
+
+    function initializeWorkingPlanState() {
+        const companyWorkingPlan = JSON.parse(vars('company_working_plan'));
+        const companyWorkingPlanWalkin = JSON.parse(vars('company_working_plan_walkin') || vars('company_working_plan'));
+
+        workingPlanByType = {
+            [APPOINTMENT_TYPE_BOOKING]: companyWorkingPlan,
+            [APPOINTMENT_TYPE_WALKIN]: companyWorkingPlanWalkin,
+        };
+
+        workingPlanExceptionsByType = {
+            [APPOINTMENT_TYPE_BOOKING]: [],
+            [APPOINTMENT_TYPE_WALKIN]: [],
+        };
+
+        setPlanType(APPOINTMENT_TYPE_BOOKING);
+    }
+
+    function persistCurrentPlanTypeState() {
+        const selectedType = currentPlanType || APPOINTMENT_TYPE_BOOKING;
+        const workingPlan = workingPlanManager.get(false);
+
+        if (workingPlan) {
+            workingPlanByType[selectedType] = workingPlan;
+        }
+
+        workingPlanExceptionsByType[selectedType] = workingPlanManager.getWorkingPlanExceptions();
+    }
+
+    function renderPlanTypeState(type) {
+        const selectedType = type || APPOINTMENT_TYPE_BOOKING;
+        const companyWorkingPlan = JSON.parse(vars('company_working_plan'));
+        const companyWorkingPlanWalkin = JSON.parse(vars('company_working_plan_walkin') || vars('company_working_plan'));
+
+        const workingPlan =
+            workingPlanByType[selectedType] ||
+            (selectedType === APPOINTMENT_TYPE_WALKIN ? companyWorkingPlanWalkin : companyWorkingPlan);
+        const exceptions = workingPlanExceptionsByType[selectedType] || [];
+
+        workingPlanManager.setup(workingPlan);
+        $providers.find('.working-plan-exceptions tbody').empty();
+        workingPlanManager.setupWorkingPlanExceptions(exceptions);
+    }
 
     /**
      * Add the page event listeners.
@@ -91,6 +151,7 @@ App.Pages.Providers = (function () {
             $('#password, #password-confirm').removeClass('required');
             $('#provider-services input:checkbox').prop('disabled', false);
             $('#select-all-services, #select-none-services').prop('disabled', false);
+            $appointmentPlanTabs.prop('disabled', false);
             $providers
                 .find(
                     '.add-break, .edit-break, .delete-break, .add-working-plan-exception, .edit-working-plan-exception, .delete-working-plan-exception, #reset-working-plan',
@@ -121,10 +182,11 @@ App.Pages.Providers = (function () {
                 .prop('disabled', false);
             $('#provider-services input:checkbox').prop('disabled', false);
             $('#select-all-services, #select-none-services').prop('disabled', false);
+            $appointmentPlanTabs.prop('disabled', false);
 
             // Apply default working plan
-            const companyWorkingPlan = JSON.parse(vars('company_working_plan'));
-            workingPlanManager.setup(companyWorkingPlan);
+            initializeWorkingPlanState();
+            renderPlanTypeState(APPOINTMENT_TYPE_BOOKING);
             workingPlanManager.timepickers(false);
         });
 
@@ -142,6 +204,7 @@ App.Pages.Providers = (function () {
             $('#password, #password-confirm').removeClass('required');
             $('#provider-services input:checkbox').prop('disabled', false);
             $('#select-all-services, #select-none-services').prop('disabled', false);
+            $appointmentPlanTabs.prop('disabled', false);
             $providers
                 .find(
                     '.add-break, .edit-break, .delete-break, .add-working-plan-exception, .edit-working-plan-exception, .delete-working-plan-exception, #reset-working-plan',
@@ -180,9 +243,12 @@ App.Pages.Providers = (function () {
          * Event: Save Provider Button "Click"
          */
         $providers.on('click', '#save-provider', () => {
-            const workingPlan = workingPlanManager.get();
+            persistCurrentPlanTypeState();
 
-            if (workingPlan === null) {
+            const bookingWorkingPlan = workingPlanByType[APPOINTMENT_TYPE_BOOKING];
+            const walkinWorkingPlan = workingPlanByType[APPOINTMENT_TYPE_WALKIN];
+
+            if (bookingWorkingPlan === null || walkinWorkingPlan === null) {
                 return;
             }
 
@@ -203,8 +269,14 @@ App.Pages.Providers = (function () {
                 ldap_dn: $ldapDn.val(),
                 settings: {
                     username: $username.val(),
-                    working_plan: JSON.stringify(workingPlan),
-                    working_plan_exceptions: JSON.stringify(workingPlanManager.getWorkingPlanExceptions()),
+                    working_plan: JSON.stringify(bookingWorkingPlan),
+                    working_plan_exceptions: JSON.stringify(
+                        workingPlanExceptionsByType[APPOINTMENT_TYPE_BOOKING] || [],
+                    ),
+                    working_plan_walkin: JSON.stringify(walkinWorkingPlan),
+                    working_plan_walkin_exceptions: JSON.stringify(
+                        workingPlanExceptionsByType[APPOINTMENT_TYPE_WALKIN] || [],
+                    ),
                     notifications: Number($notifications.prop('checked')),
                     calendar_view: $calendarView.val(),
                 },
@@ -253,12 +325,25 @@ App.Pages.Providers = (function () {
          * Event: Reset Working Plan Button "Click".
          */
         $providers.on('click', '#reset-working-plan', () => {
+            persistCurrentPlanTypeState();
+
             $('.breaks tbody').empty();
             $('.working-plan-exceptions tbody').empty();
             $('.work-start, .work-end').val('');
             const companyWorkingPlan = JSON.parse(vars('company_working_plan'));
-            workingPlanManager.setup(companyWorkingPlan);
-            workingPlanManager.timepickers(false);
+            const companyWorkingPlanWalkin = JSON.parse(vars('company_working_plan_walkin') || vars('company_working_plan'));
+            const selectedType = currentPlanType || APPOINTMENT_TYPE_BOOKING;
+
+            workingPlanByType[selectedType] =
+                selectedType === APPOINTMENT_TYPE_WALKIN ? companyWorkingPlanWalkin : companyWorkingPlan;
+            workingPlanExceptionsByType[selectedType] = [];
+
+            setPlanType(selectedType);
+        });
+
+        $appointmentPlanTabs.on('click', (event) => {
+            persistCurrentPlanTypeState();
+            setPlanType($(event.currentTarget).data('type'));
         });
 
         /**
@@ -394,6 +479,7 @@ App.Pages.Providers = (function () {
         $providers.find('.record-details #timezone').val(vars('default_timezone'));
         $providers.find('.record-details #is-private').prop('checked', false);
         $providers.find('.record-details #notifications').prop('checked', true);
+        $appointmentPlanTabs.prop('disabled', true);
         $providers.find('.add-break, .add-working-plan-exception, #reset-working-plan').prop('disabled', true);
 
         workingPlanManager.timepickers(true);
@@ -413,6 +499,9 @@ App.Pages.Providers = (function () {
         $('#providers .working-plan tbody').empty();
         $('#providers .breaks tbody').empty();
         $('#providers .working-plan-exceptions tbody').empty();
+
+        initializeWorkingPlanState();
+        setPlanType(APPOINTMENT_TYPE_BOOKING);
     }
 
     /**
@@ -441,7 +530,7 @@ App.Pages.Providers = (function () {
         $calendarView.val(provider.settings.calendar_view);
         $notifications.prop('checked', Boolean(Number(provider.settings.notifications)));
 
-        // Add dedicated provider link.
+        // Add dedicated provider links.
         let dedicatedUrl = App.Utils.Url.siteUrl('?provider=' + encodeURIComponent(provider.id));
         let $link = $('<a/>', {
             'href': dedicatedUrl,
@@ -456,8 +545,25 @@ App.Pages.Providers = (function () {
             ],
         });
 
-        $providers.find('.details-view h4').find('a').remove().end().append($link);
+        const walkinUrl = App.Utils.Url.siteUrl('in_person_appointments?departamento=' + encodeURIComponent(provider.id));
+        const walkinLabel = lang('booking_link') + ' (' + lang('appointment_type_walkin') + ')';
+        const $walkinLink = $('<a/>', {
+            'href': walkinUrl,
+            'target': '_blank',
+            'class': 'ms-2',
+            'data-bs-toggle': 'tooltip',
+            'title': walkinLabel,
+            'aria-label': walkinLabel,
+            'html': [
+                $('<i/>', {
+                    'class': 'fas fa-link',
+                }),
+            ],
+        });
+
+        $providers.find('.details-view h4').find('a').remove().end().append($link, $walkinLink);
         new bootstrap.Tooltip($link[0]);
+        new bootstrap.Tooltip($walkinLink[0]);
 
         $('#provider-services a').remove();
         $('#provider-services input:checkbox').prop('checked', false);
@@ -494,14 +600,26 @@ App.Pages.Providers = (function () {
             new bootstrap.Tooltip($link[0]);
         });
 
-        // Display working plan
-        const workingPlan = JSON.parse(provider.settings.working_plan);
-        workingPlanManager.setup(workingPlan);
+        // Display working plan by appointment type
+        workingPlanByType = {
+            [APPOINTMENT_TYPE_BOOKING]: JSON.parse(provider.settings.working_plan || vars('company_working_plan')),
+            [APPOINTMENT_TYPE_WALKIN]: JSON.parse(
+                provider.settings.working_plan_walkin ||
+                    vars('company_working_plan_walkin') ||
+                    provider.settings.working_plan ||
+                    vars('company_working_plan'),
+            ),
+        };
+
+        workingPlanExceptionsByType = {
+            [APPOINTMENT_TYPE_BOOKING]: JSON.parse(provider.settings.working_plan_exceptions || '[]'),
+            [APPOINTMENT_TYPE_WALKIN]: JSON.parse(provider.settings.working_plan_walkin_exceptions || '[]'),
+        };
+
+        setPlanType(APPOINTMENT_TYPE_BOOKING);
+
         $('.working-plan').find('input').prop('disabled', true);
         $('.breaks').find('.edit-break, .delete-break').prop('disabled', true);
-        $providers.find('.working-plan-exceptions tbody').empty();
-        const workingPlanExceptions = JSON.parse(provider.settings.working_plan_exceptions);
-        workingPlanManager.setupWorkingPlanExceptions(workingPlanExceptions);
         $('.working-plan-exceptions')
             .find('.edit-working-plan-exception, .delete-working-plan-exception')
             .prop('disabled', true);
@@ -607,6 +725,8 @@ App.Pages.Providers = (function () {
     function initialize() {
         workingPlanManager = new App.Utils.WorkingPlan();
         workingPlanManager.addEventListeners();
+
+        initializeWorkingPlanState();
 
         App.Pages.Providers.resetForm();
         App.Pages.Providers.filter('');

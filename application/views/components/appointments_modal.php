@@ -117,10 +117,6 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <?php component('color_selection', ['attributes' => 'id="appointment-color"']); ?>
-                                </div>
-
-                                <div class="mb-3">
                                     <label for="appointment-location" class="form-label">
                                         <?= lang('location') ?>
                                     </label>
@@ -140,8 +136,19 @@
                                     </label>
                                     <select id="appointment-status" class="form-select">
                                         <?php foreach ($appointment_status_options as $appointment_status_option): ?>
-                                            <option value="<?= e($appointment_status_option) ?>">
-                                                <?= e($appointment_status_option) ?>
+                                            <?php
+                                            $status_value = is_array($appointment_status_option)
+                                                ? (string) ($appointment_status_option['value'] ?? $appointment_status_option['label'] ?? '')
+                                                : (string) $appointment_status_option;
+                                            $status_label = is_array($appointment_status_option)
+                                                ? (string) ($appointment_status_option['label'] ?? $status_value)
+                                                : $status_value;
+                                            $status_color = is_array($appointment_status_option)
+                                                ? (string) ($appointment_status_option['color'] ?? '')
+                                                : '';
+                                            ?>
+                                            <option value="<?= e($status_value) ?>" data-color="<?= e($status_color) ?>">
+                                                <?= e($status_label) ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>

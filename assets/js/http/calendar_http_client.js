@@ -88,6 +88,24 @@ App.Http.Calendar = (function () {
     }
 
     /**
+     * Mark an appointment as called/in process.
+     *
+     * @param {Number} appointmentId
+     *
+     * @return {*|jQuery}
+     */
+    function callAppointment(appointmentId) {
+        const url = App.Utils.Url.siteUrl('calendar/call_appointment');
+
+        const data = {
+            csrf_token: vars('csrf_token'),
+            appointment_id: appointmentId,
+        };
+
+        return $.post(url, data);
+    }
+
+    /**
      * Save unavailability period to database.
      *
      * @param {Object} unavailability Contains the unavailability period data.
@@ -303,15 +321,78 @@ App.Http.Calendar = (function () {
         attemptSave();
     }
 
+    /**
+     * Get all active (En proceso) appointments for today.
+     *
+     * @param {?Number} providerId Optional provider filter (department scope).
+     *
+     * @return {*|jQuery}
+     */
+    function getActiveCalls(providerId = null) {
+        const url = App.Utils.Url.siteUrl('calendar/get_active_calls');
+        const data = {};
+
+        if (providerId) {
+            data.provider_id = providerId;
+        }
+
+        return $.ajax({
+            url,
+            method: 'GET',
+            data,
+            global: false,
+        });
+    }
+
+    /**
+     * Mark an appointment as finished (Finalizada).
+     *
+     * @param {Number} appointmentId
+     *
+     * @return {*|jQuery}
+     */
+    function finishAppointment(appointmentId) {
+        const url = App.Utils.Url.siteUrl('calendar/finish_appointment');
+
+        const data = {
+            csrf_token: vars('csrf_token'),
+            appointment_id: appointmentId,
+        };
+
+        return $.post(url, data);
+    }
+
+    /**
+     * Finish the current appointment and atomically call the next available one for the same provider.
+     *
+     * @param {Number} appointmentId
+     *
+     * @return {*|jQuery}
+     */
+    function finishAndCallNext(appointmentId) {
+        const url = App.Utils.Url.siteUrl('calendar/finish_and_call_next');
+
+        const data = {
+            csrf_token: vars('csrf_token'),
+            appointment_id: appointmentId,
+        };
+
+        return $.post(url, data);
+    }
+
     return {
         saveAppointment,
         saveAppointmentWithConflictHandling,
         deleteAppointment,
+        callAppointment,
         saveUnavailability,
         deleteUnavailability,
         saveWorkingPlanException,
         deleteWorkingPlanException,
         getCalendarAppointments,
         getCalendarAppointmentsForTableView,
+        getActiveCalls,
+        finishAppointment,
+        finishAndCallNext,
     };
 })();

@@ -38,7 +38,6 @@ App.Components.AppointmentsModal = (function () {
     const $appointmentLocation = $('#appointment-location');
     const $appointmentMeetingLink = $('#appointment-meeting-link');
     const $appointmentStatus = $('#appointment-status');
-    const $appointmentColor = $('#appointment-color');
     const $appointmentNotes = $('#appointment-notes');
     const $reloadAppointments = $('#reload-appointments');
     const $selectFilterItem = $('#select-filter-item');
@@ -101,7 +100,6 @@ App.Components.AppointmentsModal = (function () {
                 end_datetime: endDatetime,
                 location: $appointmentLocation.val(),
                 meeting_link: $appointmentMeetingLink.val(),
-                color: App.Components.ColorSelection.getColor($appointmentColor),
                 status: $appointmentStatus.val(),
                 notes: $appointmentNotes.val(),
                 is_unavailability: Number(false),
@@ -433,10 +431,6 @@ App.Components.AppointmentsModal = (function () {
                 return Number(availableService.id) === Number(serviceId);
             });
 
-            if (service?.color) {
-                App.Components.ColorSelection.setColor($appointmentColor, service.color);
-            }
-
             const duration = service ? service.duration : 60;
 
             const startDateTimeObject = App.Utils.UI.getDateTimePickerValue($startDatetime);
@@ -520,9 +514,6 @@ App.Components.AppointmentsModal = (function () {
 
         $language.val(vars('default_language'));
         $timezone.val(vars('default_timezone'));
-
-        // Reset color.
-        $appointmentColor.find('.color-selection-option:first').trigger('click');
 
         // Prepare service and provider select boxes.
         $selectService.val($selectService.eq(0).attr('value'));

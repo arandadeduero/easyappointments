@@ -56,12 +56,6 @@ class General_settings extends EA_Controller
 
         $role_slug = session('role_slug');
 
-        $available_theme_files = glob(__DIR__ . '/../../assets/css/themes/*.min.css');
-
-        $available_themes = array_map(function ($available_theme_file) {
-            return str_replace('.min.css', '', basename($available_theme_file));
-        }, $available_theme_files);
-
         script_vars([
             'user_id' => $user_id,
             'role_slug' => $role_slug,
@@ -74,7 +68,6 @@ class General_settings extends EA_Controller
             'active_menu' => PRIV_SYSTEM_SETTINGS,
             'user_display_name' => $this->accounts->get_user_display_name($user_id),
             'grouped_timezones' => $this->timezones->to_grouped_array(),
-            'available_themes' => $available_themes,
         ]);
 
         $this->load->view('pages/general_settings');
@@ -93,7 +86,6 @@ class General_settings extends EA_Controller
         'book_advance_timeout',
         'default_timezone',
         'default_language',
-        'theme',
         'date_format',
         'time_format',
         'first_weekday',
