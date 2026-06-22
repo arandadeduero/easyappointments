@@ -13,12 +13,14 @@
   background: rgba(0, 0, 0, 0.1);
 }
 
+#header-logo img {
+  max-height: 65px;
+}
+
 #header #header-menu .nav-item.active {
   background: rgba(0, 0, 0, 0.2);
 }
-#header-logo img{
- max-height: 65px;
-}
+
 /* Notification positioning */
 #notification .alert {
   margin-bottom: 0;
@@ -605,7 +607,6 @@ body .modal.full-screen .modal-push {
     min-width: 0;
   }
 }
-
 .aad-calendar-event-content {
   width: 100%;
   min-width: 0;
