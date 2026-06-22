@@ -112,11 +112,14 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label" for="attendants-number" disabled>
-                    <?= lang('attendants_number') ?>
+                <label class="form-label" for="attendants-number">
+                    <?= lang('service_attendants_number') ?>
                     <span class="text-danger" hidden>*</span>
                 </label>
-                <input id="attendants-number" class="form-control required" type="number" min="1">
+                <input id="attendants-number" class="form-control required" type="number" min="1" disabled>
+                <div class="form-text">
+                    <?= lang('service_attendants_number_hint') ?>
+                </div>
             </div>
 
             <div class="mb-3">

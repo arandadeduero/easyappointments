@@ -39,6 +39,10 @@ App.Pages.Providers = (function () {
     const $passwordConfirmation = $('#password-confirm');
     const $notifications = $('#notifications');
     const $calendarView = $('#calendar-view');
+    const $attendantsNumber = $('#attendants-number');
+    const $localPrintingEnabled = $('#local-printing-enabled');
+    const $localPrintingEndpoint = $('#local-printing-endpoint');
+    const $localPrintingToken = $('#local-printing-token');
     const $filterProviders = $('#filter-providers');
     const $appointmentPlanTabs = $('.appointment-plan-tab');
     let filterResults = {};
@@ -117,6 +121,7 @@ App.Pages.Providers = (function () {
             const key = $('#filter-providers .key').val();
             $('.selected').removeClass('selected');
             App.Pages.Providers.resetForm();
+            $attendantsNumber.val(1);
             App.Pages.Providers.filter(key);
         });
 
@@ -279,6 +284,10 @@ App.Pages.Providers = (function () {
                     ),
                     notifications: Number($notifications.prop('checked')),
                     calendar_view: $calendarView.val(),
+                    attendants_number: $attendantsNumber.val(),
+                    local_printing_enabled: Number($localPrintingEnabled.prop('checked')),
+                    local_printing_endpoint: $localPrintingEndpoint.val(),
+                    local_printing_token: $localPrintingToken.val(),
                 },
             };
 
@@ -415,6 +424,11 @@ App.Pages.Providers = (function () {
                 throw new Error(lang('fields_are_required'));
             }
 
+            if (!Number.isInteger(Number($attendantsNumber.val())) || Number($attendantsNumber.val()) < 1) {
+                $attendantsNumber.addClass('is-invalid');
+                throw new Error(lang('fields_are_required'));
+            }
+
             // Validate passwords.
             if ($password.val() !== $passwordConfirmation.val()) {
                 $('#password, #password-confirm').addClass('is-invalid');
@@ -475,6 +489,10 @@ App.Pages.Providers = (function () {
         $providers.find('.record-details').find('input, select, textarea').val('').prop('disabled', true);
         $providers.find('.record-details .form-label span').prop('hidden', true);
         $providers.find('.record-details #calendar-view').val('default');
+        $attendantsNumber.val(1);
+        $localPrintingEnabled.prop('checked', false);
+        $localPrintingEndpoint.val('http://127.0.0.1:8787/print');
+        $localPrintingToken.val('');
         $providers.find('.record-details #language').val(vars('default_language'));
         $providers.find('.record-details #timezone').val(vars('default_timezone'));
         $providers.find('.record-details #is-private').prop('checked', false);
@@ -528,6 +546,10 @@ App.Pages.Providers = (function () {
 
         $username.val(provider.settings.username);
         $calendarView.val(provider.settings.calendar_view);
+        $attendantsNumber.val(provider.settings.attendants_number || 1);
+        $localPrintingEnabled.prop('checked', Boolean(Number(provider.settings.local_printing_enabled || 0)));
+        $localPrintingEndpoint.val(provider.settings.local_printing_endpoint || 'http://127.0.0.1:8787/print');
+        $localPrintingToken.val(provider.settings.local_printing_token || '');
         $notifications.prop('checked', Boolean(Number(provider.settings.notifications)));
 
         // Add dedicated provider links.

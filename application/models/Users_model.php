@@ -98,6 +98,14 @@ class Users_model extends EA_Model
         ) {
             throw new InvalidArgumentException('Not all required fields are provided: ' . print_r($user, true));
         }
+
+        if (
+            isset($user['settings']['desk_number']) &&
+            $user['settings']['desk_number'] !== '' &&
+            !ctype_digit((string) $user['settings']['desk_number'])
+        ) {
+            throw new InvalidArgumentException('The desk number must be numeric.');
+        }
     }
 
     /**
@@ -165,6 +173,10 @@ class Users_model extends EA_Model
      */
     public function set_setting(int $user_id, string $name, string $value): void
     {
+        if (!$this->db->field_exists($name, 'user_settings')) {
+            return;
+        }
+
         if (!$this->db->update('user_settings', [$name => $value], ['id_users' => $user_id])) {
             throw new RuntimeException('Could not set the new user setting value: ' . $name);
         }

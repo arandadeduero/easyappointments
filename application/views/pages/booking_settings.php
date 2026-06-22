@@ -411,6 +411,23 @@
                                         </div>
                                     </div>
 
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox"
+                                                   id="allow-same-day-booking"
+                                                   data-field="allow_same_day_booking">
+                                            <label class="form-check-label" for="allow-same-day-booking">
+                                                <?= lang('allow_same_day_booking') ?>
+                                            </label>
+                                        </div>
+
+                                        <div class="form-text text-muted">
+                                            <small>
+                                                <?= lang('allow_same_day_booking_hint') ?>
+                                            </small>
+                                        </div>
+                                    </div>
+
                                     <div>
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox"
@@ -439,6 +456,62 @@
                             </div>
                         </div>
 
+                        <h5 class="mb-3 fw-light">
+                            <?= lang('kiosk_devices') ?>
+                        </h5>
+
+                        <div class="border rounded mb-3 p-3">
+                            <p class="text-muted mb-4"><?= lang('kiosk_devices_hint') ?></p>
+
+                            <?php if (can('edit', PRIV_SYSTEM_SETTINGS)): ?>
+                                <div class="row g-3 align-items-end mb-4">
+                                    <div class="col-md-5">
+                                        <label for="kiosk-provider" class="form-label"><?= lang('provider') ?></label>
+                                        <select id="kiosk-provider" class="form-select">
+                                            <option value=""><?= lang('please_select') ?></option>
+                                            <?php foreach (vars('kiosk_providers', []) as $provider): ?>
+                                                <option value="<?= e((string) $provider['id']) ?>">
+                                                    <?= e(trim($provider['first_name'] . ' ' . $provider['last_name'])) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label for="kiosk-device-name" class="form-label"><?= lang('kiosk_device_name') ?></label>
+                                        <input id="kiosk-device-name" class="form-control" maxlength="255"
+                                               placeholder="<?= e(lang('kiosk_device_name_example')) ?>">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" id="generate-kiosk-code" class="btn btn-primary w-100">
+                                            <?= lang('generate') ?>
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
+                            <div id="kiosk-pairing-code" class="alert alert-info text-center d-none" role="alert">
+                                <div><?= lang('kiosk_pairing_code') ?></div>
+                                <div id="kiosk-pairing-code-value" class="display-5 fw-bold my-2"></div>
+                                <div><?= lang('kiosk_pairing_code_hint') ?></div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table align-middle mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th><?= lang('kiosk_device_name') ?></th>
+                                        <th><?= lang('provider') ?></th>
+                                        <th><?= lang('last_activity') ?></th>
+                                        <th><?= lang('ip_address') ?></th>
+                                        <th><?= lang('status') ?></th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="kiosk-devices-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
                     </fieldset>
                 </form>
             </div>
@@ -454,5 +527,3 @@
 <script src="<?= asset_url('assets/js/pages/booking_settings.js') ?>"></script>
 
 <?php end_section('scripts'); ?>
-
-

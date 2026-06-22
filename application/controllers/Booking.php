@@ -181,36 +181,28 @@ class Booking extends EA_Controller
     {
         $provider_timezone = new DateTimeZone($provider['timezone']);
         $provider_now = new DateTime('now', $provider_timezone);
-        $future_booking_limit = (int) setting('future_booking_limit');
+        $date = $provider_now->format('Y-m-d');
 
-        for ($day_offset = 0; $day_offset <= $future_booking_limit; $day_offset++) {
-            $date = (clone $provider_now)->modify('+' . $day_offset . ' days')->format('Y-m-d');
+        $available_hours = $this->availability->get_available_hours(
+            $date,
+            $service,
+            $provider,
+            null,
+            APPOINTMENT_TYPE_WALKIN,
+        );
 
-            $available_hours = $this->availability->get_available_hours(
-                $date,
-                $service,
-                $provider,
-                null,
-                APPOINTMENT_TYPE_WALKIN,
-            );
+        foreach ($available_hours as $available_hour) {
+            $slot_start = new DateTime($date . ' ' . $available_hour . ':00', $provider_timezone);
 
-            if (empty($available_hours)) {
+            if ($slot_start < $provider_now) {
                 continue;
             }
 
-            foreach ($available_hours as $available_hour) {
-                $slot_start = new DateTime($date . ' ' . $available_hour . ':00', $provider_timezone);
-
-                if ($slot_start < $provider_now) {
-                    continue;
-                }
-
-                return [
-                    'provider_id' => (int) $provider['id'],
-                    'start_datetime' => $slot_start->format('Y-m-d H:i:s'),
-                    'timestamp' => $slot_start->getTimestamp(),
-                ];
-            }
+            return [
+                'provider_id' => (int) $provider['id'],
+                'start_datetime' => $slot_start->format('Y-m-d H:i:s'),
+                'timestamp' => $slot_start->getTimestamp(),
+            ];
         }
 
         return null;
@@ -447,6 +439,7 @@ class Booking extends EA_Controller
             'display_cookie_notice' => $display_cookie_notice,
             'display_any_provider' => setting('display_any_provider'),
             'future_booking_limit' => setting('future_booking_limit'),
+            'allow_same_day_booking' => setting('allow_same_day_booking', '0'),
             'appointment_data' => $appointment,
             'provider_data' => $provider ? filter_sensitive_user_data($provider) : null,
             'customer_data' => $customer,

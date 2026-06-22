@@ -68,7 +68,28 @@ class Availability
             return [];
         }
 
-        if ($service['attendants_number'] > 1) {
+        if (
+            $appointment_type === APPOINTMENT_TYPE_BOOKING &&
+            !filter_var(setting('allow_same_day_booking', '0'), FILTER_VALIDATE_BOOLEAN)
+        ) {
+            $provider_timezone = new DateTimeZone($provider['timezone']);
+            $selected_date = new DateTime($date, $provider_timezone);
+            $today = new DateTime('today', $provider_timezone);
+
+            if ($selected_date <= $today) {
+                return [];
+            }
+        }
+
+        if (!empty($provider['settings']['attendants_number'])) {
+            $available_hours = $this->consider_shared_provider_capacity(
+                $date,
+                $service,
+                $provider,
+                $exclude_appointment_id,
+                $appointment_type,
+            );
+        } elseif ($service['attendants_number'] > 1) {
             $available_hours = $this->consider_multiple_attendants(
                 $date,
                 $service,
@@ -187,6 +208,88 @@ class Availability
                 );
 
                 if ($appointment_attendants_number < $service['attendants_number']) {
+                    $hours[] = $slot_start->format('H:i');
+                }
+
+                $slot_start->add($interval);
+                $slot_end->add($interval);
+            }
+        }
+
+        return $hours;
+    }
+
+    /**
+     * Get hours that satisfy both the service limit and the shared department capacity.
+     */
+    protected function consider_shared_provider_capacity(
+        string $date,
+        array $service,
+        array $provider,
+        ?int $exclude_appointment_id = null,
+        string $appointment_type = APPOINTMENT_TYPE_BOOKING,
+    ): array {
+        $unavailability_events = $this->CI->unavailabilities_model->get([
+            'is_unavailability' => true,
+            'DATE(start_datetime) <=' => $date,
+            'DATE(end_datetime) >=' => $date,
+            'id_users_provider' => $provider['id'],
+        ]);
+
+        $working_plan = $this->get_working_plan_by_type($provider, $appointment_type);
+        $working_plan_exceptions = $this->get_working_plan_exceptions_by_type($provider, $appointment_type);
+        $working_day = strtolower(date('l', strtotime($date)));
+        $date_working_plan = $working_plan[$working_day] ?? null;
+
+        if (array_key_exists($date, $working_plan_exceptions)) {
+            $date_working_plan = $working_plan_exceptions[$date];
+        }
+
+        if (!$date_working_plan) {
+            return [];
+        }
+
+        $periods = [
+            [
+                'start' => new DateTime($date . ' ' . $date_working_plan['start']),
+                'end' => new DateTime($date . ' ' . $date_working_plan['end']),
+            ],
+        ];
+
+        $blocked_periods = $this->CI->blocked_periods_model->get_for_period($date, $date);
+        $periods = $this->remove_breaks($date, $periods, $date_working_plan['breaks'] ?? []);
+        $periods = $this->remove_unavailability_events($periods, $unavailability_events);
+        $periods = $this->remove_unavailability_events($periods, $blocked_periods);
+
+        $hours = [];
+        $interval_value = !empty($service['slot_interval']) ? $service['slot_interval'] : 15;
+        $interval = new DateInterval('PT' . (int) $interval_value . 'M');
+        $duration = new DateInterval('PT' . (int) $service['duration'] . 'M');
+
+        foreach ($periods as $period) {
+            $slot_start = clone $period['start'];
+            $slot_end = (clone $slot_start)->add($duration);
+
+            while ($slot_end <= $period['end']) {
+                $service_usage = $this->CI->appointments_model->get_service_attendants_number_for_period(
+                    $slot_start,
+                    $slot_end,
+                    (int) $service['id'],
+                    (int) $provider['id'],
+                    $exclude_appointment_id,
+                );
+
+                $provider_usage = $this->CI->appointments_model->get_provider_attendants_number_for_period(
+                    $slot_start,
+                    $slot_end,
+                    (int) $provider['id'],
+                    $exclude_appointment_id,
+                );
+
+                if (
+                    $service_usage < (int) $service['attendants_number'] &&
+                    $provider_usage < (int) $provider['settings']['attendants_number']
+                ) {
                     $hours[] = $slot_start->format('H:i');
                 }
 

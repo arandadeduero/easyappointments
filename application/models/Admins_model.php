@@ -135,6 +135,14 @@ class Admins_model extends EA_Model
             );
         }
 
+        if (
+            isset($admin['settings']['desk_number']) &&
+            $admin['settings']['desk_number'] !== '' &&
+            !ctype_digit((string) $admin['settings']['desk_number'])
+        ) {
+            throw new InvalidArgumentException('The desk number must be numeric.');
+        }
+
         // Make sure the email address is unique.
         $admin_id = $admin['id'] ?? null;
 
@@ -313,6 +321,10 @@ class Admins_model extends EA_Model
      */
     public function set_setting(int $admin_id, string $name, mixed $value = null): void
     {
+        if (!$this->db->field_exists($name, 'user_settings')) {
+            return;
+        }
+
         if (!$this->db->update('user_settings', [$name => $value], ['id_users' => $admin_id])) {
             throw new RuntimeException('Could not set the new admin setting value: ' . $name);
         }
@@ -593,6 +605,7 @@ class Admins_model extends EA_Model
                 'username' => $admin['settings']['username'],
                 'notifications' => filter_var($admin['settings']['notifications'], FILTER_VALIDATE_BOOLEAN),
                 'calendarView' => $admin['settings']['calendar_view'],
+                'deskNumber' => $admin['settings']['desk_number'] ?? '',
             ],
         ];
 
@@ -687,6 +700,10 @@ class Admins_model extends EA_Model
 
             if (array_key_exists('calendarView', $admin['settings'])) {
                 $decoded_resource['settings']['calendar_view'] = $admin['settings']['calendarView'];
+            }
+
+            if (array_key_exists('deskNumber', $admin['settings'])) {
+                $decoded_resource['settings']['desk_number'] = $admin['settings']['deskNumber'];
             }
         }
 

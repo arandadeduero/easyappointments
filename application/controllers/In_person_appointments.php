@@ -9,6 +9,8 @@
  */
 class In_person_appointments extends EA_Controller
 {
+    private const KIOSK_COOKIE_NAME = 'ea_kiosk_device';
+
     private const APPOINTMENT_STATUS_COLORS = [
         'Reservado' => '#7cbae8',
         'En proceso' => '#ff9800',
@@ -51,6 +53,7 @@ class In_person_appointments extends EA_Controller
 
         $this->load->model('appointments_model');
         $this->load->model('customers_model');
+        $this->load->model('kiosk_devices_model');
         $this->load->model('providers_model');
         $this->load->model('services_model');
 
@@ -144,6 +147,11 @@ class In_person_appointments extends EA_Controller
             abort(404, lang('invalid_provider_selection'));
         }
 
+        if (!$this->get_authorized_kiosk_device($department_id)) {
+            $this->render_pairing_page($provider);
+            return;
+        }
+
         $available_services = $this->services_model->get_available_services(true);
         $provider_service_ids = array_map('intval', $provider['services'] ?? []);
 
@@ -157,6 +165,20 @@ class In_person_appointments extends EA_Controller
             'provider' => filter_sensitive_user_data($provider),
             'available_services' => $available_services,
             'default_timezone' => setting('default_timezone'),
+            'date_format' => setting('date_format'),
+            'time_format' => setting('time_format'),
+            'local_printing_enabled' => $provider['settings']['local_printing_enabled'] ?? setting(
+                'local_printing_enabled',
+                '0',
+            ),
+            'local_printing_endpoint' => $provider['settings']['local_printing_endpoint'] ?? setting(
+                'local_printing_endpoint',
+                'http://127.0.0.1:8787/print',
+            ),
+            'local_printing_token' => $provider['settings']['local_printing_token'] ?? setting(
+                'local_printing_token',
+                '',
+            ),
         ]);
 
         html_vars([
@@ -193,6 +215,11 @@ class In_person_appointments extends EA_Controller
 
             if ($provider_id <= 0) {
                 throw new RuntimeException(lang('invalid_provider_selection'));
+            }
+
+            if (!$this->get_authorized_kiosk_device($provider_id)) {
+                json_response(['message' => lang('kiosk_device_not_authorized')], 403);
+                return;
             }
 
             if ($service_id <= 0) {
@@ -298,6 +325,10 @@ class In_person_appointments extends EA_Controller
                 'appointment_id' => $appointment['id'],
                 'appointment_hash' => $appointment['hash'],
                 'queue_number' => $queue_number,
+                'start_datetime' => $appointment['start_datetime'],
+                'company_name' => setting('company_name'),
+                'department' => trim($provider['first_name'] . ' ' . $provider['last_name']),
+                'service' => $service['name'],
             ]);
         } catch (Throwable $e) {
             json_exception($e);
@@ -308,34 +339,26 @@ class In_person_appointments extends EA_Controller
     {
         $provider_timezone = new DateTimeZone($provider['timezone']);
         $provider_now = new DateTime('now', $provider_timezone);
-        $future_booking_limit = (int) setting('future_booking_limit');
+        $date = $provider_now->format('Y-m-d');
 
-        for ($day_offset = 0; $day_offset <= $future_booking_limit; $day_offset++) {
-            $date = (clone $provider_now)->modify('+' . $day_offset . ' days')->format('Y-m-d');
+        $available_hours = $this->availability->get_available_hours(
+            $date,
+            $service,
+            $provider,
+            null,
+            APPOINTMENT_TYPE_WALKIN,
+        );
 
-            $available_hours = $this->availability->get_available_hours(
-                $date,
-                $service,
-                $provider,
-                null,
-                APPOINTMENT_TYPE_WALKIN,
-            );
+        foreach ($available_hours as $available_hour) {
+            $slot_start = new DateTime($date . ' ' . $available_hour . ':00', $provider_timezone);
 
-            if (empty($available_hours)) {
+            if ($slot_start < $provider_now) {
                 continue;
             }
 
-            foreach ($available_hours as $available_hour) {
-                $slot_start = new DateTime($date . ' ' . $available_hour . ':00', $provider_timezone);
-
-                if ($slot_start < $provider_now) {
-                    continue;
-                }
-
-                return [
-                    'start_datetime' => $slot_start->format('Y-m-d H:i:s'),
-                ];
-            }
+            return [
+                'start_datetime' => $slot_start->format('Y-m-d H:i:s'),
+            ];
         }
 
         return null;
@@ -344,5 +367,72 @@ class In_person_appointments extends EA_Controller
     protected function get_next_walkin_queue_number(int $provider_id, string $date): int
     {
         return $this->appointments_model->get_random_queue_number($provider_id, $date);
+    }
+
+    /**
+     * Authorize this browser as the kiosk for a department.
+     */
+    public function authorize_device(): void
+    {
+        method('post');
+
+        check('departamento', 'numeric');
+        check('pairing_code', 'numeric');
+
+        $department_id = (int) request('departamento');
+        $provider = $this->providers_model->find($department_id);
+
+        if (empty($provider)) {
+            abort(404, lang('invalid_provider_selection'));
+        }
+
+        $code = trim((string) request('pairing_code'));
+        $pairing = $this->kiosk_devices_model->pair_device(
+            $code,
+            $this->input->ip_address(),
+            $department_id,
+        );
+
+        if (!$pairing) {
+            $this->render_pairing_page($provider, lang('kiosk_pairing_code_invalid'));
+            return;
+        }
+
+        setcookie(self::KIOSK_COOKIE_NAME, $pairing['token'], [
+            'expires' => time() + 315360000,
+            'path' => config('cookie_path', '/'),
+            'domain' => config('cookie_domain', ''),
+            'secure' => (bool) config('cookie_secure', false),
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ]);
+
+        redirect('in_person_appointments?departamento=' . $pairing['provider_id']);
+    }
+
+    protected function get_authorized_kiosk_device(int $provider_id): ?array
+    {
+        $token = (string) $this->input->cookie(self::KIOSK_COOKIE_NAME, true);
+
+        if ($token === '') {
+            return null;
+        }
+
+        return $this->kiosk_devices_model->authorize($token, $provider_id, $this->input->ip_address());
+    }
+
+    protected function render_pairing_page(array $provider, string $error = ''): void
+    {
+        html_vars([
+            'page_title' => lang('kiosk_authorization'),
+            'company_color' => setting('company_color'),
+            'legal_notice_url' => setting('legal_notice_url'),
+            'imprint_url' => setting('imprint_url'),
+            'display_login_button' => setting('display_login_button'),
+            'provider' => $provider,
+            'pairing_error' => $error,
+        ]);
+
+        $this->load->view('pages/in_person_device_authorization');
     }
 }

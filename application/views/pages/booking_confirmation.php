@@ -25,6 +25,11 @@
                 <div class="display-6 fw-bold mb-0">#<?= e((string) vars('queue_number')) ?></div>
             </div>
         </div>
+        <div id="local-printing-message" class="alert d-none mt-2" role="alert"></div>
+        <button id="reprint-walkin-ticket" type="button" class="btn btn-outline-primary">
+            <i class="fas fa-print me-2"></i>
+            <?= lang('reprint_ticket') ?>
+        </button>
         <?php endif; ?>
     </div>
 </div>
@@ -32,6 +37,11 @@
 <?php end_section('content'); ?>
 
 <?php section('scripts'); ?>
+
+<?php if (!empty(vars('queue_number'))): ?>
+<script src="<?= asset_url('assets/js/utils/local_printing.js') ?>"></script>
+<script src="<?= asset_url('assets/js/pages/in_person_confirmation.js') ?>"></script>
+<?php endif; ?>
 
 <?php component('google_analytics_script', ['google_analytics_code' => vars('google_analytics_code')]); ?>
 <?php component('matomo_analytics_script', [

@@ -149,6 +149,16 @@ class Providers_model extends EA_Model
             );
         }
 
+        if (
+            empty($provider['settings']['attendants_number']) ||
+            (int) $provider['settings']['attendants_number'] < 1
+        ) {
+            throw new InvalidArgumentException(
+                'The provided provider attendants number is invalid: ' .
+                    ($provider['settings']['attendants_number'] ?? ''),
+            );
+        }
+
         // Make sure the email address is unique.
         $provider_id = $provider['id'] ?? null;
 
@@ -272,6 +282,11 @@ class Providers_model extends EA_Model
         if (empty($settings['working_plan_walkin_exceptions'])) {
             $settings['working_plan_walkin_exceptions'] = '[]';
         }
+
+        $settings['local_printing_enabled'] = $settings['local_printing_enabled'] ?? '0';
+        $settings['local_printing_endpoint'] =
+            $settings['local_printing_endpoint'] ?? setting('local_printing_endpoint', 'http://127.0.0.1:8787/print');
+        $settings['local_printing_token'] = $settings['local_printing_token'] ?? setting('local_printing_token', '');
 
         return $settings;
     }
@@ -840,6 +855,7 @@ class Providers_model extends EA_Model
                 'username' => $provider['settings']['username'],
                 'notifications' => filter_var($provider['settings']['notifications'], FILTER_VALIDATE_BOOLEAN),
                 'calendarView' => $provider['settings']['calendar_view'],
+                'attendantsNumber' => (int) ($provider['settings']['attendants_number'] ?? 1),
                 'googleSync' => array_key_exists('google_sync', $provider['settings'])
                     ? filter_var($provider['settings']['google_sync'], FILTER_VALIDATE_BOOLEAN)
                     : null,
@@ -968,6 +984,10 @@ class Providers_model extends EA_Model
 
             if (array_key_exists('calendarView', $provider['settings'])) {
                 $decoded_resource['settings']['calendar_view'] = $provider['settings']['calendarView'];
+            }
+
+            if (array_key_exists('attendantsNumber', $provider['settings'])) {
+                $decoded_resource['settings']['attendants_number'] = $provider['settings']['attendantsNumber'];
             }
 
             if (array_key_exists('notifications', $provider['settings'])) {

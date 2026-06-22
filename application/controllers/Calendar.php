@@ -63,6 +63,7 @@ class Calendar extends EA_Controller
         'appointment_type',
         'queue_number',
         'id_users_caller',
+        'call_datetime',
         'is_unavailability',
         'id_users_provider',
         'id_users_customer',
@@ -72,6 +73,20 @@ class Calendar extends EA_Controller
     public array $optional_appointment_fields = [
         //
     ];
+
+    /**
+     * Return writable appointment fields for the current schema version.
+     */
+    protected function get_allowed_appointment_fields(): array
+    {
+        $fields = $this->allowed_appointment_fields;
+
+        if (!$this->db->field_exists('call_datetime', 'appointments')) {
+            $fields = array_values(array_diff($fields, ['call_datetime']));
+        }
+
+        return $fields;
+    }
 
     /**
      * Calendar constructor.
@@ -438,7 +453,6 @@ class Calendar extends EA_Controller
             check('customer_data', 'array|null');
             check('appointment_data', 'array');
             check('notify_users', 'bool|null');
-            check('force_save', 'bool|null');
 
             $customer_data = request('customer_data');
 
@@ -446,7 +460,6 @@ class Calendar extends EA_Controller
 
             $notify_users = filter_var(request('notify_users', true), FILTER_VALIDATE_BOOLEAN);
 
-            $force_save = filter_var(request('force_save', false), FILTER_VALIDATE_BOOLEAN);
 
             $this->check_event_permissions((int) $appointment_data['id_users_provider']);
 
@@ -499,25 +512,6 @@ class Calendar extends EA_Controller
                     $previous_appointment = $this->appointments_model->find((int) $appointment['id']);
                 }
 
-                // Check if the provider has a conflicting appointment at the selected time
-                $exclude_appointment_id = !empty($appointment['id']) ? (int) $appointment['id'] : null;
-
-                $has_conflict = $this->appointments_model->has_provider_conflict(
-                    (int) $appointment['id_users_provider'],
-                    $appointment['start_datetime'],
-                    $appointment['end_datetime'],
-                    $exclude_appointment_id,
-                );
-
-                if ($has_conflict && !$force_save) {
-                    json_response([
-                        'success' => false,
-                        'conflict' => true,
-                        'message' => lang('provider_has_conflicting_appointment'),
-                    ]);
-                    return;
-                }
-
                 if ($manage_mode && !empty($appointment['id'])) {
                     $this->synchronization->remove_appointment_on_provider_change($appointment['id']);
                 }
@@ -546,9 +540,10 @@ class Calendar extends EA_Controller
 
                 if ($current_status === 'En proceso' && $previous_status !== 'En proceso') {
                     $appointment['id_users_caller'] = (int) session('user_id');
+                    $appointment['call_datetime'] = date('Y-m-d H:i:s');
                 }
 
-                $this->appointments_model->only($appointment, $this->allowed_appointment_fields);
+                $this->appointments_model->only($appointment, $this->get_allowed_appointment_fields());
 
                 $this->appointments_model->optional($appointment, $this->optional_appointment_fields);
 
@@ -718,8 +713,9 @@ class Calendar extends EA_Controller
             $appointment['status'] = 'En proceso';
             $appointment['color'] = $this->get_appointment_status_color('En proceso');
             $appointment['id_users_caller'] = (int) session('user_id');
+            $appointment['call_datetime'] = date('Y-m-d H:i:s');
 
-            $this->appointments_model->only($appointment, $this->allowed_appointment_fields);
+            $this->appointments_model->only($appointment, $this->get_allowed_appointment_fields());
 
             $this->appointments_model->save($appointment);
 
@@ -1283,7 +1279,7 @@ class Calendar extends EA_Controller
             $appointment['status'] = $finished_status;
             $appointment['color'] = $this->get_appointment_status_color($finished_status);
 
-            $this->appointments_model->only($appointment, $this->allowed_appointment_fields);
+            $this->appointments_model->only($appointment, $this->get_allowed_appointment_fields());
             $this->appointments_model->save($appointment);
 
             $appointment = $this->appointments_model->find($appointment_id);
@@ -1332,7 +1328,7 @@ class Calendar extends EA_Controller
             // Mark current appointment as finished.
             $appointment['status'] = $finished_status;
             $appointment['color'] = $this->get_appointment_status_color($finished_status);
-            $this->appointments_model->only($appointment, $this->allowed_appointment_fields);
+            $this->appointments_model->only($appointment, $this->get_allowed_appointment_fields());
             $this->appointments_model->save($appointment);
 
             // Lock and retrieve the next queued appointment atomically to prevent double-calling.
@@ -1360,7 +1356,8 @@ class Calendar extends EA_Controller
                     $next_appointment['status'] = 'En proceso';
                     $next_appointment['color'] = $this->get_appointment_status_color('En proceso');
                     $next_appointment['id_users_caller'] = (int) session('user_id');
-                    $this->appointments_model->only($next_appointment, $this->allowed_appointment_fields);
+                    $next_appointment['call_datetime'] = date('Y-m-d H:i:s');
+                    $this->appointments_model->only($next_appointment, $this->get_allowed_appointment_fields());
                     $this->appointments_model->save($next_appointment);
                     $next_called = true;
                 }

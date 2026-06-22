@@ -405,8 +405,15 @@ $customer_address = trim((string) ($customer['address'] ?? ''));
                                 <tr>
                                     <td>
 
-                                        <!-- Logo at the top center, embedded as CID -->
-                                        <img src="cid:logo.png" alt="Logo" style="display:block;max-width:67px; margin: auto auto 24px;">
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0"
+                                               width="100%" style="background-color:<?= e($settings['company_color'] ?? DEFAULT_COMPANY_COLOR) ?>;border-radius:8px;margin-bottom:24px;">
+                                            <tr>
+                                                <td align="center" style="padding:20px;">
+                                                    <img src="cid:logo.png" alt="Logo"
+                                                         style="display:block;max-width:80px;max-height:80px;margin:auto;">
+                                                </td>
+                                            </tr>
+                                        </table>
 
                                         <h1 style="text-align: center;">
                                             <?= $subject ?>
@@ -415,6 +422,22 @@ $customer_address = trim((string) ($customer['address'] ?? ''));
                                         <p style="text-align: center;">
                                             <?= $message ?>
                                         </p>
+
+                                        <?php if (!empty($appointment['queue_number'])): ?>
+                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0"
+                                                   align="center" style="margin: 24px auto;">
+                                                <tr>
+                                                    <td style="background-color:#f2f4f6;border:2px solid #34495e;border-radius:8px;padding:16px 32px;text-align:center;">
+                                                        <div style="color:#34495e;font-size:16px;font-weight:bold;margin-bottom:6px;">
+                                                            <?= lang('walkin_number_generated') ?>
+                                                        </div>
+                                                        <div style="color:#1f2d3d;font-size:38px;font-weight:bold;line-height:1;">
+                                                            #<?= e((string) $appointment['queue_number']) ?>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        <?php endif; ?>
 
                                         <h2 style="text-align: center;">
                                             <?= lang('appointment_details_title') ?>
@@ -642,11 +665,6 @@ $customer_address = trim((string) ($customer['address'] ?? ''));
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                         <tr>
                             <td class="content-block powered-by">
-                                Powered by
-                                <a href="https://easyappointments.org" style="text-decoration: none;">
-                                    Easy!Appointments
-                                </a>
-                                |
                                 <a href="<?= e($settings['company_link']) ?>" style="text-decoration: none;">
                                     <?= e($settings['company_name']) ?>
                                 </a>

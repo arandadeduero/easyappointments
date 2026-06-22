@@ -6,8 +6,10 @@ App.Pages.InPersonAppointments = (function () {
     const $departmentName = $('#department-name');
     const $service = $('#service');
     const $formMessage = $('#form-message');
+    const $continueWalkin = $('#continue-walkin');
     const $createWalkin = $('#create-walkin');
-    const $serviceDocumentation = $('#service-documentation');
+    const $serviceStep = $('#walkin-service-step');
+    const $documentationStep = $('#walkin-documentation-step');
     const $serviceDocumentationText = $('#service-documentation-text');
 
     function initialize() {
@@ -31,66 +33,99 @@ App.Pages.InPersonAppointments = (function () {
 
     function addEventListeners() {
         $service.on('change', () => {
-            renderSelectedServiceDocumentation();
+            $formMessage.removeClass('alert-danger').addClass('d-none').text('');
         });
 
-        $createWalkin.on('click', () => {
+        $continueWalkin.on('click', () => {
             if (!validate()) {
                 return;
             }
 
-            const postData = {
-                appointment: {
-                    id_users_provider: vars('provider').id,
-                    id_services: $service.val(),
-                    appointment_type: 'walkin',
-                },
-            };
+            const documentationRequirements = getSelectedServiceDocumentation();
 
-            $createWalkin.prop('disabled', true);
+            if (!documentationRequirements) {
+                createWalkin();
+                return;
+            }
 
-            App.Http.InPersonAppointments.store(postData)
-                .done((response) => {
-                    window.location.href = App.Utils.Url.siteUrl(
-                        'in_person_confirmation/of/' + response.appointment_hash,
-                    );
-                })
-                .fail((xhr) => {
-                    const responseMessage = xhr?.responseJSON?.message || lang('unexpected_issues');
-                    showError(responseMessage);
-                })
-                .always(() => {
-                    $createWalkin.prop('disabled', false);
-                });
+            const escapedDocumentationRequirements = App.Utils.String.escapeHtml(documentationRequirements);
+            $serviceDocumentationText.html(escapedDocumentationRequirements.replaceAll('\n', '<br/>'));
+            $serviceStep.addClass('d-none');
+            $documentationStep.removeClass('d-none');
         });
+
+        $('#back-walkin').on('click', () => {
+            $documentationStep.addClass('d-none');
+            $serviceStep.removeClass('d-none');
+        });
+
+        $createWalkin.on('click', createWalkin);
     }
 
-    function renderSelectedServiceDocumentation() {
+    function getSelectedServiceDocumentation() {
         const selectedServiceId = Number($service.val());
-
-        if (!selectedServiceId) {
-            $serviceDocumentation.addClass('d-none');
-            $serviceDocumentationText.text('');
-            return;
-        }
-
         const selectedService = vars('available_services').find(
             (availableService) => Number(availableService.id) === selectedServiceId,
         );
 
-        const documentationRequirements = (selectedService?.documentation_requirements || '').trim();
+        return (selectedService?.documentation_requirements || '').trim();
+    }
 
-        if (!documentationRequirements) {
-            $serviceDocumentation.addClass('d-none');
-            $serviceDocumentationText.text('');
+    function createWalkin() {
+        if (!validate()) {
             return;
         }
 
-        const escapedDocumentationRequirements = App.Utils.String.escapeHtml(documentationRequirements);
-        const multilineDocumentationRequirements = escapedDocumentationRequirements.replaceAll('\n', '<br/>');
+        const postData = {
+            appointment: {
+                id_users_provider: vars('provider').id,
+                id_services: $service.val(),
+                appointment_type: 'walkin',
+            },
+        };
 
-        $serviceDocumentation.removeClass('d-none');
-        $serviceDocumentationText.html(multilineDocumentationRequirements);
+        $createWalkin.prop('disabled', true);
+        $continueWalkin.prop('disabled', true);
+
+        App.Http.InPersonAppointments.store(postData)
+            .done((response) => {
+                printTicket(response).finally(() => {
+                    window.location.href = App.Utils.Url.siteUrl(
+                        'in_person_confirmation/of/' + response.appointment_hash,
+                    );
+                });
+            })
+            .fail((xhr) => {
+                const responseMessage = xhr?.responseJSON?.message || lang('unexpected_issues');
+                showError(responseMessage);
+            })
+            .always(() => {
+                $createWalkin.prop('disabled', false);
+                $continueWalkin.prop('disabled', false);
+            });
+    }
+
+    function printTicket(response) {
+        if (!App.Utils.LocalPrinting.isEnabled()) {
+            return Promise.resolve();
+        }
+
+        const ticket = {
+            queue_number: response.queue_number,
+            company_name: response.company_name,
+            department: response.department,
+            service: response.service,
+            datetime: App.Utils.Date.format(response.start_datetime, vars('date_format'), vars('time_format'), true),
+            appointment_hash: response.appointment_hash,
+        };
+
+        return App.Utils.LocalPrinting.print(ticket)
+            .then(() => {
+                window.sessionStorage.removeItem('easyappointments_local_print_failed');
+            })
+            .catch(() => {
+                window.sessionStorage.setItem('easyappointments_local_print_failed', response.appointment_hash);
+            });
     }
 
     function validate() {

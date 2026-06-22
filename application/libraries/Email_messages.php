@@ -298,7 +298,34 @@ class Email_messages
             $php_mailer->AltBody = $plain_text;
         }
 
-        $php_mailer->addEmbeddedImage(FCPATH . 'assets/img/logo.png', 'logo.png', 'logo.png', 'base64', 'image/png');
+        $company_logo = setting('company_logo');
+
+        if (
+            is_string($company_logo) &&
+            preg_match('/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/s', $company_logo, $matches)
+        ) {
+            $logo_data = base64_decode(preg_replace('/\s+/', '', $matches[2]), true);
+
+            if ($logo_data !== false) {
+                $php_mailer->addStringEmbeddedImage(
+                    $logo_data,
+                    'logo.png',
+                    'company-logo',
+                    PHPMailer::ENCODING_BASE64,
+                    $matches[1],
+                );
+            }
+        }
+
+        if (!$php_mailer->getAttachments()) {
+            $php_mailer->addEmbeddedImage(
+                FCPATH . 'assets/img/logo.png',
+                'logo.png',
+                'logo.png',
+                PHPMailer::ENCODING_BASE64,
+                'image/png',
+            );
+        }
 
         return $php_mailer;
     }

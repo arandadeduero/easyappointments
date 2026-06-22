@@ -19,6 +19,9 @@ App.Pages.BookingSettings = (function () {
     const $saveSettings = $('#save-settings');
     const $disableBookingAppointments = $('#disable-booking-appointments');
     const $disableBookingMessage = $('#disable-booking-message');
+    const $kioskProvider = $('#kiosk-provider');
+    const $kioskDeviceName = $('#kiosk-device-name');
+    const $kioskDevicesBody = $('#kiosk-devices-body');
 
     /**
      * Check if the form has invalid values.
@@ -243,6 +246,74 @@ App.Pages.BookingSettings = (function () {
         deserialize(bookingSettings);
 
         applyInitialState();
+        initializeKioskDevices();
+    }
+
+    function initializeKioskDevices() {
+        renderKioskDevices();
+
+        $('#generate-kiosk-code').on('click', () => {
+            const providerId = $kioskProvider.val();
+            const deviceName = $kioskDeviceName.val().trim();
+
+            if (!providerId || !deviceName) {
+                App.Layouts.Backend.displayNotification(lang('fields_are_required'));
+                return;
+            }
+
+            App.Http.BookingSettings.generateKioskPairingCode(providerId, deviceName).done((response) => {
+                $('#kiosk-pairing-code-value').text(response.code);
+                $('#kiosk-pairing-code').removeClass('d-none');
+            });
+        });
+
+        $kioskDevicesBody.on('click', '.revoke-kiosk-device', (event) => {
+            const deviceId = $(event.currentTarget).data('id');
+
+            App.Http.BookingSettings.revokeKioskDevice(deviceId).done(() => {
+                window.location.reload();
+            });
+        });
+    }
+
+    function renderKioskDevices() {
+        const devices = vars('kiosk_devices');
+
+        $kioskDevicesBody.empty();
+
+        if (!devices.length) {
+            $('<tr/>').append($('<td/>', {colspan: 6, class: 'text-center text-muted', text: lang('no_records_found')}))
+                .appendTo($kioskDevicesBody);
+            return;
+        }
+
+        devices.forEach((device) => {
+            const isRevoked = Boolean(device.revoked_datetime);
+            const department = [device.first_name, device.last_name].filter(Boolean).join(' ');
+            const $row = $('<tr/>');
+
+            $('<td/>').text(device.name).appendTo($row);
+            $('<td/>').text(department).appendTo($row);
+            $('<td/>').text(device.last_used_datetime || '-').appendTo($row);
+            $('<td/>').text(device.last_ip_address || '-').appendTo($row);
+            $('<td/>').append(
+                $('<span/>', {
+                    class: 'badge ' + (isRevoked ? 'bg-secondary' : 'bg-success'),
+                    text: isRevoked ? lang('kiosk_revoked') : lang('kiosk_active'),
+                }),
+            ).appendTo($row);
+
+            const $actions = $('<td/>', {class: 'text-end'});
+            if (!isRevoked && vars('can_manage_kiosk_devices')) {
+                $('<button/>', {
+                    type: 'button',
+                    class: 'btn btn-sm btn-outline-danger revoke-kiosk-device',
+                    text: lang('revoke'),
+                }).attr('data-id', device.id).appendTo($actions);
+            }
+            $actions.appendTo($row);
+            $row.appendTo($kioskDevicesBody);
+        });
     }
 
     document.addEventListener('DOMContentLoaded', initialize);

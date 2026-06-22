@@ -54,6 +54,10 @@ class Providers extends EA_Controller
         'working_plan_walkin_exceptions',
         'notifications',
         'calendar_view',
+        'attendants_number',
+        'local_printing_enabled',
+        'local_printing_endpoint',
+        'local_printing_token',
     ];
 
     public array $optional_provider_setting_fields = [
@@ -61,6 +65,10 @@ class Providers extends EA_Controller
         'working_plan_exceptions' => '{}',
         'working_plan_walkin' => null,
         'working_plan_walkin_exceptions' => '[]',
+        'attendants_number' => 1,
+        'local_printing_enabled' => 0,
+        'local_printing_endpoint' => 'http://127.0.0.1:8787/print',
+        'local_printing_token' => '',
     ];
 
     public array $allowed_service_fields = ['id', 'name'];

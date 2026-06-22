@@ -1,0 +1,16 @@
+{
+  "host": "127.0.0.1",
+  "port": 8787,
+  "token": "PON-AQUI-EL-MISMO-TOKEN-DE-EASYAPPOINTMENTS",
+  "allowedOrigins": [
+    "http://192.168.1.224",
+    "http://localhost",
+    "http://127.0.0.1"
+  ],
+  "printerName": "",
+  "keepTicketFiles": false,
+  "paperWidthMm": 80,
+  "paperHeightMm": 85,
+  "useCustomPaperSize": false,
+  "fontFamily": "Arial"
+}

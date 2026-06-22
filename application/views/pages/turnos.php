@@ -19,30 +19,49 @@
 <body class="aad-queue-display">
 <main class="aad-queue-shell">
     <header class="aad-queue-header">
-        <div>
-            <p class="aad-queue-kicker"><?= lang('provider') ?></p>
-            <h1 id="queue-provider-name">
-                <?= e(trim((vars('provider')['first_name'] ?? '') . ' ' . (vars('provider')['last_name'] ?? ''))) ?>
-            </h1>
-        </div>
+        <section id="queue-current-call" class="aad-queue-current-call aad-queue-current-call-empty">
+            <div class="aad-queue-current-code">
+                <p class="aad-queue-current-label"><?= lang('queue_current_call') ?></p>
+                <strong id="queue-current-code">--</strong>
+            </div>
+            <div class="aad-queue-current-desk">
+                <span><?= lang('queue_desk') ?></span>
+                <strong id="queue-current-desk">--</strong>
+            </div>
+        </section>
         <div class="aad-queue-clock">
             <span id="queue-date"></span>
             <strong id="queue-time"></strong>
         </div>
     </header>
 
-    <section class="aad-queue-section aad-queue-section-active">
-        <div class="aad-queue-section-header">
-            <h2><?= lang('queue_in_process') ?></h2>
-        </div>
-        <div id="queue-in-process" class="aad-queue-grid aad-queue-grid-active"></div>
-    </section>
+    <section class="aad-queue-board">
+        <div class="aad-queue-brand-panel">
+            <img
+                id="queue-brand-image-a"
+                class="aad-queue-brand-image is-active"
+                src="https://www.arandadeduero.es/wp-content/uploads/2025/12/Diseno-sin-titulo-1.gif"
+                alt="Aranda de Duero"
+                decoding="async"
+            >
 
-    <section class="aad-queue-section aad-queue-section-waiting">
-        <div class="aad-queue-section-header">
-            <h2><?= lang('queue_reserved') ?></h2>
+            <img
+                id="queue-brand-image-b"
+                class="aad-queue-brand-image"
+                src="https://www.arandadeduero.es/wp-content/uploads/2025/12/GIF-Aranda-es.gif"
+                alt=""
+                decoding="async"
+            >
         </div>
-        <div id="queue-reserved" class="aad-queue-grid"></div>
+
+        <aside class="aad-queue-last-calls">
+            <div class="aad-queue-last-header">
+                <div>
+                    <span><?= lang('queue_turn') ?></span>
+                </div>
+            </div>
+            <div id="queue-called" class="aad-queue-called-list"></div>
+        </aside>
     </section>
 </main>
 
@@ -59,5 +78,6 @@
 
 <script src="<?= asset_url('assets/js/http/turnos_http_client.js') ?>"></script>
 <script src="<?= asset_url('assets/js/pages/turnos.js') ?>"></script>
+<script src="<?= asset_url('assets/js/pages/turnos-slider.js') ?>"></script>
 </body>
 </html>

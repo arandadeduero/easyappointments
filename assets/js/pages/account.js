@@ -32,6 +32,7 @@ App.Pages.Account = (function () {
     const $password = $('#password');
     const $retypePassword = $('#retype-password');
     const $calendarView = $('#calendar-view');
+    const $deskNumber = $('#desk-number');
     const notifications = $('#notifications');
     const $saveSettings = $('#save-settings');
     const $footerUserDisplayName = $('#footer-user-display-name');
@@ -113,6 +114,7 @@ App.Pages.Account = (function () {
         $password.val('');
         $retypePassword.val('');
         $calendarView.val(account.settings.calendar_view);
+        $deskNumber.val(account.settings.desk_number || '');
         notifications.prop('checked', Boolean(Number(account.settings.notifications)));
     }
 
@@ -140,6 +142,7 @@ App.Pages.Account = (function () {
                 username: $username.val(),
                 password: $password.val() || undefined,
                 calendar_view: $calendarView.val(),
+                desk_number: $deskNumber.val() || '',
                 notifications: Number(notifications.prop('checked')),
             },
         };

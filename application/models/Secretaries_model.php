@@ -147,6 +147,14 @@ class Secretaries_model extends EA_Model
             );
         }
 
+        if (
+            isset($secretary['settings']['desk_number']) &&
+            $secretary['settings']['desk_number'] !== '' &&
+            !ctype_digit((string) $secretary['settings']['desk_number'])
+        ) {
+            throw new InvalidArgumentException('The desk number must be numeric.');
+        }
+
         // Make sure the email address is unique.
         $secretary_id = $secretary['id'] ?? null;
 
@@ -349,6 +357,10 @@ class Secretaries_model extends EA_Model
      */
     public function set_setting(int $secretary_id, string $name, mixed $value = null): void
     {
+        if (!$this->db->field_exists($name, 'user_settings')) {
+            return;
+        }
+
         if (!$this->db->update('user_settings', [$name => $value], ['id_users' => $secretary_id])) {
             throw new RuntimeException('Could not set the new secretary setting value: ' . $name);
         }
@@ -638,6 +650,7 @@ class Secretaries_model extends EA_Model
                 'username' => $secretary['settings']['username'],
                 'notifications' => filter_var($secretary['settings']['notifications'], FILTER_VALIDATE_BOOLEAN),
                 'calendarView' => $secretary['settings']['calendar_view'],
+                'deskNumber' => $secretary['settings']['desk_number'] ?? '',
             ],
         ];
 
@@ -736,6 +749,10 @@ class Secretaries_model extends EA_Model
 
             if (array_key_exists('calendarView', $secretary['settings'])) {
                 $decoded_resource['settings']['calendar_view'] = $secretary['settings']['calendarView'];
+            }
+
+            if (array_key_exists('deskNumber', $secretary['settings'])) {
+                $decoded_resource['settings']['desk_number'] = $secretary['settings']['deskNumber'];
             }
         }
 

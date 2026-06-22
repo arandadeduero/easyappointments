@@ -20,6 +20,10 @@
 
 <?php component('booking_type_step', ['available_services' => vars('available_services')]); ?>
 
+<!-- Required Documentation -->
+
+<?php component('booking_documentation_step'); ?>
+
 <!-- Pick An Appointment Date -->
 
 <?php component('booking_time_step', ['grouped_timezones' => vars('grouped_timezones')]); ?>

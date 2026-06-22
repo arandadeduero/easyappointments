@@ -19,6 +19,12 @@
             <strong class="d-block text-primary" style="font-size: 21px; cursor: default;">1</strong>
         </div>
 
+        <div id="step-documentation" class="book-step d-none float-start rounded" data-bs-toggle="tooltip"
+             data-tippy-content="<?= lang('documentation_to_present') ?>"
+             style="height: 35px; width: 35px; background: rgba(0,0,0,0.2); padding: 8px; margin-right: 12px; margin-top: 6px; transition: all 0.3s linear;">
+            <strong class="d-block text-center text-white-50" style="font-size: 12px; cursor: default;">2</strong>
+        </div>
+
         <div id="step-2" class="book-step d-inline-block float-start rounded" data-bs-toggle="tooltip"
              data-tippy-content="<?= lang('appointment_date_and_time') ?>"
              style="height: 35px; width: 35px; background: rgba(0,0,0,0.2); padding: 8px; margin-right: 12px; margin-top: 6px; transition: all 0.3s linear;">

@@ -46,6 +46,7 @@ class Appointments_model extends EA_Model
         'type' => 'appointment_type',
         'queueNumber' => 'queue_number',
         'callerUserId' => 'id_users_caller',
+        'callDateTime' => 'call_datetime',
         'notes' => 'notes',
         'hash' => 'hash',
         'serviceId' => 'id_services',
@@ -66,13 +67,56 @@ class Appointments_model extends EA_Model
      */
     public function save(array $appointment): int
     {
-        $this->validate($appointment);
+        $capacity_lock = $this->acquire_provider_capacity_lock($appointment);
 
-        if (empty($appointment['id'])) {
-            return $this->insert($appointment);
-        } else {
+        try {
+            $this->validate($appointment);
+
+            if (empty($appointment['id'])) {
+                return $this->insert($appointment);
+            }
+
             return $this->update($appointment);
+        } finally {
+            if ($capacity_lock) {
+                $this->db->query('SELECT RELEASE_LOCK(?)', [$capacity_lock]);
+            }
         }
+    }
+
+    /**
+     * Serialize appointment writes for departments with shared capacity.
+     */
+    protected function acquire_provider_capacity_lock(array $appointment): ?string
+    {
+        if (
+            filter_var($appointment['is_unavailability'] ?? false, FILTER_VALIDATE_BOOLEAN) ||
+            empty($appointment['id_services'])
+        ) {
+            return null;
+        }
+
+        if (empty($appointment['id_users_provider'])) {
+            return null;
+        }
+
+        $provider_settings = $this->db
+            ->select('attendants_number')
+            ->get_where('user_settings', ['id_users' => $appointment['id_users_provider']])
+            ->row_array();
+
+        if (empty($provider_settings['attendants_number'])) {
+            return null;
+        }
+
+        $lock_name = 'ea_department_capacity_' . (int) $appointment['id_users_provider'];
+        $lock_result = $this->db->query('SELECT GET_LOCK(?, 5) AS acquired', [$lock_name])->row_array();
+
+        if ((int) ($lock_result['acquired'] ?? 0) !== 1) {
+            throw new RuntimeException('Could not acquire the department capacity lock.');
+        }
+
+        return $lock_name;
     }
 
     /**
@@ -324,6 +368,75 @@ class Appointments_model extends EA_Model
             if (!$count) {
                 throw new InvalidArgumentException('Appointment service id is invalid.');
             }
+
+            $this->validate_provider_capacity($appointment);
+        }
+    }
+
+    /**
+     * Validate the shared department capacity and the selected service limit.
+     */
+    protected function validate_provider_capacity(array $appointment): void
+    {
+        if (!empty($appointment['id'])) {
+            $original_appointment = $this->db
+                ->select('start_datetime, end_datetime, id_services, id_users_provider')
+                ->get_where('appointments', ['id' => $appointment['id']])
+                ->row_array();
+
+            if (
+                $original_appointment &&
+                $original_appointment['start_datetime'] === $appointment['start_datetime'] &&
+                $original_appointment['end_datetime'] === $appointment['end_datetime'] &&
+                (int) $original_appointment['id_services'] === (int) $appointment['id_services'] &&
+                (int) $original_appointment['id_users_provider'] === (int) $appointment['id_users_provider']
+            ) {
+                return;
+            }
+        }
+
+        $service = $this->db
+            ->select('attendants_number')
+            ->get_where('services', ['id' => $appointment['id_services']])
+            ->row_array();
+
+        $provider_settings = $this->db
+            ->select('attendants_number')
+            ->get_where('user_settings', ['id_users' => $appointment['id_users_provider']])
+            ->row_array();
+
+        $provider_limit = (int) ($provider_settings['attendants_number'] ?? 0);
+
+        // A null capacity keeps legacy categories working until an administrator configures their tables.
+        if ($provider_limit < 1) {
+            return;
+        }
+
+        $start = new DateTime($appointment['start_datetime']);
+        $end = new DateTime($appointment['end_datetime']);
+        $exclude_appointment_id = !empty($appointment['id']) ? (int) $appointment['id'] : null;
+
+        $service_usage = $this->get_service_attendants_number_for_period(
+            $start,
+            $end,
+            (int) $appointment['id_services'],
+            (int) $appointment['id_users_provider'],
+            $exclude_appointment_id,
+        );
+
+        if ($service_usage >= (int) $service['attendants_number']) {
+            throw new RuntimeException(lang('requested_hour_is_unavailable'));
+        }
+
+        $provider_usage = $this->get_provider_attendants_number_for_period(
+            $start,
+            $end,
+            (int) $appointment['id_users_provider'],
+            $exclude_appointment_id,
+        );
+
+        if ($provider_usage >= $provider_limit) {
+            throw new RuntimeException(lang('requested_hour_is_unavailable'));
         }
     }
 
@@ -608,6 +721,54 @@ class Appointments_model extends EA_Model
     }
 
     /**
+     * Return the number of overlapping appointments for a service and provider, across all appointment types.
+     */
+    public function get_service_attendants_number_for_period(
+        DateTime $start,
+        DateTime $end,
+        int $service_id,
+        int $provider_id,
+        ?int $exclude_appointment_id = null,
+    ): int {
+        $this->db
+            ->from('appointments')
+            ->where('is_unavailability', false)
+            ->where('id_services', $service_id)
+            ->where('id_users_provider', $provider_id)
+            ->where('start_datetime <', $end->format('Y-m-d H:i:s'))
+            ->where('end_datetime >', $start->format('Y-m-d H:i:s'));
+
+        if ($exclude_appointment_id) {
+            $this->db->where('id !=', $exclude_appointment_id);
+        }
+
+        return $this->db->count_all_results();
+    }
+
+    /**
+     * Return the number of overlapping appointments that use tables from a provider/department.
+     */
+    public function get_provider_attendants_number_for_period(
+        DateTime $start,
+        DateTime $end,
+        int $provider_id,
+        ?int $exclude_appointment_id = null,
+    ): int {
+        $this->db
+            ->from('appointments')
+            ->where('appointments.is_unavailability', false)
+            ->where('appointments.id_users_provider', $provider_id)
+            ->where('appointments.start_datetime <', $end->format('Y-m-d H:i:s'))
+            ->where('appointments.end_datetime >', $start->format('Y-m-d H:i:s'));
+
+        if ($exclude_appointment_id) {
+            $this->db->where('appointments.id !=', $exclude_appointment_id);
+        }
+
+        return $this->db->count_all_results();
+    }
+
+    /**
      * Get the query builder interface, configured for use with the appointments table.
      *
      * @return CI_DB_query_builder
@@ -763,6 +924,7 @@ class Appointments_model extends EA_Model
             'hash' => $appointment['hash'],
             'color' => $appointment['color'],
             'status' => $appointment['status'],
+            'callDateTime' => $appointment['call_datetime'] ?? null,
             'location' => $appointment['location'],
             'notes' => $appointment['notes'],
             'customerId' => $appointment['id_users_customer'] !== null ? (int) $appointment['id_users_customer'] : null,
@@ -818,6 +980,10 @@ class Appointments_model extends EA_Model
 
         if (array_key_exists('status', $appointment)) {
             $decoded_resource['status'] = $appointment['status'];
+        }
+
+        if (array_key_exists('callDateTime', $appointment)) {
+            $decoded_resource['call_datetime'] = $appointment['callDateTime'];
         }
 
         if (array_key_exists('notes', $appointment)) {

@@ -35,6 +35,7 @@ App.Pages.Secretaries = (function () {
     const $passwordConfirmation = $('#password-confirm');
     const $notifications = $('#notifications');
     const $calendarView = $('#calendar-view');
+    const $deskNumber = $('#desk-number');
     const $filterSecretaries = $('#filter-secretaries');
     let filterResults = {};
     let filterLimit = 20;
@@ -214,6 +215,7 @@ App.Pages.Secretaries = (function () {
                     username: $username.val(),
                     notifications: Number($notifications.prop('checked')),
                     calendar_view: $calendarView.val(),
+                    desk_number: $deskNumber.val() || '',
                 },
             };
 
@@ -416,6 +418,7 @@ App.Pages.Secretaries = (function () {
 
         $username.val(secretary.settings.username);
         $calendarView.val(secretary.settings.calendar_view);
+        $deskNumber.val(secretary.settings.desk_number || '');
         $notifications.prop('checked', Boolean(Number(secretary.settings.notifications)));
 
         $('#secretary-providers input:checkbox').prop('checked', false);

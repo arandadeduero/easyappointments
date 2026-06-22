@@ -90,9 +90,11 @@ class Account extends EA_Controller
         }
 
         $account = $this->users_model->find($user_id);
+        $show_desk_number = session('role_slug') !== DB_SLUG_PROVIDER;
 
         script_vars([
             'account' => filter_sensitive_user_data($account),
+            'show_desk_number' => $show_desk_number,
         ]);
 
         html_vars([
@@ -100,6 +102,7 @@ class Account extends EA_Controller
             'active_menu' => PRIV_SYSTEM_SETTINGS,
             'user_display_name' => $this->accounts->get_user_display_name($user_id),
             'grouped_timezones' => $this->timezones->to_grouped_array(),
+            'show_desk_number' => $show_desk_number,
         ]);
 
         $this->load->view('pages/account');
@@ -127,7 +130,13 @@ class Account extends EA_Controller
 
             $this->users_model->optional($account, $this->optional_user_fields);
 
-            $this->users_model->only($account['settings'], $this->allowed_user_setting_fields);
+            $allowed_user_setting_fields = $this->allowed_user_setting_fields;
+
+            if (session('role_slug') !== DB_SLUG_PROVIDER) {
+                $allowed_user_setting_fields[] = 'desk_number';
+            }
+
+            $this->users_model->only($account['settings'], $allowed_user_setting_fields);
 
             $this->users_model->optional($account['settings'], $this->optional_user_setting_fields);
 

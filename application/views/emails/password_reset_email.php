@@ -380,8 +380,15 @@
                             <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td align="center" style="text-align: center;">
-                                        <!-- Logo at the top center, embedded as CID -->
-                                        <img src="cid:logo.png" alt="Logo" style="display:block;max-width:80px;margin: auto auto 24px;">
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0"
+                                               width="100%" style="background-color:<?= e($settings['company_color'] ?? DEFAULT_COMPANY_COLOR) ?>;border-radius:8px;margin-bottom:24px;">
+                                            <tr>
+                                                <td align="center" style="padding:20px;">
+                                                    <img src="cid:logo.png" alt="Logo"
+                                                         style="display:block;max-width:80px;max-height:80px;margin:auto;">
+                                                </td>
+                                            </tr>
+                                        </table>
                                         <h2 style="text-align: center;">
                                             <?= $subject ?>
                                         </h2>
@@ -430,11 +437,6 @@
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                         <tr>
                             <td class="content-block powered-by">
-                                Powered by
-                                <a href="https://easyappointments.org" style="text-decoration: none;">
-                                    Easy!Appointments
-                                </a>
-                                |
                                 <a href="<?= e($settings['company_link']) ?>" style="text-decoration: none;">
                                     <?= e($settings['company_name']) ?>
                                 </a>
@@ -450,6 +452,5 @@
 </table>
 </body>
 </html>
-
 
 

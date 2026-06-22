@@ -4,18 +4,19 @@
 // Example: $config['smtp_host'] = 'smtp.gmail.com';
 // @link https://codeigniter.com/user_guide/libraries/email.html
 
-$config['useragent'] = 'Easy!Appointments';
-$config['protocol'] = 'mail'; // or 'smtp'
-$config['mailtype'] = 'html'; // or 'text'
-// $config['smtp_debug'] = '0'; // or '1'
-// $config['smtp_auth'] = TRUE; //or FALSE for anonymous relay.
-// $config['smtp_host'] = '';
-// $config['smtp_user'] = '';
-// $config['smtp_pass'] = '';
-// $config['smtp_crypto'] = 'ssl'; // or 'tls'
-// $config['smtp_port'] = 25;
-// $config['from_name'] = '';
-// $config['from_address'] = '';
-// $config['reply_to'] = '';
+$config['useragent'] = 'Ayuntamiento de Aranda de Duero';
+$config['protocol'] = 'smtp';
+$config['mailtype'] = 'html';
+
+$config['smtp_auth'] = true;
+$config['smtp_host'] = 'smtp.mail.ovh.net';
+$config['smtp_user'] = 'noreply@sanchainformatica.com';
+$config['smtp_pass'] = '';
+$config['smtp_crypto'] = 'tls';
+$config['smtp_port'] = 587;
+
+$config['from_name'] = 'Ayuntamiento de Aranda de Duero';
+$config['from_address'] = 'noreply@sanchainformatica.com';
+$config['reply_to'] = 'noreply@sanchainformatica.com';
 $config['crlf'] = "\r\n";
 $config['newline'] = "\r\n";

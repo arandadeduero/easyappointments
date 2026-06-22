@@ -35,6 +35,7 @@ App.Pages.Admins = (function () {
     const $passwordConfirmation = $('#password-confirm');
     const $notifications = $('#notifications');
     const $calendarView = $('#calendar-view');
+    const $deskNumber = $('#desk-number');
     const $filterAdmins = $('#filter-admins');
     let filterResults = {};
     let filterLimit = 20;
@@ -206,6 +207,7 @@ App.Pages.Admins = (function () {
                     username: $username.val(),
                     notifications: Number($notifications.prop('checked')),
                     calendar_view: $calendarView.val(),
+                    desk_number: $deskNumber.val() || '',
                 },
             };
 
@@ -387,6 +389,7 @@ App.Pages.Admins = (function () {
 
         $username.val(admin.settings.username);
         $calendarView.val(admin.settings.calendar_view);
+        $deskNumber.val(admin.settings.desk_number || '');
         $notifications.prop('checked', Boolean(Number(admin.settings.notifications)));
     }
 

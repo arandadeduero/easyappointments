@@ -202,6 +202,45 @@
                             </div>
 
                             <div class="mb-3">
+                                <label class="form-label" for="attendants-number">
+                                    <?= lang('provider_attendants_number') ?>
+                                    <span class="text-danger" hidden>*</span>
+                                </label>
+                                <input id="attendants-number" class="form-control required" type="number" min="1" disabled>
+                                <div class="form-text">
+                                    <?= lang('provider_attendants_number_hint') ?>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox"
+                                           id="local-printing-enabled" disabled>
+                                    <label class="form-check-label" for="local-printing-enabled">
+                                        <?= lang('local_printing_enabled') ?>
+                                    </label>
+                                </div>
+                                <div class="form-text">
+                                    <?= lang('local_printing_enabled_hint') ?>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" for="local-printing-endpoint">
+                                    <?= lang('local_printing_endpoint') ?>
+                                </label>
+                                <input id="local-printing-endpoint" class="form-control" maxlength="512" disabled>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" for="local-printing-token">
+                                    <?= lang('local_printing_token') ?>
+                                </label>
+                                <input id="local-printing-token" class="form-control" maxlength="255"
+                                       autocomplete="off" disabled>
+                            </div>
+
+                            <div class="mb-3">
                                 <label class="form-label" for="language">
                                     <?= lang('language') ?>
                                     <span class="text-danger" hidden>*</span>
@@ -409,6 +448,4 @@
 <script src="<?= asset_url('assets/js/pages/providers.js') ?>"></script>
 
 <?php end_section('scripts'); ?>
-
-
 

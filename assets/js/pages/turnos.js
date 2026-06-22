@@ -1,30 +1,36 @@
 /* ----------------------------------------------------------------------------
- * Easy!Appointments - Online Appointment Scheduler
+ * Easy!Appointments - Queue Display
  * ---------------------------------------------------------------------------- */
 
 App.Pages.Turnos = (function () {
+    const CALL_DISPLAY_MS = 30000;
+    const REFRESH_INTERVAL_MS = 5000;
+
     const $date = $('#queue-date');
     const $time = $('#queue-time');
-    const $inProcess = $('#queue-in-process');
-    const $reserved = $('#queue-reserved');
-    const $empty = $('#queue-empty');
+    const $currentCall = $('#queue-current-call');
+    const $currentCode = $('#queue-current-code');
+    const $currentDesk = $('#queue-current-desk');
+    const $called = $('#queue-called');
 
     let socket = null;
     let reconnectTimer = null;
     let refreshTimer = null;
     let currentDate = null;
-    let previousInProcessIds = null;
+    let previousCalledSignatures = null;
+    let displayedCall = null;
+    let callQueue = [];
+    let callTimer = null;
 
     function initialize() {
-        $inProcess.attr('data-empty', lang('queue_no_records'));
-        $reserved.attr('data-empty', lang('queue_no_records'));
+        $called.attr('data-empty', lang('queue_no_records'));
 
         updateClock();
         refresh();
         connectRealtime();
 
         setInterval(updateClock, 1000);
-        setInterval(refresh, 60000);
+        setInterval(refresh, REFRESH_INTERVAL_MS);
     }
 
     function updateClock() {
@@ -57,61 +63,109 @@ App.Pages.Turnos = (function () {
     }
 
     function render(response) {
-        const inProcess = response?.in_process || [];
-        const reserved = response?.reserved || [];
-        const inProcessIds = inProcess.map((item) => Number(item.id));
-        const hasNewInProcess =
-            previousInProcessIds !== null && inProcessIds.some((id) => !previousInProcessIds.includes(id));
+        const called = response?.called || [];
+        const pending = response?.pending || [];
 
-        renderItems($inProcess, inProcess, true);
-        renderItems($reserved, reserved, false);
+        renderPending(pending);
+        enqueueNewCalls(called);
 
-        $empty.toggleClass('d-none', Boolean(inProcess.length || reserved.length));
-
-        if (hasNewInProcess) {
-            flashScreen();
+        if (!displayedCall && !callQueue.length && called.length) {
+            showCall(called[0], false);
         }
-
-        previousInProcessIds = inProcessIds;
     }
 
-    function renderItems($target, items, showCaller) {
-        $target.empty();
+    function renderPending(items) {
+        $called.empty();
 
-        items.forEach((item) => {
-            const deskText = showCaller && item.caller_name ? item.caller_name : item.desk || '';
-
+        items.slice(0, 6).forEach((item) => {
             $('<article/>', {
-                class: 'aad-queue-ticket',
+                class: 'aad-queue-called-item',
                 'data-appointment-id': item.id,
-                'data-appointment-type': item.appointment_type,
-                'data-desk': deskText,
                 html: [
-                    $('<span/>', {
-                        class: 'aad-queue-desk',
-                        text: deskText,
-                    }),
-                    $('<span/>', {
-                    class: 'aad-queue-code',
-                    text: item.code,
+                    $('<strong/>', {
+                        class: 'aad-queue-called-code',
+                        text: item.code,
                     }),
                 ],
-            }).appendTo($target);
+            }).appendTo($called);
         });
     }
 
-    function flashScreen() {
-        const $body = $('body');
+    function enqueueNewCalls(items) {
+        const signatures = items.map(getCallSignature);
+        const newItems = [];
 
-        $body.removeClass('aad-queue-flash');
+        if (previousCalledSignatures === null) {
+            previousCalledSignatures = signatures;
+            return;
+        }
+
+        items.forEach((item) => {
+            const signature = getCallSignature(item);
+
+            if (previousCalledSignatures.includes(signature) || isAlreadyQueued(signature)) {
+                return;
+            }
+
+            newItems.push(item);
+        });
+
+        callQueue.push(...newItems.reverse());
+        previousCalledSignatures = signatures;
+        processCallQueue();
+    }
+
+    function processCallQueue() {
+        if (callTimer || !callQueue.length) {
+            return;
+        }
+
+        showCall(callQueue.shift(), true);
+
+        callTimer = setTimeout(() => {
+            callTimer = null;
+            processCallQueue();
+        }, CALL_DISPLAY_MS);
+    }
+
+    function showCall(item, animate) {
+        displayedCall = item;
+
+        $currentCode.text(item.code || '--');
+        $currentDesk.text(getDeskText(item) || '--');
+        $currentCall.removeClass('aad-queue-current-call-empty');
+
+        if (animate) {
+            flashCurrentCall();
+        }
+    }
+
+    function flashCurrentCall() {
+        $currentCall.removeClass('aad-queue-current-call-flash');
 
         window.requestAnimationFrame(() => {
-            $body.addClass('aad-queue-flash');
+            $currentCall.addClass('aad-queue-current-call-flash');
 
             setTimeout(() => {
-                $body.removeClass('aad-queue-flash');
-            }, 2600);
+                $currentCall.removeClass('aad-queue-current-call-flash');
+            }, 1800);
         });
+    }
+
+    function getDeskText(item) {
+        return item.caller_desk_number || item.caller_name || item.desk || '';
+    }
+
+    function getCallSignature(item) {
+        return [item.id, item.call_datetime || item.update_datetime || '', item.status || ''].join(':');
+    }
+
+    function isAlreadyQueued(signature) {
+        if (displayedCall && getCallSignature(displayedCall) === signature) {
+            return true;
+        }
+
+        return callQueue.some((item) => getCallSignature(item) === signature);
     }
 
     function connectRealtime() {

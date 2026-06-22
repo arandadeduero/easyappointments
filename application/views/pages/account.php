@@ -134,6 +134,18 @@
                                     </select>
                                 </div>
 
+                                <?php if (vars('show_desk_number')): ?>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="desk-number">
+                                            <?= lang('desk_number') ?>
+                                        </label>
+                                        <input type="number" id="desk-number" class="form-control" min="1" step="1">
+                                        <div class="form-text">
+                                            <?= lang('desk_number_hint') ?>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
                                 <div class="mb-3">
                                     <label class="form-label" for="language">
                                         <?= lang('language') ?>

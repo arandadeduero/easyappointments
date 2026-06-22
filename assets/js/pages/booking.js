@@ -40,10 +40,58 @@ App.Pages.Booking = (function () {
     const $customField5 = $('#custom-field-5');
     const $displayBookingSelection = $('.display-booking-selection');
     const $rememberMe = $('#remember-me');
+    const $documentationText = $('#booking-documentation-text');
     const tippy = window.tippy;
     const moment = window.moment;
 
     const STORAGE_KEY = 'EasyAppointments.CustomerInfo';
+
+    function getSelectedService() {
+        return vars('available_services').find(
+            (availableService) => Number(availableService.id) === Number($selectService.val()),
+        );
+    }
+
+    function getSelectedServiceDocumentation() {
+        return (getSelectedService()?.documentation_requirements || '').trim();
+    }
+
+    function updateDocumentationStep() {
+        const hasDocumentation = Boolean(getSelectedServiceDocumentation());
+
+        $('#step-documentation').toggleClass('d-none', !hasDocumentation).toggleClass('d-inline-block', hasDocumentation);
+        $('#steps').css('width', hasDocumentation ? '247px' : '200px');
+
+        $('#steps .book-step:visible').each((index, bookStepEl) => {
+            $(bookStepEl).find('strong').text(index + 1);
+        });
+    }
+
+    function showWizardFrame(frameSelector, stepSelector, $currentFrame) {
+        $('.active-step').removeClass('active-step');
+        $(stepSelector).addClass('active-step');
+
+        $currentFrame.fadeOut(() => {
+            $(frameSelector).fadeIn();
+        });
+    }
+
+    function getEarliestBookingMoment() {
+        return Boolean(Number(vars('allow_same_day_booking')))
+            ? moment().startOf('day')
+            : moment().add(1, 'day').startOf('day');
+    }
+
+    function prepareBookingCalendar() {
+        const earliestBookingMoment = getEarliestBookingMoment();
+
+        App.Utils.UI.setDateTimePickerValue($selectDate, earliestBookingMoment.toDate());
+        App.Http.Booking.getUnavailableDates(
+            $selectProvider.val(),
+            $selectService.val(),
+            earliestBookingMoment.format('YYYY-MM-DD'),
+        );
+    }
 
     /**
      * Determines the functionality of the page.
@@ -108,7 +156,7 @@ App.Pages.Booking = (function () {
 
         App.Utils.UI.initializeDatePicker($selectDate, {
             inline: true,
-            minDate: moment().subtract(1, 'day').set({hours: 23, minutes: 59, seconds: 59}).toDate(),
+            minDate: getEarliestBookingMoment().toDate(),
             maxDate: moment().add(vars('future_booking_limit'), 'days').toDate(),
             onChange: (selectedDates) => {
                 App.Http.Booking.getAvailableHours(moment(selectedDates[0]).format('YYYY-MM-DD'));
@@ -238,12 +286,23 @@ App.Pages.Booking = (function () {
                     $selectService.val(String($selectService.find('option:first').val())).trigger('change');
                 }
 
-                $('.active-step').removeClass('active-step');
-                $('#step-2').addClass('active-step');
+                updateDocumentationStep();
                 $('#wizard-frame-1').hide();
-                $('#wizard-frame-2').fadeIn();
 
-                $selectService.closest('.wizard-frame').find('.button-next').trigger('click');
+                const documentation = getSelectedServiceDocumentation();
+
+                if (documentation) {
+                    const escapedDocumentation = App.Utils.String.escapeHtml(documentation);
+                    $documentationText.html(escapedDocumentation.replaceAll('\n', '<br/>'));
+                    $('.active-step').removeClass('active-step');
+                    $('#step-documentation').addClass('active-step');
+                    $('#wizard-frame-documentation').fadeIn();
+                } else {
+                    prepareBookingCalendar();
+                    $('.active-step').removeClass('active-step');
+                    $('#step-2').addClass('active-step');
+                    $('#wizard-frame-2').fadeIn();
+                }
 
                 $('#step-1').hide().removeClass('d-inline-block');
 
@@ -428,6 +487,7 @@ App.Pages.Booking = (function () {
             const serviceId = $selectService.val();
 
             App.Pages.Booking.updateServiceDescription(serviceId);
+            updateDocumentationStep();
             App.Pages.Booking.updateConfirmFrame();
         });
 
@@ -442,6 +502,16 @@ App.Pages.Booking = (function () {
             App.Pages.Booking.updateConfirmFrame();
 
             App.Pages.Booking.updateServiceDescription(serviceId);
+            updateDocumentationStep();
+        });
+
+        $('#button-back-documentation').on('click', () => {
+            showWizardFrame('#wizard-frame-1', '#step-1', $('#wizard-frame-documentation'));
+        });
+
+        $('#button-next-documentation').on('click', () => {
+            prepareBookingCalendar();
+            showWizardFrame('#wizard-frame-2', '#step-2', $('#wizard-frame-documentation'));
         });
 
         /**
@@ -460,15 +530,16 @@ App.Pages.Booking = (function () {
 
             // If we are on the first step, fetch unavailable dates and available hours for step 2.
             if ($target.attr('data-step_index') === '1') {
-                const todayMoment = moment();
+                const documentation = getSelectedServiceDocumentation();
 
-                App.Utils.UI.setDateTimePickerValue($selectDate, todayMoment.toDate());
+                if (documentation) {
+                    const escapedDocumentation = App.Utils.String.escapeHtml(documentation);
+                    $documentationText.html(escapedDocumentation.replaceAll('\n', '<br/>'));
+                    showWizardFrame('#wizard-frame-documentation', '#step-documentation', $('#wizard-frame-1'));
+                    return;
+                }
 
-                App.Http.Booking.getUnavailableDates(
-                    $selectProvider.val(),
-                    $selectService.val(),
-                    todayMoment.format('YYYY-MM-DD'),
-                );
+                prepareBookingCalendar();
             }
 
             // If we are on the 2nd tab then the user should have an appointment hour selected.
@@ -528,6 +599,11 @@ App.Pages.Booking = (function () {
          * book wizard.
          */
         $('.button-back').on('click', (event) => {
+            if ($(event.currentTarget).attr('data-step_index') === '2' && getSelectedServiceDocumentation()) {
+                showWizardFrame('#wizard-frame-documentation', '#step-documentation', $('#wizard-frame-2'));
+                return;
+            }
+
             const prevTabIndex = parseInt($(event.currentTarget).attr('data-step_index')) - 1;
 
             // Update step indicator immediately
@@ -1018,20 +1094,6 @@ App.Pages.Booking = (function () {
             $(`
                 <div class="mb-2 fst-italic">
                     ${additionalInfoParts.join(', ')}
-                </div>
-            `).appendTo($serviceDescription);
-        }
-
-        if (service.documentation_requirements?.length) {
-            const escapedDocumentationRequirements = App.Utils.String.escapeHtml(service.documentation_requirements);
-            const multilineDocumentationRequirements = escapedDocumentationRequirements.replaceAll('\n', '<br/>');
-
-            $(`
-                <div class="mb-2">
-                    <strong>${lang('documentation_to_present')}:</strong>
-                </div>
-                <div class="mb-2 text-muted">
-                    ${multilineDocumentationRequirements}
                 </div>
             `).appendTo($serviceDescription);
         }

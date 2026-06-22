@@ -33,7 +33,24 @@ App.Http.BookingSettings = (function () {
         return $.post(url, data);
     }
 
+    function generateKioskPairingCode(providerId, deviceName) {
+        return $.post(App.Utils.Url.siteUrl('booking_settings/generate_kiosk_pairing_code'), {
+            csrf_token: vars('csrf_token'),
+            provider_id: providerId,
+            device_name: deviceName,
+        });
+    }
+
+    function revokeKioskDevice(deviceId) {
+        return $.post(App.Utils.Url.siteUrl('booking_settings/revoke_kiosk_device'), {
+            csrf_token: vars('csrf_token'),
+            device_id: deviceId,
+        });
+    }
+
     return {
         save,
+        generateKioskPairingCode,
+        revokeKioskDevice,
     };
 })();
