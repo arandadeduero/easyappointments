@@ -135,6 +135,40 @@ class Booking extends EA_Controller
     }
 
     /**
+     * Allow authenticated users to test booking while public access is disabled.
+     */
+    private function can_access_disabled_appointments(): bool
+    {
+        return (bool) session('user_id');
+    }
+
+    /**
+     * Check whether the requested appointment type is unavailable for this visitor.
+     */
+    private function is_appointment_type_disabled_for_current_user(string $appointment_type): bool
+    {
+        $disabled =
+            $appointment_type === APPOINTMENT_TYPE_WALKIN
+                ? $this->are_walkin_appointments_disabled()
+                : $this->are_booking_appointments_disabled();
+
+        return $disabled && !$this->can_access_disabled_appointments();
+    }
+
+    /**
+     * Determine whether to display the maintenance warning on the booking form.
+     */
+    private function is_maintenance_access_enabled(string $appointment_type): bool
+    {
+        $disabled =
+            $appointment_type === APPOINTMENT_TYPE_WALKIN
+                ? $this->are_walkin_appointments_disabled()
+                : $this->are_booking_appointments_disabled();
+
+        return $disabled && $this->can_access_disabled_appointments();
+    }
+
+    /**
      * Resolve the default appointment status from settings.
      */
     private function get_default_appointment_status(): ?string
@@ -278,7 +312,7 @@ class Booking extends EA_Controller
         $matomo_analytics_url = setting('matomo_analytics_url');
         $matomo_analytics_site_id = setting('matomo_analytics_site_id');
 
-        if ($disable_booking) {
+        if ($disable_booking && !$this->can_access_disabled_appointments()) {
             $disable_booking_message = setting('disable_booking_message');
 
             html_vars([
@@ -453,6 +487,9 @@ class Booking extends EA_Controller
         html_vars([
             'available_services' => $available_services,
             'available_providers' => filter_sensitive_users_data($available_providers),
+            'maintenance_access_notice' => $this->is_maintenance_access_enabled($appointment_type)
+                ? lang('maintenance_authenticated_booking_notice')
+                : null,
             'theme' => $theme,
             'company_name' => $company_name,
             'company_logo' => $company_logo,
@@ -530,12 +567,8 @@ class Booking extends EA_Controller
             $appointment_type = $this->normalize_appointment_type($appointment['appointment_type'] ?? null);
             $appointment['appointment_type'] = $appointment_type;
 
-            if ($appointment_type === APPOINTMENT_TYPE_BOOKING && $this->are_booking_appointments_disabled()) {
+            if ($this->is_appointment_type_disabled_for_current_user($appointment_type)) {
                 abort(403);
-            }
-
-            if ($appointment_type === APPOINTMENT_TYPE_WALKIN && $this->are_walkin_appointments_disabled()) {
-                throw new RuntimeException(lang('walkin_appointments_are_disabled'));
             }
 
             // Validate required appointment fields
@@ -893,11 +926,7 @@ class Booking extends EA_Controller
             $selected_date = request('selected_date');
             $appointment_type = $this->normalize_appointment_type(request('appointment_type'));
 
-            if ($appointment_type === APPOINTMENT_TYPE_BOOKING && $this->are_booking_appointments_disabled()) {
-                abort(403);
-            }
-
-            if ($appointment_type === APPOINTMENT_TYPE_WALKIN && $this->are_walkin_appointments_disabled()) {
+            if ($this->is_appointment_type_disabled_for_current_user($appointment_type)) {
                 abort(403);
             }
 
@@ -990,13 +1019,10 @@ class Booking extends EA_Controller
             $selected_date_string = request('selected_date');
             $appointment_type = $this->normalize_appointment_type(request('appointment_type'));
 
-            if ($appointment_type === APPOINTMENT_TYPE_BOOKING && $this->are_booking_appointments_disabled()) {
+            if ($this->is_appointment_type_disabled_for_current_user($appointment_type)) {
                 abort(403);
             }
 
-            if ($appointment_type === APPOINTMENT_TYPE_WALKIN && $this->are_walkin_appointments_disabled()) {
-                abort(403);
-            }
             $selected_date = new DateTime($selected_date_string);
             $number_of_days_in_month = (int) $selected_date->format('t');
             $unavailable_dates = [];

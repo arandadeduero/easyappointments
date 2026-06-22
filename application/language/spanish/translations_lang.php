@@ -646,4 +646,6 @@ $lang['active_calls_finish_error'] = 'Error al finalizar la cita. Intentelo de n
 $lang['active_calls_finish_next_success'] = 'Cita finalizada. Se ha llamado automaticamente al siguiente turno.';
 $lang['active_calls_finish_next_empty'] = 'Cita finalizada. No hay mas turnos pendientes para este departamento hoy.';
 $lang['active_calls_action_error'] = 'Error al procesar la accion. Intentelo de nuevo.';
+$lang['maintenance_authenticated_booking_notice'] = 'La cita previa publica esta desactivada por mantenimiento. Puedes acceder a este formulario porque tienes la sesion iniciada; los visitantes sin sesion no pueden pedir cita.';
+$lang['maintenance_authenticated_walkin_notice'] = 'La cita presencial publica esta desactivada por mantenimiento. Puedes acceder a este formulario porque tienes la sesion iniciada; los visitantes sin sesion no pueden crear citas.';
 // End

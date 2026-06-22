@@ -2,6 +2,13 @@
 
 <?php section('content'); ?>
 
+<?php if (vars('maintenance_access_notice')): ?>
+    <div class="alert alert-warning mx-3 mt-3 mb-0" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <?= e(vars('maintenance_access_notice')) ?>
+    </div>
+<?php endif; ?>
+
 <?php if (empty(vars('available_services')) || empty(vars('available_providers'))): ?>
 
 <?php component('booking_no_services_message'); ?>

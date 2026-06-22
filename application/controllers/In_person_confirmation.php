@@ -61,6 +61,10 @@ class In_person_confirmation extends EA_Controller
                 'datetime' => format_date_time($appointment['start_datetime']),
                 'appointment_hash' => $appointment['hash'],
             ],
+            'walkin_return_url' => site_url(
+                'in_person_appointments?departamento=' . (int) $appointment['id_users_provider'],
+            ),
+            'walkin_return_delay' => 8000,
         ]);
 
         html_vars([

@@ -646,4 +646,6 @@ $lang['active_calls_finish_error'] = 'Error finishing the appointment. Please tr
 $lang['active_calls_finish_next_success'] = 'Appointment finished. The next turn was called automatically.';
 $lang['active_calls_finish_next_empty'] = 'Appointment finished. There are no more pending turns for this department today.';
 $lang['active_calls_action_error'] = 'Error processing the action. Please try again.';
+$lang['maintenance_authenticated_booking_notice'] = 'Public online booking is currently disabled for maintenance. You can access this form because you are signed in; visitors without a session cannot book appointments.';
+$lang['maintenance_authenticated_walkin_notice'] = 'Public in-person appointments are currently disabled for maintenance. You can access this form because you are signed in; visitors without a session cannot create appointments.';
 // End

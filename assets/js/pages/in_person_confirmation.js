@@ -9,6 +9,8 @@ App.Pages.InPersonConfirmation = (function () {
     function initialize() {
         const ticket = vars('walkin_ticket');
 
+        scheduleReturnToWalkinPage();
+
         if (!ticket || !ticket.queue_number || !App.Utils.LocalPrinting.isEnabled()) {
             $reprintButton.addClass('d-none');
             return;
@@ -36,6 +38,20 @@ App.Pages.InPersonConfirmation = (function () {
                     $reprintButton.prop('disabled', false);
                 });
         });
+    }
+
+    function scheduleReturnToWalkinPage() {
+        const returnUrl = vars('walkin_return_url');
+
+        if (!returnUrl) {
+            return;
+        }
+
+        const delay = Number(vars('walkin_return_delay')) || 8000;
+
+        window.setTimeout(() => {
+            window.location.href = returnUrl;
+        }, delay);
     }
 
     function showMessage(message, type) {

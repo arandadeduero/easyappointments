@@ -103,6 +103,30 @@ class In_person_appointments extends EA_Controller
         return filter_var(setting('disable_walkin_appointments', '0'), FILTER_VALIDATE_BOOLEAN);
     }
 
+    /**
+     * Allow authenticated users to test in-person appointments while public access is disabled.
+     */
+    protected function can_access_disabled_appointments(): bool
+    {
+        return (bool) session('user_id');
+    }
+
+    /**
+     * Check whether in-person appointments are unavailable for this visitor.
+     */
+    protected function are_walkin_appointments_disabled_for_current_user(): bool
+    {
+        return $this->are_walkin_appointments_disabled() && !$this->can_access_disabled_appointments();
+    }
+
+    /**
+     * Determine whether to display the maintenance warning on the in-person form.
+     */
+    protected function is_maintenance_access_enabled(): bool
+    {
+        return $this->are_walkin_appointments_disabled() && $this->can_access_disabled_appointments();
+    }
+
     public function index(): void
     {
         method('get');
@@ -113,7 +137,7 @@ class In_person_appointments extends EA_Controller
             return;
         }
 
-        if ($this->are_walkin_appointments_disabled()) {
+        if ($this->are_walkin_appointments_disabled_for_current_user()) {
             html_vars([
                 'show_message' => true,
                 'page_title' => lang('walkin_create'),
@@ -147,7 +171,7 @@ class In_person_appointments extends EA_Controller
             abort(404, lang('invalid_provider_selection'));
         }
 
-        if (!$this->get_authorized_kiosk_device($department_id)) {
+        if (!$this->is_maintenance_access_enabled() && !$this->get_authorized_kiosk_device($department_id)) {
             $this->render_pairing_page($provider);
             return;
         }
@@ -184,6 +208,9 @@ class In_person_appointments extends EA_Controller
         html_vars([
             'page_title' => lang('walkin_create'),
             'company_color' => setting('company_color'),
+            'maintenance_access_notice' => $this->is_maintenance_access_enabled()
+                ? lang('maintenance_authenticated_walkin_notice')
+                : null,
             'legal_notice_url' => setting('legal_notice_url'),
             'imprint_url' => setting('imprint_url'),
             'display_login_button' => setting('display_login_button'),
@@ -197,7 +224,7 @@ class In_person_appointments extends EA_Controller
         try {
             method('post');
 
-            if ($this->are_walkin_appointments_disabled()) {
+            if ($this->are_walkin_appointments_disabled_for_current_user()) {
                 throw new RuntimeException(lang('walkin_appointments_are_disabled'));
             }
 
@@ -217,7 +244,7 @@ class In_person_appointments extends EA_Controller
                 throw new RuntimeException(lang('invalid_provider_selection'));
             }
 
-            if (!$this->get_authorized_kiosk_device($provider_id)) {
+            if (!$this->is_maintenance_access_enabled() && !$this->get_authorized_kiosk_device($provider_id)) {
                 json_response(['message' => lang('kiosk_device_not_authorized')], 403);
                 return;
             }

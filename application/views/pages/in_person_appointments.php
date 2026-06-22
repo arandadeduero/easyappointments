@@ -2,6 +2,13 @@
 
 <?php section('content'); ?>
 
+<?php if (vars('maintenance_access_notice')): ?>
+    <div class="alert alert-warning text-start" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <?= e(vars('maintenance_access_notice')) ?>
+    </div>
+<?php endif; ?>
+
 <div id="form-message" class="alert d-none"></div>
 
 <div id="walkin-service-step" class="text-start">
