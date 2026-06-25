@@ -12,7 +12,7 @@ $config['smtp_auth'] = true;
 $config['smtp_host'] = 'mail.viavox.com';
 $config['smtp_user'] = 'citaprevia@arandadeduero.com';
 $config['smtp_pass'] = '';
-$config['smtp_crypto'] = 'tls';
+$config['smtp_crypto'] = 'STARTTLS';
 $config['smtp_port'] = 587;
 
 $config['from_name'] = 'Ayuntamiento de Aranda de Duero';
