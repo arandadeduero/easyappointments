@@ -9,14 +9,14 @@ $config['protocol'] = 'smtp';
 $config['mailtype'] = 'html';
 
 $config['smtp_auth'] = true;
-$config['smtp_host'] = 'smtp.mail.ovh.net';
-$config['smtp_user'] = 'noreply@sanchainformatica.com';
+$config['smtp_host'] = 'mail.viavox.com';
+$config['smtp_user'] = 'citaprevia@arandadeduero.com';
 $config['smtp_pass'] = '';
 $config['smtp_crypto'] = 'tls';
 $config['smtp_port'] = 587;
 
 $config['from_name'] = 'Ayuntamiento de Aranda de Duero';
-$config['from_address'] = 'noreply@sanchainformatica.com';
-$config['reply_to'] = 'noreply@sanchainformatica.com';
+$config['from_address'] = 'citaprevia@arandadeduero.com';
+$config['reply_to'] = 'citaprevia@arandadeduero.com';
 $config['crlf'] = "\r\n";
 $config['newline'] = "\r\n";

@@ -70,6 +70,19 @@ class Migration_Add_walkin_appointment_type_and_working_plan extends EA_Migratio
                     " SET working_plan_walkin = working_plan WHERE working_plan_walkin IS NULL OR working_plan_walkin = ''",
             );
         }
+
+        if (!$this->db->get_where('settings', ['name' => 'company_working_plan_walkin'])->num_rows()) {
+            $company_working_plan = $this->db
+                ->get_where('settings', ['name' => 'company_working_plan'])
+                ->row_array();
+
+            $this->db->insert('settings', [
+                'name' => 'company_working_plan_walkin',
+                'value' => $company_working_plan['value'] ?? '{}',
+                'create_datetime' => date('Y-m-d H:i:s'),
+                'update_datetime' => date('Y-m-d H:i:s'),
+            ]);
+        }
     }
 
     /**
@@ -83,6 +96,10 @@ class Migration_Add_walkin_appointment_type_and_working_plan extends EA_Migratio
 
         if ($this->db->field_exists('working_plan_walkin', 'user_settings')) {
             $this->dbforge->drop_column('user_settings', 'working_plan_walkin');
+        }
+
+        if ($this->db->get_where('settings', ['name' => 'company_working_plan_walkin'])->num_rows()) {
+            $this->db->delete('settings', ['name' => 'company_working_plan_walkin']);
         }
 
         if ($this->db->field_exists('queue_number', 'appointments')) {
