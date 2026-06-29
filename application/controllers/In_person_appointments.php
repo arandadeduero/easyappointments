@@ -440,12 +440,17 @@ class In_person_appointments extends EA_Controller
     protected function get_authorized_kiosk_device(int $provider_id): ?array
     {
         $token = (string) $this->input->cookie(self::KIOSK_COOKIE_NAME, true);
+        $ip_address = $this->input->ip_address();
 
-        if ($token === '') {
-            return null;
+        if ($token !== '') {
+            $device = $this->kiosk_devices_model->authorize($token, $provider_id, $ip_address);
+
+            if ($device) {
+                return $device;
+            }
         }
 
-        return $this->kiosk_devices_model->authorize($token, $provider_id, $this->input->ip_address());
+        return $this->kiosk_devices_model->authorize_by_ip($provider_id, $ip_address);
     }
 
     protected function render_pairing_page(array $provider, string $error = ''): void

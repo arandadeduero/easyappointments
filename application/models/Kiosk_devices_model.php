@@ -152,6 +152,38 @@ class Kiosk_devices_model extends EA_Model
         return $device;
     }
 
+    public function authorize_by_ip(int $provider_id, string $ip_address): ?array
+    {
+        if ($ip_address === '') {
+            return null;
+        }
+
+        $devices = $this->db
+            ->get_where('kiosk_devices', [
+                'id_users_provider' => $provider_id,
+                'last_ip_address' => $ip_address,
+                'revoked_datetime' => null,
+            ])
+            ->result_array();
+
+        if (count($devices) !== 1) {
+            return null;
+        }
+
+        $device = $devices[0];
+
+        $this->db->update(
+            'kiosk_devices',
+            [
+                'last_used_datetime' => date('Y-m-d H:i:s'),
+                'last_ip_address' => $ip_address,
+            ],
+            ['id' => $device['id']],
+        );
+
+        return $device;
+    }
+
     public function revoke(int $device_id): void
     {
         $this->db->update(
