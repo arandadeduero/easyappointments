@@ -84,6 +84,7 @@ class General_settings extends EA_Controller
         'company_color',
         'company_working_plan',
         'book_advance_timeout',
+        'walkin_advance_margin',
         'default_timezone',
         'default_language',
         'date_format',

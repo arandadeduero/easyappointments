@@ -116,13 +116,28 @@
 
                         <div class="mb-5">
                             <label for="book-advance-timeout" class="form-label">
-                                <?= lang('timeout_minutes') ?>
+                                <?= lang('cancel_reschedule_timeout_minutes') ?>
                             </label>
                             <input id="book-advance-timeout" data-field="book_advance_timeout" class="form-control"
-                                   type="number" min="15">
+                                   type="number" min="0">
                             <div class="form-text text-muted">
                                 <small>
                                     <?= lang('book_advance_timeout_hint') ?>
+                                </small>
+                            </div>
+                        </div>
+
+                        <h5 class="mb-3 fw-light"><?= lang('walkin_advance_margin') ?></h5>
+
+                        <div class="mb-5">
+                            <label for="walkin-advance-margin" class="form-label">
+                                <?= lang('walkin_advance_margin_minutes') ?>
+                            </label>
+                            <input id="walkin-advance-margin" data-field="walkin_advance_margin" class="form-control"
+                                   type="number" min="0">
+                            <div class="form-text text-muted">
+                                <small>
+                                    <?= lang('walkin_advance_margin_hint') ?>
                                 </small>
                             </div>
                         </div>
@@ -160,4 +175,3 @@
 <script src="<?= asset_url('assets/js/pages/business_settings.js') ?>"></script>
 
 <?php end_section('scripts'); ?>
-

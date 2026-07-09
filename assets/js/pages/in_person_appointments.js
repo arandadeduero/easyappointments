@@ -10,7 +10,14 @@ App.Pages.InPersonAppointments = (function () {
     const $createWalkin = $('#create-walkin');
     const $serviceStep = $('#walkin-service-step');
     const $documentationStep = $('#walkin-documentation-step');
+    const $timeStep = $('#walkin-time-step');
     const $serviceDocumentationText = $('#service-documentation-text');
+    const $walkinTimeValue = $('#walkin-time-value');
+    const $walkinDateValue = $('#walkin-date-value');
+    const $cancelWalkinTime = $('#cancel-walkin-time');
+    const $confirmWalkinTime = $('#confirm-walkin-time');
+    let inactivityTimer = null;
+    let isCreatingWalkin = false;
 
     function initialize() {
         const provider = vars('provider');
@@ -29,9 +36,12 @@ App.Pages.InPersonAppointments = (function () {
         }
 
         addEventListeners();
+        startInactivityTimer();
     }
 
     function addEventListeners() {
+        $(document).on('click touchstart keydown change', resetInactivityTimer);
+
         $service.on('change', () => {
             $formMessage.removeClass('alert-danger').addClass('d-none').text('');
         });
@@ -59,7 +69,14 @@ App.Pages.InPersonAppointments = (function () {
             $serviceStep.removeClass('d-none');
         });
 
-        $createWalkin.on('click', createWalkin);
+        $createWalkin.on('click', previewWalkinTime);
+
+        $cancelWalkinTime.on('click', () => {
+            $timeStep.addClass('d-none');
+            $documentationStep.removeClass('d-none');
+        });
+
+        $confirmWalkinTime.on('click', createWalkin);
     }
 
     function getSelectedServiceDocumentation() {
@@ -71,23 +88,55 @@ App.Pages.InPersonAppointments = (function () {
         return (selectedService?.documentation_requirements || '').trim();
     }
 
-    function createWalkin() {
-        if (!validate()) {
-            return;
-        }
-
-        const postData = {
+    function getWalkinPostData() {
+        return {
             appointment: {
                 id_users_provider: vars('provider').id,
                 id_services: $service.val(),
                 appointment_type: 'walkin',
             },
         };
+    }
+
+    function previewWalkinTime() {
+        if (!validate()) {
+            return;
+        }
 
         $createWalkin.prop('disabled', true);
         $continueWalkin.prop('disabled', true);
 
-        App.Http.InPersonAppointments.store(postData)
+        App.Http.InPersonAppointments.preview(getWalkinPostData())
+            .done((response) => {
+                const timeFormat = vars('time_format') === 'regular' ? 'h:mm a' : 'HH:mm';
+                $walkinTimeValue.text(moment(response.start_datetime).format(timeFormat).toLowerCase());
+                $walkinDateValue.text(App.Utils.Date.format(response.start_datetime, vars('date_format'), vars('time_format'), true));
+                $documentationStep.addClass('d-none');
+                $timeStep.removeClass('d-none');
+            })
+            .fail((xhr) => {
+                const responseMessage = xhr?.responseJSON?.message || lang('unexpected_issues');
+                showError(responseMessage);
+            })
+            .always(() => {
+                $createWalkin.prop('disabled', false);
+                $continueWalkin.prop('disabled', false);
+            });
+    }
+
+    function createWalkin() {
+        if (!validate()) {
+            return;
+        }
+
+        isCreatingWalkin = true;
+        window.clearTimeout(inactivityTimer);
+
+        $createWalkin.prop('disabled', true);
+        $continueWalkin.prop('disabled', true);
+        $confirmWalkinTime.prop('disabled', true);
+
+        App.Http.InPersonAppointments.store(getWalkinPostData())
             .done((response) => {
                 printTicket(response).finally(() => {
                     window.location.href = App.Utils.Url.siteUrl(
@@ -102,7 +151,36 @@ App.Pages.InPersonAppointments = (function () {
             .always(() => {
                 $createWalkin.prop('disabled', false);
                 $continueWalkin.prop('disabled', false);
+                $confirmWalkinTime.prop('disabled', false);
+                isCreatingWalkin = false;
+                resetInactivityTimer();
             });
+    }
+
+    function startInactivityTimer() {
+        const returnUrl = vars('walkin_return_url');
+
+        if (!returnUrl) {
+            return;
+        }
+
+        resetInactivityTimer();
+    }
+
+    function resetInactivityTimer() {
+        const returnUrl = vars('walkin_return_url');
+
+        if (!returnUrl || isCreatingWalkin) {
+            return;
+        }
+
+        const delay = Number(vars('walkin_request_timeout')) || 60000;
+
+        window.clearTimeout(inactivityTimer);
+
+        inactivityTimer = window.setTimeout(() => {
+            window.location.href = returnUrl;
+        }, delay);
     }
 
     function printTicket(response) {

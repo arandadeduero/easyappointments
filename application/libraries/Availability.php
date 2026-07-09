@@ -108,7 +108,12 @@ class Availability
             $available_hours = $this->generate_available_hours($date, $service, $available_periods);
         }
 
-        $available_hours = $this->consider_book_advance_timeout($date, $available_hours, $provider);
+        $available_hours = $this->consider_appointment_type_advance_margin(
+            $date,
+            $available_hours,
+            $provider,
+            $appointment_type,
+        );
 
         return $this->consider_future_booking_limit($date, $available_hours, $provider);
     }
@@ -691,11 +696,10 @@ class Availability
     }
 
     /**
-     * Consider the book advance timeout and remove available hours that have passed the threshold.
+     * Consider the appointment-type advance margin and remove available hours that have passed the threshold.
      *
-     * If the selected date is today, remove past hours. It is important  include the timeout before booking
-     * that is set in the back-office the system. Normally we might want the customer to book an appointment
-     * that is at least half or one hour from now. The setting is stored in minutes.
+     * If the selected date is today, remove past hours. In-person appointments can keep a short operational margin
+     * so the next ticket is not assigned for the same minute it is requested.
      *
      * @param string $date The selected date.
      * @param array $available_hours Already generated available hours.
@@ -705,16 +709,21 @@ class Availability
      *
      * @throws Exception
      */
-    protected function consider_book_advance_timeout(string $date, array $available_hours, array $provider): array
+    protected function consider_appointment_type_advance_margin(
+        string $date,
+        array $available_hours,
+        array $provider,
+        string $appointment_type,
+    ): array
     {
         $provider_timezone = new DateTimeZone($provider['timezone']);
 
-        $book_advance_timeout = setting('book_advance_timeout', 0);
-        $book_advance_timeout = is_numeric($book_advance_timeout) ? max(0, (int) $book_advance_timeout) : 0;
+        $advance_margin = $appointment_type === APPOINTMENT_TYPE_WALKIN ? setting('walkin_advance_margin', 0) : 0;
+        $advance_margin = is_numeric($advance_margin) ? max(0, (int) $advance_margin) : 0;
 
         $threshold = new DateTime('now', $provider_timezone);
 
-        $threshold->modify('+' . $book_advance_timeout . ' minutes');
+        $threshold->modify('+' . $advance_margin . ' minutes');
 
         foreach ($available_hours as $index => $value) {
             $available_hour = new DateTime($date . ' ' . $value, $provider_timezone);

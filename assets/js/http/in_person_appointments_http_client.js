@@ -10,7 +10,15 @@ App.Http.InPersonAppointments = (function () {
         });
     }
 
+    function preview(postData) {
+        return $.post(App.Utils.Url.siteUrl('in_person_appointments/preview'), {
+            csrf_token: vars('csrf_token'),
+            post_data: postData,
+        });
+    }
+
     return {
+        preview,
         store,
     };
 })();

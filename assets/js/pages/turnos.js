@@ -21,9 +21,11 @@ App.Pages.Turnos = (function () {
     let displayedCall = null;
     let callQueue = [];
     let callTimer = null;
+    let speechVoices = [];
 
     function initialize() {
         $called.attr('data-empty', lang('queue_no_records'));
+        initializeSpeech();
 
         updateClock();
         refresh();
@@ -31,6 +33,15 @@ App.Pages.Turnos = (function () {
 
         setInterval(updateClock, 1000);
         setInterval(refresh, REFRESH_INTERVAL_MS);
+    }
+
+    function initializeSpeech() {
+        if (!('speechSynthesis' in window)) {
+            return;
+        }
+
+        loadSpeechVoices();
+        window.speechSynthesis.addEventListener?.('voiceschanged', loadSpeechVoices);
     }
 
     function updateClock() {
@@ -137,6 +148,7 @@ App.Pages.Turnos = (function () {
 
         if (animate) {
             flashCurrentCall();
+            speakCall(item);
         }
     }
 
@@ -154,6 +166,55 @@ App.Pages.Turnos = (function () {
 
     function getDeskText(item) {
         return item.caller_desk_number || item.caller_name || item.desk || '';
+    }
+
+    function getDeskNumberText(item) {
+        return item.caller_desk_number || item.desk || '';
+    }
+
+    function speakCall(item) {
+        if (
+            !('speechSynthesis' in window) ||
+            !('SpeechSynthesisUtterance' in window) ||
+            !item?.code
+        ) {
+            return;
+        }
+
+        const desk = getDeskNumberText(item);
+        const text = desk ? item.code + '. MESA ' + desk + '.' : item.code + '.';
+        const utterance = createUtterance(text);
+
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function loadSpeechVoices() {
+        speechVoices = window.speechSynthesis.getVoices() || [];
+    }
+
+    function getSpanishVoice() {
+        return (
+            speechVoices.find((voice) => voice.lang === 'es-ES') ||
+            speechVoices.find((voice) => voice.lang?.startsWith('es')) ||
+            null
+        );
+    }
+
+    function createUtterance(text) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        const voice = getSpanishVoice();
+
+        utterance.lang = 'es-ES';
+        utterance.rate = 0.78;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+
+        if (voice) {
+            utterance.voice = voice;
+        }
+
+        return utterance;
     }
 
     function getCallSignature(item) {

@@ -98,6 +98,12 @@ class Booking_cancellation extends EA_Controller
 
             $provider = $this->providers_model->find($appointment['id_users_provider']);
 
+            if (empty($provider)) {
+                throw new RuntimeException(lang('invalid_provider_selection'));
+            }
+
+            $this->ensure_appointment_can_be_cancelled($appointment, $provider);
+
             $customer = $this->customers_model->find($appointment['id_users_customer']);
 
             $service = $this->services_model->find($appointment['id_services']);
@@ -154,6 +160,37 @@ class Booking_cancellation extends EA_Controller
             ]);
 
             $this->load->view('pages/booking_message');
+        }
+    }
+
+    /**
+     * Ensure the customer is still within the public cancellation window.
+     */
+    private function ensure_appointment_can_be_cancelled(array $appointment, array $provider): void
+    {
+        $cancel_reschedule_timeout = setting('book_advance_timeout', 0);
+        $cancel_reschedule_timeout = is_numeric($cancel_reschedule_timeout)
+            ? max(0, (int) $cancel_reschedule_timeout)
+            : 0;
+
+        if ($cancel_reschedule_timeout === 0) {
+            return;
+        }
+
+        $provider_timezone = new DateTimeZone($provider['timezone'] ?: setting('default_timezone'));
+        $appointment_start = new DateTime($appointment['start_datetime'], $provider_timezone);
+        $limit = new DateTime('now', $provider_timezone);
+        $limit->modify('+' . $cancel_reschedule_timeout . ' minutes');
+
+        if ($appointment_start < $limit) {
+            $hours = floor($cancel_reschedule_timeout / 60);
+            $minutes = $cancel_reschedule_timeout % 60;
+
+            throw new RuntimeException(
+                strtr(lang('appointment_locked_message'), [
+                    '{$limit}' => sprintf('%02d:%02d', $hours, $minutes),
+                ]),
+            );
         }
     }
 

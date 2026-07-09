@@ -203,6 +203,8 @@ class In_person_appointments extends EA_Controller
                 'local_printing_token',
                 '',
             ),
+            'walkin_return_url' => site_url('in_person_appointments?departamento=' . $department_id),
+            'walkin_request_timeout' => 60000,
         ]);
 
         html_vars([
@@ -219,6 +221,34 @@ class In_person_appointments extends EA_Controller
         $this->load->view('pages/in_person_appointments');
     }
 
+    public function preview(): void
+    {
+        try {
+            method('post');
+
+            if ($this->are_walkin_appointments_disabled_for_current_user()) {
+                throw new RuntimeException(lang('walkin_appointments_are_disabled'));
+            }
+
+            check('post_data', 'array');
+
+            $context = $this->resolve_walkin_request_context(request('post_data'));
+            $walkin_slot = $this->find_next_walkin_slot_for_provider($context['provider'], $context['service']);
+
+            if (empty($walkin_slot)) {
+                throw new RuntimeException(lang('walkin_no_slots_available'));
+            }
+
+            json_response([
+                'start_datetime' => $walkin_slot['start_datetime'],
+                'department' => trim($context['provider']['first_name'] . ' ' . $context['provider']['last_name']),
+                'service' => $context['service']['name'],
+            ]);
+        } catch (Throwable $e) {
+            json_exception($e);
+        }
+    }
+
     public function store(): void
     {
         try {
@@ -231,42 +261,11 @@ class In_person_appointments extends EA_Controller
             check('post_data', 'array');
 
             $post_data = request('post_data');
-            $appointment = $post_data['appointment'] ?? [];
-
-            if (empty($appointment)) {
-                throw new RuntimeException(lang('fields_are_required'));
-            }
-
-            $provider_id = (int) ($appointment['id_users_provider'] ?? 0);
-            $service_id = (int) ($appointment['id_services'] ?? 0);
-
-            if ($provider_id <= 0) {
-                throw new RuntimeException(lang('invalid_provider_selection'));
-            }
-
-            if (!$this->is_maintenance_access_enabled() && !$this->get_authorized_kiosk_device($provider_id)) {
-                json_response(['message' => lang('kiosk_device_not_authorized')], 403);
-                return;
-            }
-
-            if ($service_id <= 0) {
-                throw new RuntimeException(lang('invalid_service_selection'));
-            }
-
-            $provider = $this->providers_model->find($provider_id);
-            $service = $this->services_model->find($service_id);
-
-            if (empty($provider)) {
-                throw new RuntimeException(lang('invalid_provider_selection'));
-            }
-
-            if (empty($service)) {
-                throw new RuntimeException(lang('invalid_service_selection'));
-            }
-
-            if (!in_array($service_id, array_map('intval', $provider['services'] ?? []), true)) {
-                throw new RuntimeException(lang('invalid_service_selection'));
-            }
+            $context = $this->resolve_walkin_request_context($post_data);
+            $provider_id = $context['provider_id'];
+            $service_id = $context['service_id'];
+            $provider = $context['provider'];
+            $service = $context['service'];
 
             $walkin_slot = $this->find_next_walkin_slot_for_provider($provider, $service);
 
@@ -360,6 +359,53 @@ class In_person_appointments extends EA_Controller
         } catch (Throwable $e) {
             json_exception($e);
         }
+    }
+
+    protected function resolve_walkin_request_context(array $post_data): array
+    {
+        $appointment = $post_data['appointment'] ?? [];
+
+        if (empty($appointment)) {
+            throw new RuntimeException(lang('fields_are_required'));
+        }
+
+        $provider_id = (int) ($appointment['id_users_provider'] ?? 0);
+        $service_id = (int) ($appointment['id_services'] ?? 0);
+
+        if ($provider_id <= 0) {
+            throw new RuntimeException(lang('invalid_provider_selection'));
+        }
+
+        if (!$this->is_maintenance_access_enabled() && !$this->get_authorized_kiosk_device($provider_id)) {
+            json_response(['message' => lang('kiosk_device_not_authorized')], 403);
+            exit;
+        }
+
+        if ($service_id <= 0) {
+            throw new RuntimeException(lang('invalid_service_selection'));
+        }
+
+        $provider = $this->providers_model->find($provider_id);
+        $service = $this->services_model->find($service_id);
+
+        if (empty($provider)) {
+            throw new RuntimeException(lang('invalid_provider_selection'));
+        }
+
+        if (empty($service)) {
+            throw new RuntimeException(lang('invalid_service_selection'));
+        }
+
+        if (!in_array($service_id, array_map('intval', $provider['services'] ?? []), true)) {
+            throw new RuntimeException(lang('invalid_service_selection'));
+        }
+
+        return [
+            'provider_id' => $provider_id,
+            'service_id' => $service_id,
+            'provider' => $provider,
+            'service' => $service,
+        ];
     }
 
     protected function find_next_walkin_slot_for_provider(array $provider, array $service): ?array
