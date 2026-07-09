@@ -19,9 +19,11 @@ App.Pages.Turnos = (function () {
     let currentDate = null;
     let previousCalledSignatures = null;
     let displayedCall = null;
+    let latestDisplayedCallSignature = null;
     let callQueue = [];
     let callTimer = null;
     let speechVoices = [];
+    let isSpeechUnlocked = false;
 
     function initialize() {
         $called.attr('data-empty', lang('queue_no_records'));
@@ -42,6 +44,10 @@ App.Pages.Turnos = (function () {
 
         loadSpeechVoices();
         window.speechSynthesis.addEventListener?.('voiceschanged', loadSpeechVoices);
+
+        document.addEventListener('pointerdown', unlockSpeech, {once: true});
+        document.addEventListener('keydown', unlockSpeech, {once: true});
+        document.addEventListener('touchstart', unlockSpeech, {once: true, passive: true});
     }
 
     function updateClock() {
@@ -79,8 +85,10 @@ App.Pages.Turnos = (function () {
 
         renderPending(pending);
         enqueueNewCalls(called);
+        announceLatestCallChange(called);
 
         if (!displayedCall && !callQueue.length && called.length) {
+            latestDisplayedCallSignature = getCallSignature(called[0]);
             showCall(called[0], false);
         }
     }
@@ -126,12 +134,36 @@ App.Pages.Turnos = (function () {
         processCallQueue();
     }
 
+    function announceLatestCallChange(items) {
+        if (!items.length || callQueue.length || callTimer) {
+            return;
+        }
+
+        const latestCall = items[0];
+        const latestSignature = getCallSignature(latestCall);
+
+        if (latestDisplayedCallSignature === null) {
+            latestDisplayedCallSignature = latestSignature;
+            return;
+        }
+
+        if (latestDisplayedCallSignature === latestSignature) {
+            return;
+        }
+
+        latestDisplayedCallSignature = latestSignature;
+        showCall(latestCall, true);
+    }
+
     function processCallQueue() {
         if (callTimer || !callQueue.length) {
             return;
         }
 
-        showCall(callQueue.shift(), true);
+        const item = callQueue.shift();
+
+        latestDisplayedCallSignature = getCallSignature(item);
+        showCall(item, true);
 
         callTimer = setTimeout(() => {
             callTimer = null;
@@ -183,6 +215,24 @@ App.Pages.Turnos = (function () {
 
         const desk = getDeskNumberText(item);
         const text = desk ? item.code + '. MESA ' + desk + '.' : item.code + '.';
+
+        speakText(text);
+    }
+
+    function unlockSpeech() {
+        if (
+            isSpeechUnlocked ||
+            !('speechSynthesis' in window) ||
+            !('SpeechSynthesisUtterance' in window)
+        ) {
+            return;
+        }
+
+        isSpeechUnlocked = true;
+        speakText(' ');
+    }
+
+    function speakText(text) {
         const utterance = createUtterance(text);
 
         window.speechSynthesis.cancel();
