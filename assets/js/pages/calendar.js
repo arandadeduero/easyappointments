@@ -119,7 +119,7 @@ App.Pages.Calendar = (function () {
         const startTillEndDiff = endMoment.diff(startMoment);
         const startTillEndDuration = moment.duration(startTillEndDiff);
         const durationInMinutes = startTillEndDuration.asMinutes();
-        const minDurationInMinutes = 15;
+        const minDurationInMinutes = 5;
 
         if (durationInMinutes <= minDurationInMinutes) {
             const serviceId = $('#select-service').val();
