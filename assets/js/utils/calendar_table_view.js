@@ -84,11 +84,29 @@ App.Utils.CalendarTableView = (function () {
     }
 
     /**
+     * Cancel a pending popover close.
+     */
+    function cancelPopoverClose() {
+        window.clearTimeout(popoverCloseTimeout);
+    }
+
+    /**
      * Schedule the current popover to close, unless the user moves into it.
      */
     function schedulePopoverClose() {
-        window.clearTimeout(popoverCloseTimeout);
-        popoverCloseTimeout = window.setTimeout(closePopover, 250);
+        cancelPopoverClose();
+        popoverCloseTimeout = window.setTimeout(closePopover, 700);
+    }
+
+    /**
+     * Check if an element belongs to the active popover.
+     *
+     * @param {HTMLElement|null} element - Target element.
+     *
+     * @returns {Boolean}
+     */
+    function isActivePopoverElement(element) {
+        return !!element && $(element).closest('.popover').length > 0;
     }
 
     /**
@@ -551,9 +569,14 @@ App.Utils.CalendarTableView = (function () {
      * @param {Object} info - FullCalendar event info.
      */
     function showEventPopover(info) {
-        window.clearTimeout(popoverCloseTimeout);
-        closePopover();
         const $target = $(info.el);
+        cancelPopoverClose();
+
+        if ($popoverTarget && $popoverTarget[0] === info.el) {
+            return;
+        }
+
+        closePopover();
 
         let $html;
         let displayEdit;
@@ -591,9 +614,7 @@ App.Utils.CalendarTableView = (function () {
         $target.popover('show');
         $popoverTarget = $target;
 
-        $calendar.find('.popover').on('mouseenter', () => {
-            window.clearTimeout(popoverCloseTimeout);
-        });
+        $calendar.find('.popover').on('mouseenter', cancelPopoverClose);
 
         $calendar.find('.popover').on('mouseleave', schedulePopoverClose);
 
@@ -627,7 +648,11 @@ App.Utils.CalendarTableView = (function () {
     /**
      * Handle calendar event hover exit - hide popover.
      */
-    function onEventMouseLeave() {
+    function onEventMouseLeave(info) {
+        if (isActivePopoverElement(info.jsEvent.relatedTarget)) {
+            return;
+        }
+
         schedulePopoverClose();
     }
 
@@ -999,6 +1024,9 @@ App.Utils.CalendarTableView = (function () {
                 return !filterServiceIds.length || filterServiceIds.includes(appointment.id_services);
             })
             .map((appointment) => {
+                const start = moment(appointment.start_datetime);
+                const end = moment(appointment.end_datetime);
+                const durationInMinutes = end.diff(start, 'minutes');
                 const customerName = [appointment.customer.first_name, appointment.customer.last_name]
                     .filter(Boolean)
                     .join(' ');
@@ -1008,12 +1036,13 @@ App.Utils.CalendarTableView = (function () {
                 return {
                     id: appointment.id,
                     title: title,
-                    start: moment(appointment.start_datetime).toDate(),
-                    end: moment(appointment.end_datetime).toDate(),
+                    start: start.toDate(),
+                    end: end.toDate(),
                     allDay: false,
                     color: getAppointmentEventColor(appointment),
                     display: 'block',
                     data: appointment,
+                    classNames: durationInMinutes <= 10 ? ['aad-calendar-event-compact'] : [],
                 };
             });
         $providerColumn.find('.calendar-wrapper').data('fullCalendar').addEventSource(calendarEvents);
@@ -1572,8 +1601,8 @@ App.Utils.CalendarTableView = (function () {
             firstDay: firstWeekdayNumber,
             slotDuration: '00:05:00',
             snapDuration: '00:05:00',
-            eventMinHeight: 26,
-            eventShortHeight: 26,
+            eventMinHeight: 32,
+            eventShortHeight: 32,
             slotEventOverlap: false,
             scrollTime: '07:00:00',
             slotLabelInterval: '01:00',

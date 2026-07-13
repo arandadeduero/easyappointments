@@ -118,11 +118,29 @@ App.Utils.CalendarDefaultView = (function () {
     }
 
     /**
+     * Cancel a pending popover close.
+     */
+    function cancelPopoverClose() {
+        window.clearTimeout(popoverCloseTimeout);
+    }
+
+    /**
      * Schedule the current popover to close, unless the user moves into it.
      */
     function schedulePopoverClose() {
-        window.clearTimeout(popoverCloseTimeout);
-        popoverCloseTimeout = window.setTimeout(closePopover, 250);
+        cancelPopoverClose();
+        popoverCloseTimeout = window.setTimeout(closePopover, 700);
+    }
+
+    /**
+     * Check if an element belongs to the active popover.
+     *
+     * @param {HTMLElement|null} element - Target element.
+     *
+     * @returns {Boolean}
+     */
+    function isActivePopoverElement(element) {
+        return !!element && $(element).closest('.popover').length > 0;
     }
 
     /**
@@ -530,7 +548,12 @@ App.Utils.CalendarDefaultView = (function () {
      */
     function showEventPopover(info) {
         const $target = $(info.el);
-        window.clearTimeout(popoverCloseTimeout);
+        cancelPopoverClose();
+
+        if ($popoverTarget && $popoverTarget[0] === info.el) {
+            return;
+        }
+
         closePopover();
 
         let $html;
@@ -568,9 +591,7 @@ App.Utils.CalendarDefaultView = (function () {
         $target.popover('show');
         $popoverTarget = $target;
 
-        $calendarPage.find('.popover').on('mouseenter', () => {
-            window.clearTimeout(popoverCloseTimeout);
-        });
+        $calendarPage.find('.popover').on('mouseenter', cancelPopoverClose);
 
         $calendarPage.find('.popover').on('mouseleave', schedulePopoverClose);
 
@@ -603,7 +624,11 @@ App.Utils.CalendarDefaultView = (function () {
     /**
      * Handle calendar event hover exit - hide popover.
      */
-    function onEventMouseLeave() {
+    function onEventMouseLeave(info) {
+        if (isActivePopoverElement(info.jsEvent.relatedTarget)) {
+            return;
+        }
+
         schedulePopoverClose();
     }
 
@@ -1050,6 +1075,9 @@ App.Utils.CalendarDefaultView = (function () {
      */
     function createAppointmentEvents(appointments) {
         return appointments.map((appointment) => {
+            const start = moment(appointment.start_datetime);
+            const end = moment(appointment.end_datetime);
+            const durationInMinutes = end.diff(start, 'minutes');
             const customerName = [appointment.customer.first_name, appointment.customer.last_name]
                 .filter(Boolean)
                 .join(' ');
@@ -1064,12 +1092,13 @@ App.Utils.CalendarDefaultView = (function () {
             return {
                 id: appointment.id,
                 title,
-                start: moment(appointment.start_datetime).toDate(),
-                end: moment(appointment.end_datetime).toDate(),
+                start: start.toDate(),
+                end: end.toDate(),
                 allDay: false,
                 color: getAppointmentEventColor(appointment),
                 data: appointment,
                 display: 'block',
+                classNames: durationInMinutes <= 10 ? ['aad-calendar-event-compact'] : [],
             };
         });
     }
@@ -1487,8 +1516,8 @@ App.Utils.CalendarDefaultView = (function () {
             firstDay: firstWeekdayNumber,
             slotDuration: '00:05:00',
             snapDuration: '00:05:00',
-            eventMinHeight: 26,
-            eventShortHeight: 26,
+            eventMinHeight: 32,
+            eventShortHeight: 32,
             slotEventOverlap: false,
             scrollTime: '07:00:00',
             slotLabelInterval: '01:00',

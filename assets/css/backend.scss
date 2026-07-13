@@ -196,7 +196,7 @@ body .modal.full-screen .modal-push {
     border: 1px solid var(--bs-info);
     background-color: var(--bs-info);
     color: var(--bs-dark);
-    font-size: 11px;
+    font-size: 12px;
 }
 
 #calendar .fc-timegrid-event {
@@ -678,18 +678,22 @@ body .modal.full-screen .modal-push {
     font-weight: 800;
 }
 
-.fc-timegrid-event.fc-timegrid-event-short .aad-calendar-event-content {
+.fc-timegrid-event.fc-timegrid-event-short .aad-calendar-event-content,
+.fc-timegrid-event.aad-calendar-event-compact .aad-calendar-event-content {
     flex-direction: row;
     align-items: center;
     gap: 0.35rem;
+    line-height: 1;
 }
 
-.fc-timegrid-event.fc-timegrid-event-short .aad-calendar-event-header {
+.fc-timegrid-event.fc-timegrid-event-short .aad-calendar-event-header,
+.fc-timegrid-event.aad-calendar-event-compact .aad-calendar-event-header {
     flex: 0 1 auto;
     width: auto;
     gap: 0.25rem;
 }
 
-.fc-timegrid-event.fc-timegrid-event-short .aad-calendar-event-title {
+.fc-timegrid-event.fc-timegrid-event-short .aad-calendar-event-title,
+.fc-timegrid-event.aad-calendar-event-compact .aad-calendar-event-title {
     flex: 1 1 auto;
 }
