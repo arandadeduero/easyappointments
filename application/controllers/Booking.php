@@ -29,6 +29,8 @@ class Booking extends EA_Controller
         'Finalizada' => '#adb5bd',
     ];
 
+    private const WALKIN_RESERVED_COLOR = '#56cc9d';
+
     public array $allowed_customer_fields = [
         'id',
         'first_name',
@@ -198,6 +200,18 @@ class Booking extends EA_Controller
     private function get_appointment_status_color(?string $status): ?string
     {
         return $status !== null ? self::APPOINTMENT_STATUS_COLORS[$status] ?? null : null;
+    }
+
+    /**
+     * Get the display color for an appointment status and type.
+     */
+    private function get_appointment_display_color(?string $status, ?string $appointment_type): ?string
+    {
+        if ($status === 'Reservado' && $appointment_type === APPOINTMENT_TYPE_WALKIN) {
+            return self::WALKIN_RESERVED_COLOR;
+        }
+
+        return $this->get_appointment_status_color($status);
     }
 
     /**
@@ -738,7 +752,10 @@ class Booking extends EA_Controller
             $appointment['is_unavailability'] = false;
 
             $appointment['status'] = $this->get_default_appointment_status();
-            $appointment['color'] = $this->get_appointment_status_color($appointment['status']);
+            $appointment['color'] = $this->get_appointment_display_color(
+                $appointment['status'],
+                $appointment['appointment_type'] ?? APPOINTMENT_TYPE_BOOKING,
+            );
             $appointment['end_datetime'] = $this->appointments_model->calculate_end_datetime($appointment);
             $this->appointments_model->ensure_queue_number($appointment);
 

@@ -77,7 +77,7 @@ body {
     flex-direction: column;
     justify-content: center;
     min-width: 0;
-    padding: clamp(20px, 2.2vw, 36px);
+    padding: clamp(12px, 1.4vw, 24px) clamp(20px, 2.2vw, 36px);
     background: var(--queue-surface);
 }
 
@@ -85,7 +85,7 @@ body {
 .aad-queue-current-desk span {
     margin: 0 0 12px;
     color: var(--queue-text-muted);
-    font-size: clamp(18px, 1.65vw, 30px);
+    font-size: clamp(24px, min(2.2vw, 3.8vh), 42px);
     font-weight: 700;
     line-height: 1;
     letter-spacing: 0.075em;
@@ -97,7 +97,7 @@ body {
     max-width: 100%;
     overflow: hidden;
     color: var(--queue-text);
-    font-size: clamp(72px, 9.2vw, 138px);
+    font-size: clamp(104px, min(12.2vw, 15.5vh), 190px);
     font-weight: 800;
     letter-spacing: -0.045em;
     line-height: 0.9;
@@ -114,7 +114,7 @@ body {
     justify-content: center;
     min-width: 0;
     height: 100%;
-    padding: clamp(20px, 2vw, 34px);
+    padding: clamp(12px, 1.35vw, 24px) clamp(20px, 2vw, 34px);
     background: var(--queue-surface-muted);
     border-left: 1px solid var(--queue-border);
     text-align: center;
@@ -129,7 +129,7 @@ body {
     max-width: 100%;
     overflow: hidden;
     color: var(--queue-primary);
-    font-size: clamp(68px, 8vw, 126px);
+    font-size: clamp(96px, min(11vw, 14.5vh), 176px);
     font-weight: 800;
     letter-spacing: -0.04em;
     line-height: 0.9;
@@ -153,7 +153,7 @@ body {
     flex-direction: column;
     justify-content: center;
     min-width: 0;
-    padding: 24px 30px;
+    padding: clamp(14px, 1.45vw, 24px) 30px;
     background:
         linear-gradient(
             145deg,
@@ -172,7 +172,7 @@ body {
 .aad-queue-clock span {
     margin-bottom: 10px;
     color: rgba(255, 255, 255, 0.72);
-    font-size: clamp(15px, 1.25vw, 22px);
+    font-size: clamp(18px, min(1.6vw, 3vh), 28px);
     font-weight: 600;
     letter-spacing: 0.035em;
     text-transform: capitalize;
@@ -180,7 +180,7 @@ body {
 
 .aad-queue-clock strong {
     color: #ffffff;
-    font-size: clamp(48px, 5.4vw, 82px);
+    font-size: clamp(66px, min(7vw, 10.5vh), 112px);
     font-variant-numeric: tabular-nums;
     font-weight: 650;
     letter-spacing: -0.04em;
@@ -271,7 +271,7 @@ body {
 
 .aad-queue-last-header span {
     color: var(--queue-text-muted);
-    font-size: clamp(14px, 1.1vw, 18px);
+    font-size: clamp(16px, 1.25vw, 22px);
     font-weight: 700;
     letter-spacing: 0.08em;
     text-align: center;
@@ -293,7 +293,7 @@ body {
     min-height: 100%;
     padding: 32px;
     color: var(--queue-text-muted);
-    font-size: clamp(20px, 1.7vw, 28px);
+    font-size: clamp(22px, 1.9vw, 32px);
     font-weight: 600;
     line-height: 1.35;
     text-align: center;
@@ -337,7 +337,7 @@ body {
     max-width: 100%;
     overflow: hidden;
     color: var(--queue-text);
-    font-size: clamp(42px, 4.5vw, 70px);
+    font-size: clamp(46px, 4.9vw, 78px);
     font-variant-numeric: tabular-nums;
     font-weight: 800;
     letter-spacing: -0.04em;
@@ -351,7 +351,7 @@ body {
     max-width: 100%;
     overflow: hidden;
     color: var(--queue-primary);
-    font-size: clamp(34px, 3.7vw, 58px);
+    font-size: clamp(38px, 4vw, 64px);
     font-variant-numeric: tabular-nums;
     font-weight: 800;
     line-height: 1;

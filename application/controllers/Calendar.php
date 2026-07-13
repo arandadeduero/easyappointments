@@ -27,6 +27,8 @@ class Calendar extends EA_Controller
         'Finalizada' => '#adb5bd',
     ];
 
+    private const WALKIN_RESERVED_COLOR = '#56cc9d';
+
     public array $allowed_customer_fields = [
         'id',
         'first_name',
@@ -371,6 +373,73 @@ class Calendar extends EA_Controller
     }
 
     /**
+     * Apply the calendar display color for an appointment.
+     */
+    protected function apply_appointment_display_color(array &$appointment): void
+    {
+        $status = $appointment['status'] ?? null;
+
+        if (empty($status)) {
+            return;
+        }
+
+        if (
+            $status === 'Reservado' &&
+            $this->is_walkin_appointment($appointment)
+        ) {
+            $appointment['color'] = self::WALKIN_RESERVED_COLOR;
+            return;
+        }
+
+        $status_color = $this->get_appointment_status_color($status);
+
+        if (!empty($status_color)) {
+            $appointment['color'] = $status_color;
+        }
+    }
+
+    /**
+     * Detect walk-in appointments, including legacy records created before the
+     * appointment_type column was filled consistently.
+     */
+    protected function is_walkin_appointment(array $appointment): bool
+    {
+        if (($appointment['appointment_type'] ?? null) === APPOINTMENT_TYPE_WALKIN) {
+            return true;
+        }
+
+        $walkin_label = lang('appointment_type_walkin');
+        $notes = trim((string) ($appointment['notes'] ?? ''));
+
+        if ($walkin_label !== '' && stripos($notes, $walkin_label) === 0) {
+            return true;
+        }
+
+        $customer = $appointment['customer'] ?? null;
+
+        if (empty($customer) && !empty($appointment['id_users_customer'])) {
+            try {
+                $customer = $this->customers_model->find((int) $appointment['id_users_customer']);
+            } catch (Throwable) {
+                $customer = null;
+            }
+        }
+
+        if (empty($customer) || !is_array($customer)) {
+            return false;
+        }
+
+        $first_name = trim((string) ($customer['first_name'] ?? ''));
+        $email = trim((string) ($customer['email'] ?? ''));
+
+        if ($walkin_label !== '' && strcasecmp($first_name, $walkin_label) === 0) {
+            return true;
+        }
+
+        return strpos(strtolower($email), 'walkin-') === 0;
+    }
+
+    /**
      * Resolve the finished status label already used in this installation.
      *
      * Prefer an existing value in DB/options to avoid creating duplicate states
@@ -521,17 +590,11 @@ class Calendar extends EA_Controller
                     $appointment['meeting_link'] = $this->jitsi_client->generate_link();
                 }
 
-                if (!empty($appointment['status'])) {
-                    $status_color = $this->get_appointment_status_color($appointment['status']);
-
-                    if (!empty($status_color)) {
-                        $appointment['color'] = $status_color;
-                    }
-                }
-
                 if (empty($appointment['appointment_type'])) {
                     $appointment['appointment_type'] = APPOINTMENT_TYPE_BOOKING;
                 }
+
+                $this->apply_appointment_display_color($appointment);
 
                 $this->appointments_model->ensure_queue_number($appointment);
 
@@ -905,13 +968,7 @@ class Calendar extends EA_Controller
             ];
 
             foreach ($response['appointments'] as &$appointment) {
-                if (!empty($appointment['status'])) {
-                    $status_color = $this->get_appointment_status_color($appointment['status']);
-
-                    if (!empty($status_color)) {
-                        $appointment['color'] = $status_color;
-                    }
-                }
+                $this->apply_appointment_display_color($appointment);
 
                 $appointment['provider'] = $this->providers_model->find($appointment['id_users_provider']);
                 $appointment['service'] = $this->services_model->find($appointment['id_services']);
@@ -1068,13 +1125,7 @@ class Calendar extends EA_Controller
             $response['appointments'] = $this->db->get()->result_array();
 
             foreach ($response['appointments'] as &$appointment) {
-                if (!empty($appointment['status'])) {
-                    $status_color = $this->get_appointment_status_color($appointment['status']);
-
-                    if (!empty($status_color)) {
-                        $appointment['color'] = $status_color;
-                    }
-                }
+                $this->apply_appointment_display_color($appointment);
 
                 $appointment['provider'] = $this->providers_model->find($appointment['id_users_provider']);
                 $appointment['service'] = $this->services_model->find($appointment['id_services']);

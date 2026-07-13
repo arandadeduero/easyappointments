@@ -28,6 +28,7 @@ App.Utils.CalendarDefaultView = (function () {
         unavailability: '#879DB4',
         blockedPeriod: '#d65069',
         notWorking: '#BEBEBE',
+        walkinReserved: '#56cc9d',
         default: '#7cbae8',
     };
 
@@ -49,6 +50,7 @@ App.Utils.CalendarDefaultView = (function () {
     const moment = window.moment;
     let $popoverTarget = null;
     let fullCalendar = null;
+    let popoverCloseTimeout = null;
     let lastFocusedEventData = null;
 
     // Helper Functions
@@ -107,10 +109,20 @@ App.Utils.CalendarDefaultView = (function () {
      * Close the current popover if open.
      */
     function closePopover() {
+        window.clearTimeout(popoverCloseTimeout);
+
         if ($popoverTarget) {
             $popoverTarget.popover('dispose');
             $popoverTarget = null;
         }
+    }
+
+    /**
+     * Schedule the current popover to close, unless the user moves into it.
+     */
+    function schedulePopoverClose() {
+        window.clearTimeout(popoverCloseTimeout);
+        popoverCloseTimeout = window.setTimeout(closePopover, 250);
     }
 
     /**
@@ -131,6 +143,50 @@ App.Utils.CalendarDefaultView = (function () {
      */
     function isWorkingPlanException(eventData) {
         return eventData?.workingPlanException !== undefined;
+    }
+
+    /**
+     * Get the display color for an appointment event.
+     *
+     * @param {Object} appointment - Appointment data.
+     * @returns {string}
+     */
+    function getAppointmentEventColor(appointment) {
+        const isWalkin = isWalkinAppointment(appointment);
+
+        if (appointment.status === 'Reservado' && isWalkin) {
+            return EVENT_COLORS.walkinReserved;
+        }
+
+        return appointment.color || EVENT_COLORS.default;
+    }
+
+    /**
+     * Check if an appointment is an in-person/walk-in appointment.
+     *
+     * @param {Object} appointment - Appointment data.
+     * @returns {boolean}
+     */
+    function isWalkinAppointment(appointment) {
+        if (appointment.appointment_type === 'walkin') {
+            return true;
+        }
+
+        const notes = String(appointment.notes || '').trim().toLowerCase();
+        const customer = appointment.customer || {};
+        const firstName = String(customer.first_name || '').trim().toLowerCase();
+        const email = String(customer.email || '').trim().toLowerCase();
+        const walkinLabel = String(lang('appointment_type_walkin') || 'cita presencial')
+            .trim()
+            .toLowerCase();
+
+        return (
+            notes.startsWith(walkinLabel) ||
+            notes.startsWith('cita presencial') ||
+            firstName === walkinLabel ||
+            firstName === 'cita presencial' ||
+            email.startsWith('walkin-')
+        );
     }
 
     /**
@@ -468,12 +524,13 @@ App.Utils.CalendarDefaultView = (function () {
     // Calendar Event Callbacks
 
     /**
-     * Handle calendar event click - show popover.
+     * Show an event popover.
      *
      * @param {Object} info - FullCalendar event info.
      */
-    function onEventClick(info) {
+    function showEventPopover(info) {
         const $target = $(info.el);
+        window.clearTimeout(popoverCloseTimeout);
         closePopover();
 
         let $html;
@@ -511,12 +568,43 @@ App.Utils.CalendarDefaultView = (function () {
         $target.popover('show');
         $popoverTarget = $target;
 
+        $calendarPage.find('.popover').on('mouseenter', () => {
+            window.clearTimeout(popoverCloseTimeout);
+        });
+
+        $calendarPage.find('.popover').on('mouseleave', schedulePopoverClose);
+
         // Fix popover position if too high
         const $popover = $calendarPage.find('.popover');
 
         if ($popover.length && $popover.position().top < 200) {
             $popover.css('top', '200px');
         }
+    }
+
+    /**
+     * Handle calendar event click - show popover.
+     *
+     * @param {Object} info - FullCalendar event info.
+     */
+    function onEventClick(info) {
+        showEventPopover(info);
+    }
+
+    /**
+     * Handle calendar event hover - show popover.
+     *
+     * @param {Object} info - FullCalendar event info.
+     */
+    function onEventMouseEnter(info) {
+        showEventPopover(info);
+    }
+
+    /**
+     * Handle calendar event hover exit - hide popover.
+     */
+    function onEventMouseLeave() {
+        schedulePopoverClose();
     }
 
     /**
@@ -979,7 +1067,7 @@ App.Utils.CalendarDefaultView = (function () {
                 start: moment(appointment.start_datetime).toDate(),
                 end: moment(appointment.end_datetime).toDate(),
                 allDay: false,
-                color: appointment.color,
+                color: getAppointmentEventColor(appointment),
                 data: appointment,
                 display: 'block',
             };
@@ -1368,6 +1456,27 @@ App.Utils.CalendarDefaultView = (function () {
         const initialView = window.innerWidth < 468 ? 'timeGridDay' : 'timeGridWeek';
         const firstWeekdayNumber = App.Utils.Date.getWeekdayId(vars('first_weekday'));
 
+        function openReports() {
+            const viewType = fullCalendar?.view?.type || initialView;
+            const period = viewType === 'dayGridMonth' ? 'month' : viewType === 'timeGridWeek' ? 'week' : 'day';
+            const date = moment(fullCalendar?.view?.currentStart || new Date()).format('YYYY-MM-DD');
+            const filterType = getSelectedFilterType();
+            const params = new URLSearchParams({
+                period,
+                date,
+            });
+
+            if (filterType === FILTER_TYPE_PROVIDER) {
+                params.set('provider_id', $selectFilterItem.val());
+            }
+
+            if (filterType === FILTER_TYPE_SERVICE) {
+                params.set('service_id', $selectFilterItem.val());
+            }
+
+            window.location.href = App.Utils.Url.siteUrl('reports?' + params.toString());
+        }
+
         // Create FullCalendar instance
         fullCalendar = new FullCalendar.Calendar($calendar[0], {
             initialView,
@@ -1378,6 +1487,9 @@ App.Utils.CalendarDefaultView = (function () {
             firstDay: firstWeekdayNumber,
             slotDuration: '00:15:00',
             snapDuration: '00:15:00',
+            eventMinHeight: 26,
+            eventShortHeight: 26,
+            slotEventOverlap: false,
             scrollTime: '07:00:00',
             slotLabelInterval: '01:00',
             eventTimeFormat: timeFormat,
@@ -1392,7 +1504,13 @@ App.Utils.CalendarDefaultView = (function () {
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'timeGridDay,timeGridWeek,dayGridMonth',
+                right: 'reportsButton timeGridDay,timeGridWeek,dayGridMonth',
+            },
+            customButtons: {
+                reportsButton: {
+                    text: lang('reports'),
+                    click: openReports,
+                },
             },
             buttonText: {
                 today: lang('today'),
@@ -1404,6 +1522,8 @@ App.Utils.CalendarDefaultView = (function () {
             datesSet: onDatesSet,
             dateClick: onDateClick,
             eventClick: onEventClick,
+            eventMouseEnter: onEventMouseEnter,
+            eventMouseLeave: onEventMouseLeave,
             eventResize: onEventResize,
             eventDrop: onEventDrop,
             select: onSelect,

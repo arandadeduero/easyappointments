@@ -22,12 +22,11 @@ App.Pages.Turnos = (function () {
     let latestDisplayedCallSignature = null;
     let callQueue = [];
     let callTimer = null;
-    let speechVoices = [];
-    let isSpeechUnlocked = false;
+    let audioContext = null;
 
     function initialize() {
         $called.attr('data-empty', lang('queue_no_records'));
-        initializeSpeech();
+        initializeBell();
 
         updateClock();
         refresh();
@@ -35,19 +34,6 @@ App.Pages.Turnos = (function () {
 
         setInterval(updateClock, 1000);
         setInterval(refresh, REFRESH_INTERVAL_MS);
-    }
-
-    function initializeSpeech() {
-        if (!('speechSynthesis' in window)) {
-            return;
-        }
-
-        loadSpeechVoices();
-        window.speechSynthesis.addEventListener?.('voiceschanged', loadSpeechVoices);
-
-        document.addEventListener('pointerdown', unlockSpeech, {once: true});
-        document.addEventListener('keydown', unlockSpeech, {once: true});
-        document.addEventListener('touchstart', unlockSpeech, {once: true, passive: true});
     }
 
     function updateClock() {
@@ -134,6 +120,22 @@ App.Pages.Turnos = (function () {
         processCallQueue();
     }
 
+    function initializeBell() {
+        document.addEventListener('pointerdown', unlockBell, {once: true});
+        document.addEventListener('keydown', unlockBell, {once: true});
+        document.addEventListener('touchstart', unlockBell, {once: true, passive: true});
+    }
+
+    function unlockBell() {
+        const context = getAudioContext();
+
+        if (!context) {
+            return;
+        }
+
+        context.resume?.();
+    }
+
     function announceLatestCallChange(items) {
         if (!items.length || callQueue.length || callTimer) {
             return;
@@ -180,7 +182,7 @@ App.Pages.Turnos = (function () {
 
         if (animate) {
             flashCurrentCall();
-            speakCall(item);
+            playBell();
         }
     }
 
@@ -204,67 +206,52 @@ App.Pages.Turnos = (function () {
         return item.caller_desk_number || item.desk || '';
     }
 
-    function speakCall(item) {
-        if (
-            !('speechSynthesis' in window) ||
-            !('SpeechSynthesisUtterance' in window) ||
-            !item?.code
-        ) {
+    function getAudioContext() {
+        const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioContextConstructor) {
+            return null;
+        }
+
+        if (!audioContext) {
+            audioContext = new AudioContextConstructor();
+        }
+
+        return audioContext;
+    }
+
+    function playBell() {
+        const context = getAudioContext();
+
+        if (!context) {
             return;
         }
 
-        const desk = getDeskNumberText(item);
-        const text = desk ? item.code + '. MESA ' + desk + '.' : item.code + '.';
+        context.resume?.();
 
-        speakText(text);
+        const startTime = context.currentTime + 0.02;
+
+        playBellTone(context, startTime, 880, 0.9);
+        playBellTone(context, startTime + 0.18, 1175, 0.55);
+        playBellTone(context, startTime + 0.38, 880, 0.45);
     }
 
-    function unlockSpeech() {
-        if (
-            isSpeechUnlocked ||
-            !('speechSynthesis' in window) ||
-            !('SpeechSynthesisUtterance' in window)
-        ) {
-            return;
-        }
+    function playBellTone(context, startTime, frequency, volume) {
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
 
-        isSpeechUnlocked = true;
-        speakText(' ');
-    }
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(frequency, startTime);
 
-    function speakText(text) {
-        const utterance = createUtterance(text);
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.exponentialRampToValueAtTime(volume, startTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.75);
 
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(utterance);
-    }
+        oscillator.connect(gain);
+        gain.connect(context.destination);
 
-    function loadSpeechVoices() {
-        speechVoices = window.speechSynthesis.getVoices() || [];
-    }
-
-    function getSpanishVoice() {
-        return (
-            speechVoices.find((voice) => voice.lang === 'es-ES') ||
-            speechVoices.find((voice) => voice.lang?.startsWith('es')) ||
-            null
-        );
-    }
-
-    function createUtterance(text) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        const voice = getSpanishVoice();
-
-        utterance.lang = 'es-ES';
-        utterance.rate = 0.78;
-        utterance.pitch = 1;
-        utterance.volume = 1;
-
-        if (voice) {
-            utterance.voice = voice;
-        }
-
-        return utterance;
+        oscillator.start(startTime);
+        oscillator.stop(startTime + 0.8);
     }
 
     function getCallSignature(item) {

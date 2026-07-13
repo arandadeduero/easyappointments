@@ -9,10 +9,10 @@
 ?>
 
 <div id="frame-footer" class="p-3 text-center border-top">
-    <small class="d-block d-md-flex">
+    <small class="d-block d-md-flex justify-content-between align-items-center">
         <span class="footer-powered-by small d-block w-100 w-md-50 text-center text-md-start p-1 pe-md-0">
             Desarrollado por
-            <a href="https://easyappointments.org" target="_blank">San-Cha Informática</a>
+            <a href="https://sanchainformatica.com" target="_blank">San-Cha Informática</a>
 
             <?php if (!empty($legal_notice_url)): ?>
                 <span>|</span>
@@ -25,8 +25,8 @@
             <?php endif; ?>
         </span>
 
-        <span class="footer-options d-block w-100 w-md-50 text-center text-md-end">
-
+        <span class="footer-options d-block w-100 w-md-50 text-center text-md-end" style="font-size: 0.7rem;">
+            Powered by Easy!Appointments
             <?php if ($display_login_button): ?>
                 <a class="backend-link badge bg-primary text-decoration-none px-2 d-inline-block my-1 my-md-0 p-1"
                    href="<?= session('user_id') ? site_url('calendar') : site_url('login') ?>"

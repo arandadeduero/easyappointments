@@ -22,6 +22,7 @@ App.Utils.CalendarTableView = (function () {
         blockedPeriod: '#d65069',
         notWorking: '#BEBEBE',
         workingPlanException: '#879DB4',
+        walkinReserved: '#56cc9d',
         default: '#7cbae8',
     };
 
@@ -48,6 +49,7 @@ App.Utils.CalendarTableView = (function () {
     let $filterService;
     let $selectDate;
     let $popoverTarget = null;
+    let popoverCloseTimeout = null;
     let lastFocusedEventData = null;
 
     // Helper Functions
@@ -73,10 +75,20 @@ App.Utils.CalendarTableView = (function () {
      * Close the current popover if open.
      */
     function closePopover() {
+        window.clearTimeout(popoverCloseTimeout);
+
         if ($popoverTarget) {
             $popoverTarget.popover('dispose');
             $popoverTarget = null;
         }
+    }
+
+    /**
+     * Schedule the current popover to close, unless the user moves into it.
+     */
+    function schedulePopoverClose() {
+        window.clearTimeout(popoverCloseTimeout);
+        popoverCloseTimeout = window.setTimeout(closePopover, 250);
     }
 
     /**
@@ -107,6 +119,93 @@ App.Utils.CalendarTableView = (function () {
      */
     function isBlockedPeriod(eventData) {
         return eventData?.hasOwnProperty('name') && !eventData?.hasOwnProperty('is_unavailability');
+    }
+
+    /**
+     * Get the display color for an appointment event.
+     *
+     * @param {Object} appointment - Appointment data.
+     * @returns {string}
+     */
+    function getAppointmentEventColor(appointment) {
+        const isWalkin = isWalkinAppointment(appointment);
+
+        if (appointment.status === 'Reservado' && isWalkin) {
+            return EVENT_COLORS.walkinReserved;
+        }
+
+        return appointment.color || EVENT_COLORS.default;
+    }
+
+    /**
+     * Check if an appointment is an in-person/walk-in appointment.
+     *
+     * @param {Object} appointment - Appointment data.
+     * @returns {boolean}
+     */
+    function isWalkinAppointment(appointment) {
+        if (appointment.appointment_type === 'walkin') {
+            return true;
+        }
+
+        const notes = String(appointment.notes || '').trim().toLowerCase();
+        const customer = appointment.customer || {};
+        const firstName = String(customer.first_name || '').trim().toLowerCase();
+        const email = String(customer.email || '').trim().toLowerCase();
+        const walkinLabel = String(lang('appointment_type_walkin') || 'cita presencial')
+            .trim()
+            .toLowerCase();
+
+        return (
+            notes.startsWith(walkinLabel) ||
+            notes.startsWith('cita presencial') ||
+            firstName === walkinLabel ||
+            firstName === 'cita presencial' ||
+            email.startsWith('walkin-')
+        );
+    }
+
+    /**
+     * Render calendar event content with a compact layout for short appointments.
+     *
+     * @param {Object} info - FullCalendar event content info.
+     * @returns {{domNodes: HTMLElement[]}}
+     */
+    function renderEventContent(info) {
+        const eventData = info.event.extendedProps.data || {};
+        const queueNumber = !isUnavailability(eventData) ? eventData.queue_number : null;
+        const title = info.event.title || '';
+
+        const $content = $('<div/>', {
+            class: 'aad-calendar-event-content',
+        });
+
+        if (info.timeText || queueNumber) {
+            const $header = $('<div/>', {
+                class: 'aad-calendar-event-header',
+            }).appendTo($content);
+
+            $('<span/>', {
+                class: 'aad-calendar-event-time',
+                text: info.timeText,
+            }).appendTo($header);
+
+            if (queueNumber) {
+                $('<span/>', {
+                    class: 'aad-calendar-event-code',
+                    text: queueNumber,
+                }).appendTo($header);
+            }
+        }
+
+        $('<div/>', {
+            class: 'aad-calendar-event-title',
+            text: title,
+        }).appendTo($content);
+
+        return {
+            domNodes: [$content[0]],
+        };
     }
 
     /**
@@ -447,11 +546,12 @@ App.Utils.CalendarTableView = (function () {
     // Calendar Event Callbacks
 
     /**
-     * Handle calendar event click - show popover.
+     * Show an event popover.
      *
      * @param {Object} info - FullCalendar event info.
      */
-    function onEventClick(info) {
+    function showEventPopover(info) {
+        window.clearTimeout(popoverCloseTimeout);
         closePopover();
         const $target = $(info.el);
 
@@ -491,6 +591,12 @@ App.Utils.CalendarTableView = (function () {
         $target.popover('show');
         $popoverTarget = $target;
 
+        $calendar.find('.popover').on('mouseenter', () => {
+            window.clearTimeout(popoverCloseTimeout);
+        });
+
+        $calendar.find('.popover').on('mouseleave', schedulePopoverClose);
+
         // Fix popover position if too high
 
         const $popover = $calendar.find('.popover');
@@ -498,6 +604,31 @@ App.Utils.CalendarTableView = (function () {
         if ($popover.length && $popover.position().top < 200) {
             $popover.css('top', '200px');
         }
+    }
+
+    /**
+     * Handle calendar event click - show popover.
+     *
+     * @param {Object} info - FullCalendar event info.
+     */
+    function onEventClick(info) {
+        showEventPopover(info);
+    }
+
+    /**
+     * Handle calendar event hover - show popover.
+     *
+     * @param {Object} info - FullCalendar event info.
+     */
+    function onEventMouseEnter(info) {
+        showEventPopover(info);
+    }
+
+    /**
+     * Handle calendar event hover exit - hide popover.
+     */
+    function onEventMouseLeave() {
+        schedulePopoverClose();
     }
 
     /**
@@ -880,7 +1011,7 @@ App.Utils.CalendarTableView = (function () {
                     start: moment(appointment.start_datetime).toDate(),
                     end: moment(appointment.end_datetime).toDate(),
                     allDay: false,
-                    color: appointment.color,
+                    color: getAppointmentEventColor(appointment),
                     display: 'block',
                     data: appointment,
                 };
@@ -1441,6 +1572,9 @@ App.Utils.CalendarTableView = (function () {
             firstDay: firstWeekdayNumber,
             slotDuration: '00:15:00',
             snapDuration: '00:15:00',
+            eventMinHeight: 26,
+            eventShortHeight: 26,
+            slotEventOverlap: false,
             scrollTime: '07:00:00',
             slotLabelInterval: '01:00',
             eventTimeFormat: timeFormat,
@@ -1467,9 +1601,12 @@ App.Utils.CalendarTableView = (function () {
                 listDay: lang('list'),
             },
             eventClick: onEventClick,
+            eventMouseEnter: onEventMouseEnter,
+            eventMouseLeave: onEventMouseLeave,
             eventResize: onEventResize,
             eventDrop: onEventDrop,
             select: (info) => onSelect(info, fullCalendar),
+            eventContent: renderEventContent,
         });
 
         fullCalendar.render();

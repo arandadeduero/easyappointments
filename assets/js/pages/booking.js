@@ -56,6 +56,16 @@ App.Pages.Booking = (function () {
         return (getSelectedService()?.documentation_requirements || '').trim();
     }
 
+    function renderDocumentationHtml(documentation) {
+        const sanitizedDocumentation = App.Utils.String.sanitizeHtml(documentation);
+
+        if (/<[a-z][\s\S]*>/i.test(sanitizedDocumentation)) {
+            return sanitizedDocumentation;
+        }
+
+        return App.Utils.String.escapeHtml(documentation).replaceAll('\n', '<br/>');
+    }
+
     function updateDocumentationStep() {
         const hasDocumentation = Boolean(getSelectedServiceDocumentation());
 
@@ -292,8 +302,7 @@ App.Pages.Booking = (function () {
                 const documentation = getSelectedServiceDocumentation();
 
                 if (documentation) {
-                    const escapedDocumentation = App.Utils.String.escapeHtml(documentation);
-                    $documentationText.html(escapedDocumentation.replaceAll('\n', '<br/>'));
+                    $documentationText.html(renderDocumentationHtml(documentation));
                     $('.active-step').removeClass('active-step');
                     $('#step-documentation').addClass('active-step');
                     $('#wizard-frame-documentation').fadeIn();
@@ -533,8 +542,7 @@ App.Pages.Booking = (function () {
                 const documentation = getSelectedServiceDocumentation();
 
                 if (documentation) {
-                    const escapedDocumentation = App.Utils.String.escapeHtml(documentation);
-                    $documentationText.html(escapedDocumentation.replaceAll('\n', '<br/>'));
+                    $documentationText.html(renderDocumentationHtml(documentation));
                     showWizardFrame('#wizard-frame-documentation', '#step-documentation', $('#wizard-frame-1'));
                     return;
                 }
@@ -845,10 +853,7 @@ App.Pages.Booking = (function () {
 
         const timezoneOptionText = $selectTimezone.find('option:selected').text();
         const documentationRequirements = (service.documentation_requirements || '').trim();
-        const escapedDocumentationRequirements = App.Utils.String.escapeHtml(documentationRequirements).replaceAll(
-            '\n',
-            '<br/>',
-        );
+        const documentationRequirementsHtml = renderDocumentationHtml(documentationRequirements);
 
         $('#appointment-details').html(`
             <div>
@@ -865,7 +870,7 @@ App.Pages.Booking = (function () {
                 <div class="mb-2" ${!documentationRequirements ? 'hidden' : ''}>
                     <i class="fas fa-id-card me-2"></i>
                     <strong>${lang('documentation_to_present')}:</strong>
-                    <div class="mt-1">${escapedDocumentationRequirements}</div>
+                    <div class="mt-1">${documentationRequirementsHtml}</div>
                 </div>
                 <div class="mb-2">
                     <i class="fas fa-globe me-2"></i>

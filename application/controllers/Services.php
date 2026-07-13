@@ -41,6 +41,22 @@ class Services extends EA_Controller
     ];
 
     /**
+     * Sanitize HTML fields that are rendered in public booking screens.
+     */
+    private function sanitize_service_html_fields(array &$service): void
+    {
+        if (!array_key_exists('documentation_requirements', $service)) {
+            return;
+        }
+
+        $documentation_requirements = (string) ($service['documentation_requirements'] ?? '');
+
+        $service['documentation_requirements'] = function_exists('pure_html')
+            ? pure_html($documentation_requirements)
+            : strip_tags($documentation_requirements, '<p><br><ul><ol><li><strong><b><em><i><u><a>');
+    }
+
+    /**
      * Services constructor.
      */
     public function __construct()
@@ -161,6 +177,8 @@ class Services extends EA_Controller
 
             $this->services_model->optional($service, $this->optional_service_fields);
 
+            $this->sanitize_service_html_fields($service);
+
             $service_id = $this->services_model->save($service);
 
             $service = $this->services_model->find($service_id);
@@ -224,6 +242,8 @@ class Services extends EA_Controller
             $this->services_model->only($service, $this->allowed_service_fields);
 
             $this->services_model->optional($service, $this->optional_service_fields);
+
+            $this->sanitize_service_html_fields($service);
 
             $service_id = $this->services_model->save($service);
 

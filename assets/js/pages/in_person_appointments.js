@@ -58,8 +58,7 @@ App.Pages.InPersonAppointments = (function () {
                 return;
             }
 
-            const escapedDocumentationRequirements = App.Utils.String.escapeHtml(documentationRequirements);
-            $serviceDocumentationText.html(escapedDocumentationRequirements.replaceAll('\n', '<br/>'));
+            $serviceDocumentationText.html(renderDocumentationHtml(documentationRequirements));
             $serviceStep.addClass('d-none');
             $documentationStep.removeClass('d-none');
         });
@@ -86,6 +85,16 @@ App.Pages.InPersonAppointments = (function () {
         );
 
         return (selectedService?.documentation_requirements || '').trim();
+    }
+
+    function renderDocumentationHtml(documentation) {
+        const sanitizedDocumentation = App.Utils.String.sanitizeHtml(documentation);
+
+        if (/<[a-z][\s\S]*>/i.test(sanitizedDocumentation)) {
+            return sanitizedDocumentation;
+        }
+
+        return App.Utils.String.escapeHtml(documentation).replaceAll('\n', '<br/>');
     }
 
     function getWalkinPostData() {

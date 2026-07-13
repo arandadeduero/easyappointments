@@ -17,6 +17,8 @@ class In_person_appointments extends EA_Controller
         'Finalizada' => '#adb5bd',
     ];
 
+    private const WALKIN_RESERVED_COLOR = '#56cc9d';
+
     protected array $allowed_customer_fields = [
         'id',
         'first_name',
@@ -93,6 +95,18 @@ class In_person_appointments extends EA_Controller
     protected function get_appointment_status_color(?string $status): ?string
     {
         return $status !== null ? self::APPOINTMENT_STATUS_COLORS[$status] ?? null : null;
+    }
+
+    /**
+     * Get the display color for an appointment status and type.
+     */
+    protected function get_appointment_display_color(?string $status, ?string $appointment_type): ?string
+    {
+        if ($status === 'Reservado' && $appointment_type === APPOINTMENT_TYPE_WALKIN) {
+            return self::WALKIN_RESERVED_COLOR;
+        }
+
+        return $this->get_appointment_status_color($status);
     }
 
     /**
@@ -315,7 +329,7 @@ class In_person_appointments extends EA_Controller
                 'id_users_customer' => $customer_id,
                 'id_services' => $service_id,
                 'location' => $service['location'] ?? null,
-                'color' => $this->get_appointment_status_color($appointment_status),
+                'color' => $this->get_appointment_display_color($appointment_status, APPOINTMENT_TYPE_WALKIN),
             ];
 
             $this->appointments_model->only($appointment_data, $this->allowed_appointment_fields);
