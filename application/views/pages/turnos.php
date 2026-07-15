@@ -20,13 +20,13 @@
 <main class="aad-queue-shell">
     <header class="aad-queue-header">
         <section id="queue-current-call" class="aad-queue-current-call aad-queue-current-call-empty">
-            <div class="aad-queue-current-code">
-                <p class="aad-queue-current-label"><?= lang('queue_current_call') ?></p>
-                <strong id="queue-current-code">--</strong>
-            </div>
             <div class="aad-queue-current-desk">
                 <span><?= lang('queue_desk') ?></span>
                 <strong id="queue-current-desk">--</strong>
+            </div>
+            <div class="aad-queue-current-code">
+                <p class="aad-queue-current-label"><?= lang('queue_current_call') ?></p>
+                <strong id="queue-current-code">--</strong>
             </div>
         </section>
         <div class="aad-queue-clock">
