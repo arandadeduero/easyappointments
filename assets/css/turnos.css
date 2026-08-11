@@ -11,6 +11,7 @@
     --queue-radius: 12px;
     --queue-shadow: 0 1px 3px rgba(15, 23, 42, 0.08),
         0 10px 30px rgba(15, 23, 42, 0.05);
+    --queue-called-slots: 3;
 }
 
 * {
@@ -44,10 +45,34 @@ body {
 /* Estructura principal */
 
 .aad-queue-shell {
-    display: grid;
-    grid-template-rows: 29vh minmax(0, 1fr);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
     min-height: 100vh;
     padding: 12px;
+    gap: 12px;
+}
+
+.aad-queue-layout {
+    display: flex;
+    flex: 1;
+    height: 100%;
+    min-height: 0;
+    gap: 12px;
+}
+
+.aad-queue-layout > .aad-queue-called-panel {
+    flex: 1;
+    height: 100%;
+    min-height: 0;
+}
+
+.aad-queue-sidebar {
+    display: flex;
+    flex: 0 0 var(--queue-sidebar-width);
+    min-width: 0;
+    min-height: 0;
+    flex-direction: column;
     gap: 12px;
 }
 
@@ -55,7 +80,7 @@ body {
 
 .aad-queue-header {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) var(--queue-sidebar-width);
+    grid-template-columns: 1fr;
     min-height: 0;
     overflow: hidden;
     background: var(--queue-surface);
@@ -193,46 +218,24 @@ body {
 
 .aad-queue-board {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) var(--queue-sidebar-width);
+    grid-template-columns: 1fr;
     min-height: 0;
     gap: 12px;
 }
 
-/* Slider */
-.aad-queue-brand-panel {
+/* Llamadas activas */
+.aad-queue-called-panel {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
     position: relative;
     min-width: 0;
     min-height: 0;
     padding: 0;
     overflow: hidden;
-    background: #0f172a;
-    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: var(--queue-surface);
+    border: 1px solid var(--queue-border);
     border-radius: var(--queue-radius);
     box-shadow: var(--queue-shadow);
-}
-
-.aad-queue-brand-image {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    opacity: 0;
-    transform: scale(1.01);
-    will-change: opacity;
-    transition: opacity 900ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.aad-queue-brand-image.is-active {
-    z-index: 2;
-    opacity: 1;
-}
-
-.aad-queue-brand-image:not(.is-active) {
-    z-index: 1;
-    opacity: 0;
 }
 
 /* Últimos turnos */    
@@ -282,12 +285,44 @@ body {
 
 .aad-queue-called-list {
     display: grid;
+    grid-template-rows: repeat(var(--queue-called-slots), minmax(0, 1fr));
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.aad-queue-pending-list {
+    display: grid;
     grid-template-rows: repeat(6, minmax(0, 1fr));
     min-height: 0;
     overflow: hidden;
 }
 
+.aad-queue-pending-list .aad-queue-called-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.aad-queue-pending-list .aad-queue-called-code-value {
+    font-size: clamp(42px, 4vw, 68px);
+}
+
 .aad-queue-called-list:empty::after {
+    content: attr(data-empty);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    padding: 32px;
+    color: var(--queue-text-muted);
+    font-size: clamp(34px, 2.7vw, 48px);
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: center;
+}
+
+.aad-queue-pending-list:empty::after {
     content: attr(data-empty);
     display: flex;
     align-items: center;
@@ -312,6 +347,16 @@ body {
         transform 0.2s ease;
 }
 
+.aad-queue-called-panel .aad-queue-called-item {
+    grid-template-columns: minmax(130px, 0.4fr) minmax(0, 1fr);
+    gap: clamp(18px, 2vw, 36px);
+    padding: 18px clamp(24px, 3vw, 48px);
+}
+
+.aad-queue-current-call {
+    transition: background-color 0.2s ease;
+}
+
 .aad-queue-called-item:last-child {
     border-bottom: 0;
 }
@@ -324,42 +369,61 @@ body {
     background: rgba(23, 74, 124, 0.06);
 }
 
-.aad-queue-called-item:first-child::before {
-    position: absolute;
-    top: 18%;
-    bottom: 18%;
-    left: 0;
-    width: 4px;
-    background: var(--queue-primary);
-    border-radius: 0 999px 999px 0;
-    content: "";
+
+
+.aad-queue-called-panel .aad-queue-called-item {
+    background: rgba(23, 74, 124, 0.06);
 }
 
+
+
 .aad-queue-called-code {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+}
+
+.aad-queue-called-label {
+    color: var(--queue-text-muted);
+    font-size: clamp(38px, 2.8vw, 54px);
+    font-weight: 700;
+    letter-spacing: 0.075em;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.aad-queue-called-code-value,
+.aad-queue-called-desk-value {
     max-width: 100%;
     overflow: hidden;
-    color: var(--queue-text);
-    font-size: clamp(66px, 6.2vw, 106px);
+    font-size: clamp(100px, 9vw, 160px);
     font-variant-numeric: tabular-nums;
     font-weight: 800;
-    letter-spacing: -0.04em;
     line-height: 1;
-    text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.aad-queue-called-code-value {
+    color: var(--queue-text);
+}
+
+.aad-queue-sidebar .aad-queue-last-calls {
+    flex: 1;
 }
 
 .aad-queue-called-desk {
-    max-width: 100%;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+}
+
+.aad-queue-called-desk-value {
     color: var(--queue-primary);
-    font-size: clamp(58px, 5.2vw, 90px);
-    font-variant-numeric: tabular-nums;
-    font-weight: 800;
-    line-height: 1;
-    text-align: center;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 /* Animación de nuevo turno */
@@ -386,6 +450,7 @@ body {
 
     .aad-queue-shell {
         display: block;
+        height: auto;
         min-height: 100vh;
         padding: 8px;
     }
@@ -410,13 +475,25 @@ body {
         border-left: 0;
     }
 
+    .aad-queue-layout {
+        display: block;
+        height: auto;
+    }
+
+    .aad-queue-layout > .aad-queue-called-panel {
+        height: auto;
+        min-height: 520px;
+    }
+
+    .aad-queue-sidebar {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        margin-top: 8px;
+    }
+
     .aad-queue-clock {
         min-height: 140px;
         text-align: left;
-    }
-
-    .aad-queue-brand-panel {
-        min-height: 360px;
     }
 
     .aad-queue-last-calls {
@@ -425,7 +502,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .aad-queue-brand-image,
     .aad-queue-called-item {
         transition: none;
     }

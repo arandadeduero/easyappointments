@@ -8,10 +8,8 @@ App.Pages.Turnos = (function () {
 
     const $date = $('#queue-date');
     const $time = $('#queue-time');
-    const $currentCall = $('#queue-current-call');
-    const $currentCode = $('#queue-current-code');
-    const $currentDesk = $('#queue-current-desk');
     const $called = $('#queue-called');
+    const $pending = $('#queue-pending');
 
     let socket = null;
     let reconnectTimer = null;
@@ -26,6 +24,7 @@ App.Pages.Turnos = (function () {
 
     function initialize() {
         $called.attr('data-empty', lang('queue_no_records'));
+        $pending.attr('data-empty', lang('queue_no_records'));
         initializeBell();
 
         updateClock();
@@ -68,19 +67,64 @@ App.Pages.Turnos = (function () {
     function render(response) {
         const called = response?.called || [];
         const pending = response?.pending || [];
+        const calledSlots = Math.max(3, parseInt(response?.called_slots || response?.provider?.called_slots || 3, 10));
 
+        $called.css('--queue-called-slots', calledSlots);
+
+        renderCalled(called);
         renderPending(pending);
         enqueueNewCalls(called);
         announceLatestCallChange(called);
+    }
 
-        if (!displayedCall && !callQueue.length && called.length) {
-            latestDisplayedCallSignature = getCallSignature(called[0]);
-            showCall(called[0], false);
-        }
+    function renderCalled(items) {
+        $called.empty();
+
+        const visibleItems = items.slice(0, getCalledSlots()).reverse();
+        visibleItems.forEach((item) => {
+            $('<article/>', {
+                class: 'aad-queue-called-item',
+                'data-appointment-id': item.id,
+                html: [
+                    $('<div/>', {
+                        class: 'aad-queue-called-desk',
+                        html: [
+                            $('<span/>', {
+                                class: 'aad-queue-called-label',
+                                text: lang('queue_desk'),
+                            }),
+                            $('<strong/>', {
+                                class: 'aad-queue-called-desk-value',
+                                text: getDeskText(item) || '--',
+                            }),
+                        ],
+                    }),
+                    $('<div/>', {
+                        class: 'aad-queue-called-code',
+                        html: [
+                            $('<span/>', {
+                                class: 'aad-queue-called-label',
+                                text: lang('queue_turn'),
+                            }),
+                            $('<strong/>', {
+                                class: 'aad-queue-called-code-value',
+                                text: item.code || '--',
+                            }),
+                        ],
+                    }),
+                ],
+            }).appendTo($called);
+        });
+    }
+
+    function getCalledSlots() {
+        const slots = parseInt($called.css('--queue-called-slots'), 10);
+
+        return Number.isFinite(slots) && slots >= 3 ? slots : 3;
     }
 
     function renderPending(items) {
-        $called.empty();
+        $pending.empty();
 
         items.slice(0, 6).forEach((item) => {
             $('<article/>', {
@@ -88,11 +132,11 @@ App.Pages.Turnos = (function () {
                 'data-appointment-id': item.id,
                 html: [
                     $('<strong/>', {
-                        class: 'aad-queue-called-code',
-                        text: item.code,
+                        class: 'aad-queue-called-code-value',
+                        text: item.code || '--',
                     }),
                 ],
-            }).appendTo($called);
+            }).appendTo($pending);
         });
     }
 
@@ -176,10 +220,6 @@ App.Pages.Turnos = (function () {
     function showCall(item, animate) {
         displayedCall = item;
 
-        $currentCode.text(item.code || '--');
-        $currentDesk.text(getDeskText(item) || '--');
-        $currentCall.removeClass('aad-queue-current-call-empty');
-
         if (animate) {
             flashCurrentCall();
             playBell();
@@ -187,13 +227,13 @@ App.Pages.Turnos = (function () {
     }
 
     function flashCurrentCall() {
-        $currentCall.removeClass('aad-queue-current-call-flash');
+        $called.removeClass('aad-queue-current-call-flash');
 
         window.requestAnimationFrame(() => {
-            $currentCall.addClass('aad-queue-current-call-flash');
+            $called.addClass('aad-queue-current-call-flash');
 
             setTimeout(() => {
-                $currentCall.removeClass('aad-queue-current-call-flash');
+                $called.removeClass('aad-queue-current-call-flash');
             }, 1800);
         });
     }

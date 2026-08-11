@@ -561,6 +561,24 @@ App.Utils.CalendarTableView = (function () {
         }
     }
 
+    /**
+     * Handle call popover button click.
+     */
+    function onCallPopoverClick() {
+        const data = lastFocusedEventData.extendedProps.data;
+
+        if (!data?.id || isUnavailability(data) || isWorkingPlanException(data)) {
+            return;
+        }
+
+        closePopover();
+
+        App.Http.Calendar.callAppointment(data.id).done(() => {
+            App.Layouts.Backend.displayNotification(lang('appointment_updated'));
+            $reloadAppointments.trigger('click');
+        });
+    }
+
     // Calendar Event Callbacks
 
     /**
@@ -1629,9 +1647,35 @@ App.Utils.CalendarTableView = (function () {
                 timeGridDay: lang('calendar'),
                 listDay: lang('list'),
             },
+            datesSet: (info) => {
+                const isListView = info.view.type === 'listDay';
+
+                $wrapper.toggleClass('aad-calendar-list-mode', isListView);
+                $providerColumn.toggleClass('aad-calendar-list-mode', isListView);
+                window.setTimeout(setCalendarViewSize, 0);
+            },
             eventClick: onEventClick,
-            eventMouseEnter: onEventMouseEnter,
-            eventMouseLeave: onEventMouseLeave,
+            eventDidMount: (info) => {
+                if (!info.el.closest('.fc-list')) {
+                    return;
+                }
+
+                const color = info.event.backgroundColor || info.event.color;
+
+                if (!color) {
+                    return;
+                }
+
+                $(info.el).css({
+                    backgroundColor: color,
+                    borderColor: color,
+                    color: '#ffffff',
+                });
+                $(info.el).find('td').css({
+                    backgroundColor: color,
+                    color: '#ffffff',
+                });
+            },
             eventResize: onEventResize,
             eventDrop: onEventDrop,
             select: (info) => onSelect(info, fullCalendar),
@@ -1649,6 +1693,13 @@ App.Utils.CalendarTableView = (function () {
      */
     function setCalendarViewSize() {
         const $dateColumn = $('.date-column');
+
+        $('.provider-column').each((index, providerColumn) => {
+            const $providerColumn = $(providerColumn);
+            const isListView = $providerColumn.find('.fc-list').length > 0;
+
+            $providerColumn.toggleClass('aad-calendar-list-mode', isListView);
+        });
 
         const $calendarViewDiv = $('.calendar-view > div');
 
@@ -1789,6 +1840,10 @@ App.Utils.CalendarTableView = (function () {
         // Popover delete button
 
         $calendar.on('click', '.delete-popover', onDeletePopoverClick);
+
+        // Popover call button
+
+        $calendar.on('click', '.call-popover', onCallPopoverClick);
 
         // listDay button
         $calendar.on('click', '.fc-listDay-button', setCalendarViewSize);

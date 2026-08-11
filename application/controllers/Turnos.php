@@ -161,7 +161,8 @@ class Turnos extends EA_Controller
                 return strcmp($second_called_at, $first_called_at);
             });
 
-            $called = array_slice($called, 0, 8);
+            $called_slots = max(3, (int) ($provider['settings']['attendants_number'] ?? 1));
+            $called = array_slice($called, 0, max(8, $called_slots));
             $pending = array_slice($pending, 0, 6);
 
             json_response([
@@ -169,7 +170,9 @@ class Turnos extends EA_Controller
                 'provider' => [
                     'id' => (int) $provider['id'],
                     'name' => trim(($provider['first_name'] ?? '') . ' ' . ($provider['last_name'] ?? '')),
+                    'called_slots' => $called_slots,
                 ],
+                'called_slots' => $called_slots,
                 'called' => $called,
                 'pending' => $pending,
             ]);

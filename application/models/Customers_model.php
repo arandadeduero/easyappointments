@@ -60,9 +60,9 @@ class Customers_model extends EA_Model
      *
      * @throws InvalidArgumentException
      */
-    public function save(array $customer): int
+    public function save(array $customer, bool $allow_empty_email = false): int
     {
-        $this->validate($customer);
+        $this->validate($customer, $allow_empty_email);
 
         if ($this->exists($customer) && empty($customer['id'])) {
             $customer['id'] = $this->find_record_id($customer);
@@ -82,7 +82,7 @@ class Customers_model extends EA_Model
      *
      * @throws InvalidArgumentException
      */
-    public function validate(array $customer): void
+    public function validate(array $customer, bool $allow_empty_email = false): void
     {
         // If a customer ID is provided then check whether the record really exists in the database.
         if (!empty($customer['id'])) {
@@ -107,7 +107,7 @@ class Customers_model extends EA_Model
         if (
             (empty($customer['first_name']) && $require_first_name) ||
             (empty($customer['last_name']) && $require_last_name) ||
-            (empty($customer['email']) && $require_email) ||
+            (empty($customer['email']) && $require_email && !$allow_empty_email) ||
             (empty($customer['phone_number']) && $require_phone_number) ||
             (empty($customer['address']) && $require_address) ||
             (empty($customer['city']) && $require_city) ||

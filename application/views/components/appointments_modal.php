@@ -265,13 +265,8 @@
                                 <div class="mb-3">
                                     <label for="email" class="form-label">
                                         <?= lang('email') ?>
-                                        <?php if ($require_email): ?>
-                                            <span class="text-danger">*</span>
-                                        <?php endif; ?>
                                     </label>
-                                    <input type="text" id="email"
-                                           class="<?= $require_email ? 'required' : '' ?> form-control"
-                                           maxlength="120"/>
+                                    <input type="text" id="email" class="form-control" maxlength="120"/>
                                 </div>
 
                                 <div class="mb-3">

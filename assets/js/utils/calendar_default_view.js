@@ -1551,8 +1551,6 @@ App.Utils.CalendarDefaultView = (function () {
             datesSet: onDatesSet,
             dateClick: onDateClick,
             eventClick: onEventClick,
-            eventMouseEnter: onEventMouseEnter,
-            eventMouseLeave: onEventMouseLeave,
             eventResize: onEventResize,
             eventDrop: onEventDrop,
             select: onSelect,

@@ -116,13 +116,13 @@
 
                         <div class="mb-5">
                             <label for="book-advance-timeout" class="form-label">
-                                <?= lang('cancel_reschedule_timeout_minutes') ?>
+                                <?= lang('cancel_reschedule_days') ?>
                             </label>
                             <input id="book-advance-timeout" data-field="book_advance_timeout" class="form-control"
-                                   type="number" min="0">
+                                   type="number" min="0" step="1">
                             <div class="form-text text-muted">
                                 <small>
-                                    <?= lang('book_advance_timeout_hint') ?>
+                                    <?= lang('cancel_reschedule_days_hint') ?>
                                 </small>
                             </div>
                         </div>

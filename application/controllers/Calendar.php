@@ -553,7 +553,8 @@ class Calendar extends EA_Controller
                     $customer['id'] = $this->customers_model->find_record_id($customer);
                 }
 
-                $customer['id'] = $this->customers_model->save($customer);
+                // Calendar-created customers may not have an email address.
+                $customer['id'] = $this->customers_model->save($customer, true);
             }
 
             // Save appointment changes to the database.
@@ -597,6 +598,21 @@ class Calendar extends EA_Controller
                 $this->apply_appointment_display_color($appointment);
 
                 $this->appointments_model->ensure_queue_number($appointment);
+
+                if (
+                    !$manage_mode &&
+                    ($appointment['appointment_type'] ?? APPOINTMENT_TYPE_BOOKING) === APPOINTMENT_TYPE_BOOKING &&
+                    !empty($appointment['queue_number'])
+                ) {
+                    $booking_note = lang('appointment_type_booking') . ' #' . $appointment['queue_number'];
+                    $appointment_notes = trim((string) ($appointment['notes'] ?? ''));
+
+                    if (stripos($appointment_notes, $booking_note) === false) {
+                        $appointment['notes'] = $appointment_notes === ''
+                            ? $booking_note
+                            : $appointment_notes . PHP_EOL . $booking_note;
+                    }
+                }
 
                 $previous_status = $previous_appointment['status'] ?? null;
                 $current_status = $appointment['status'] ?? null;

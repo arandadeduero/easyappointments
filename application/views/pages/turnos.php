@@ -18,51 +18,27 @@
 </head>
 <body class="aad-queue-display">
 <main class="aad-queue-shell">
-    <header class="aad-queue-header">
-        <section id="queue-current-call" class="aad-queue-current-call aad-queue-current-call-empty">
-            <div class="aad-queue-current-desk">
-                <span><?= lang('queue_desk') ?></span>
-                <strong id="queue-current-desk">--</strong>
-            </div>
-            <div class="aad-queue-current-code">
-                <p class="aad-queue-current-label"><?= lang('queue_current_call') ?></p>
-                <strong id="queue-current-code">--</strong>
-            </div>
-        </section>
-        <div class="aad-queue-clock">
-            <span id="queue-date"></span>
-            <strong id="queue-time"></strong>
-        </div>
-    </header>
-
-    <section class="aad-queue-board">
-        <div class="aad-queue-brand-panel">
-            <img
-                id="queue-brand-image-a"
-                class="aad-queue-brand-image is-active"
-                src="https://www.arandadeduero.es/wp-content/uploads/2025/12/Diseno-sin-titulo-1.gif"
-                alt="Aranda de Duero"
-                decoding="async"
-            >
-
-            <img
-                id="queue-brand-image-b"
-                class="aad-queue-brand-image"
-                src="https://www.arandadeduero.es/wp-content/uploads/2025/12/GIF-Aranda-es.gif"
-                alt=""
-                decoding="async"
-            >
-        </div>
-
-        <aside class="aad-queue-last-calls">
-            <div class="aad-queue-last-header">
-                <div>
-                    <span><?= lang('queue_turn') ?></span>
-                </div>
-            </div>
+    <div class="aad-queue-layout">
+        <section class="aad-queue-called-panel">
             <div id="queue-called" class="aad-queue-called-list"></div>
-        </aside>
-    </section>
+        </section>
+
+        <div class="aad-queue-sidebar">
+            <div class="aad-queue-clock">
+                <span id="queue-date"></span>
+                <strong id="queue-time"></strong>
+            </div>
+
+            <aside class="aad-queue-last-calls">
+                <div class="aad-queue-last-header">
+                    <div>
+                        <span><?= lang('queue_turn') ?></span>
+                    </div>
+                </div>
+                <div id="queue-pending" class="aad-queue-pending-list"></div>
+            </aside>
+        </div>
+    </div>
 </main>
 
 <script src="<?= asset_url('assets/vendor/jquery/jquery.min.js') ?>"></script>
@@ -78,6 +54,5 @@
 
 <script src="<?= asset_url('assets/js/http/turnos_http_client.js') ?>"></script>
 <script src="<?= asset_url('assets/js/pages/turnos.js') ?>"></script>
-<script src="<?= asset_url('assets/js/pages/turnos-slider.js') ?>"></script>
 </body>
 </html>

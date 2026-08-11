@@ -168,29 +168,25 @@ class Booking_cancellation extends EA_Controller
      */
     private function ensure_appointment_can_be_cancelled(array $appointment, array $provider): void
     {
-        $cancel_reschedule_timeout = setting('book_advance_timeout', 0);
-        $cancel_reschedule_timeout = is_numeric($cancel_reschedule_timeout)
-            ? max(0, (int) $cancel_reschedule_timeout)
-            : 0;
+        $advance_days = setting('book_advance_timeout', 0);
+        $advance_days = is_numeric($advance_days) ? max(0, (int) $advance_days) : 0;
 
-        if ($cancel_reschedule_timeout === 0) {
+        if ($advance_days === 0) {
             return;
         }
 
         $provider_timezone = new DateTimeZone($provider['timezone'] ?: setting('default_timezone'));
         $appointment_start = new DateTime($appointment['start_datetime'], $provider_timezone);
-        $limit = new DateTime('now', $provider_timezone);
-        $limit->modify('+' . $cancel_reschedule_timeout . ' minutes');
+        $limit = new DateTime($appointment_start->format('Y-m-d') . ' 00:00:00', $provider_timezone);
 
-        if ($appointment_start < $limit) {
-            $hours = floor($cancel_reschedule_timeout / 60);
-            $minutes = $cancel_reschedule_timeout % 60;
+        if ($advance_days > 1) {
+            $limit->modify('-' . ($advance_days - 1) . ' days');
+        }
 
-            throw new RuntimeException(
-                strtr(lang('appointment_locked_message'), [
-                    '{$limit}' => sprintf('%02d:%02d', $hours, $minutes),
-                ]),
-            );
+        $now = new DateTime('now', $provider_timezone);
+
+        if ($now >= $limit) {
+            throw new RuntimeException(lang('appointment_locked_message'));
         }
     }
 

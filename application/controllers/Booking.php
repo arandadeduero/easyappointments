@@ -385,7 +385,6 @@ class Booking extends EA_Controller
         $display_any_provider = setting('display_any_provider');
         $display_login_button = setting('display_login_button');
         $display_delete_personal_information = setting('display_delete_personal_information');
-        $book_advance_timeout = setting('book_advance_timeout');
         $legal_notice_url = setting('legal_notice_url');
         $imprint_url = setting('imprint_url');
         $theme = 'minty';
@@ -430,23 +429,24 @@ class Booking extends EA_Controller
             $provider_timezone = new DateTimeZone($provider['timezone']);
 
             $appointment_start = new DateTime($appointment['start_datetime'], $provider_timezone);
+            $advance_days = setting('book_advance_timeout', 0);
+            $advance_days = is_numeric($advance_days) ? max(0, (int) $advance_days) : 0;
 
-            $limit = new DateTime('now', $provider_timezone);
+            $limit = new DateTime($appointment_start->format('Y-m-d') . ' 00:00:00', $provider_timezone);
 
-            $limit->modify('+' . $book_advance_timeout . ' minutes');
+            if ($advance_days > 1) {
+                $limit->modify('-' . ($advance_days - 1) . ' days');
+            }
 
-            if ($appointment_start < $limit) {
-                $hours = floor($book_advance_timeout / 60);
+            $now = new DateTime('now', $provider_timezone);
 
-                $minutes = $book_advance_timeout % 60;
+            if ($advance_days > 0 && $now >= $limit) {
 
                 html_vars([
                     'show_message' => true,
                     'page_title' => lang('page_title') . ' ' . $company_name,
                     'message_title' => lang('appointment_locked'),
-                    'message_text' => strtr(lang('appointment_locked_message'), [
-                        '{$limit}' => sprintf('%02d:%02d', $hours, $minutes),
-                    ]),
+                    'message_text' => lang('appointment_locked_message'),
                     'message_icon' => base_url('assets/img/error.png'),
                     'google_analytics_code' => $google_analytics_code,
                     'matomo_analytics_url' => $matomo_analytics_url,
@@ -758,6 +758,21 @@ class Booking extends EA_Controller
             );
             $appointment['end_datetime'] = $this->appointments_model->calculate_end_datetime($appointment);
             $this->appointments_model->ensure_queue_number($appointment);
+
+            if (
+                !$manage_mode &&
+                ($appointment['appointment_type'] ?? APPOINTMENT_TYPE_BOOKING) === APPOINTMENT_TYPE_BOOKING &&
+                !empty($appointment['queue_number'])
+            ) {
+                $booking_note = lang('appointment_type_booking') . ' #' . $appointment['queue_number'];
+                $appointment_notes = trim((string) ($appointment['notes'] ?? ''));
+
+                if (stripos($appointment_notes, $booking_note) === false) {
+                    $appointment['notes'] = $appointment_notes === ''
+                        ? $booking_note
+                        : $appointment_notes . PHP_EOL . $booking_note;
+                }
+            }
 
             $this->appointments_model->only($appointment, $this->allowed_appointment_fields);
 

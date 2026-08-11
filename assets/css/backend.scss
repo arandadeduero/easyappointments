@@ -192,6 +192,31 @@ body .modal.full-screen .modal-push {
     display: none;
 }
 
+#calendar .fc-list-event-graphic {
+    display: none;
+}
+
+#calendar .provider-column.aad-calendar-list-mode {
+    width: max(350px, 50vw);
+    min-width: max(350px, 50vw);
+    max-width: none;
+}
+
+#calendar .calendar-wrapper.aad-calendar-list-mode {
+    width: max(350px, 50vw) !important;
+    min-width: max(350px, 50vw);
+}
+
+#calendar .provider-column.aad-calendar-list-mode .fc-list,
+#calendar .provider-column.aad-calendar-list-mode .fc-list-table {
+    width: 100%;
+    min-width: 100%;
+}
+
+#calendar .provider-column.aad-calendar-list-mode .fc-list-event > td {
+    color: #ffffff;
+}
+
 #calendar .fc-event {
     border: 1px solid var(--bs-info);
     background-color: var(--bs-info);
