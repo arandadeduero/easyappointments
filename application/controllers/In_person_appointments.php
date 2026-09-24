@@ -481,6 +481,9 @@ class In_person_appointments extends EA_Controller
         );
 
         if (!$pairing) {
+            // Only failed pairing attempts consume this limit; authorized kiosk traffic is unaffected.
+            rate_limit($this->input->ip_address(), 10, 600, 'kiosk_pairing_failure');
+
             $this->render_pairing_page($provider, lang('kiosk_pairing_code_invalid'));
             return;
         }

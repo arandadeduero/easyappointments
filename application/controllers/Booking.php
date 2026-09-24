@@ -84,6 +84,8 @@ class Booking extends EA_Controller
         $this->load->model('settings_model');
         $this->load->model('consents_model');
 
+        $this->load->driver('cache', ['adapter' => 'file']);
+
         $this->load->library('timezones');
         $this->load->library('synchronization');
         $this->load->library('notifications');
@@ -95,17 +97,33 @@ class Booking extends EA_Controller
     /**
      * Verify CSRF token for booking submissions.
      *
-     * @throws RuntimeException If CSRF token is invalid.
+     * @return bool Whether the supplied token is valid.
      */
-    private function verify_csrf_token(): void
+    private function verify_csrf_token(): bool
     {
-        $csrf_token = request('csrf_token') ?? $this->input->get_request_header('X-CSRF');
+        $csrf_token = $this->input->get_request_header('X-CSRF') ?? request('csrf_token');
         $csrf_cookie = $this->input->cookie('csrf_cookie');
 
         if (empty($csrf_token) || empty($csrf_cookie) || !hash_equals($csrf_cookie, $csrf_token)) {
             log_message('error', 'Invalid CSRF token in booking request from IP: ' . $this->input->ip_address());
-            throw new RuntimeException('Security validation failed. Please refresh the page and try again.');
+
+            // Booking routes are excluded from the framework-wide CSRF check,
+            // so issue a fresh cookie/header here to let the next attempt recover.
+            $this->security->csrf_set_cookie();
+            json_response(
+                [
+                    'success' => false,
+                    'code' => 'csrf_mismatch',
+                    'message' => 'Security validation expired. Please try again.',
+                ],
+                403,
+                ['X-CSRF-Error: token-mismatch'],
+            );
+
+            return false;
         }
+
+        return true;
     }
 
     /**
@@ -561,7 +579,12 @@ class Booking extends EA_Controller
             method('post');
 
             // Verify CSRF token for booking submissions
-            $this->verify_csrf_token();
+            if (!$this->verify_csrf_token()) {
+                return;
+            }
+
+            // Limit appointment submissions independently from browsing and availability requests.
+            rate_limit($this->input->ip_address(), 20, 120, 'booking_register');
 
             check('post_data', 'array');
             check('captcha', 'string|null');

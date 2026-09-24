@@ -58,6 +58,9 @@ class Recovery extends EA_Controller
         try {
             method('post');
 
+            // Protect the email-producing operation without limiting ordinary application traffic.
+            rate_limit($this->input->ip_address(), 5, 600, 'password_recovery');
+
             check('username', 'string');
             check('email', 'email');
             check('captcha', 'string|null');

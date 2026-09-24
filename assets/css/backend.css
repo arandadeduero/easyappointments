@@ -163,6 +163,10 @@ body .modal.full-screen .modal-push {
 }
 
 /* Calendar page specific styles */
+#calendar-page {
+  padding-bottom: 40px;
+}
+
 #calendar-page #calendar {
   margin-bottom: 15px;
 }

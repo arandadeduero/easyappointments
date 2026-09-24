@@ -42,6 +42,36 @@
 class EA_Security extends CI_Security
 {
     /**
+     * Send the current CSRF token both as a cookie and as a response header.
+     *
+     * Long-lived pages can use the header to keep their AJAX token in sync
+     * when CodeIgniter renews an expired cookie.
+     */
+    public function csrf_set_cookie()
+    {
+        parent::csrf_set_cookie();
+
+        if ($this->_csrf_hash !== null && !headers_sent()) {
+            header('X-CSRF-Token: ' . $this->_csrf_hash);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Mark CSRF failures explicitly so the AJAX layer does not confuse a
+     * permission-related 403 response with an expired token.
+     */
+    public function csrf_show_error()
+    {
+        if (!headers_sent()) {
+            header('X-CSRF-Error: token-mismatch');
+        }
+
+        parent::csrf_show_error();
+    }
+
+    /**
      * CSRF Verify
      *
      * @return    CI_Security
@@ -64,7 +94,9 @@ class EA_Security extends CI_Security
         }
 
         // Check CSRF token validity, but don't error on mismatch just yet - we'll want to regenerate
-        $csrf_token = $_POST[$this->_csrf_token_name] ?? ($_SERVER['HTTP_X_CSRF'] ?? null);
+        // Prefer the header because the AJAX layer can refresh it while an old
+        // token may still be present in an already serialized request body.
+        $csrf_token = $_SERVER['HTTP_X_CSRF'] ?? ($_POST[$this->_csrf_token_name] ?? null);
 
         $valid =
             isset($csrf_token, $_COOKIE[$this->_csrf_cookie_name]) &&

@@ -96,7 +96,17 @@ class Google_sync
     public function initialize_clients(): void
     {
         $http = new GuzzleHttp\Client([
-            'verify' => false,
+            'verify' => true,
+            'connect_timeout' => (float) config('external_connect_timeout', 3.0),
+            'timeout' => (float) config('external_google_timeout', 10.0),
+            'on_stats' => static function ($stats): void {
+                log_external_call_duration(
+                    'google',
+                    $stats->getTransferTime(),
+                    $stats->hasResponse() ? $stats->getResponse()->getStatusCode() : null,
+                    $stats->getEffectiveUri()->getHost(),
+                );
+            },
         ]);
 
         $this->client = new Google_Client();
@@ -147,6 +157,8 @@ class Google_sync
      */
     public function authenticate(string $code): array
     {
+        release_session_lock();
+
         $response = $this->client->fetchAccessTokenWithAuthCode($code);
 
         if (isset($response['error'])) {
@@ -171,6 +183,8 @@ class Google_sync
     public function refresh_token(string $refresh_token): void
     {
         $this->initialize_clients();
+
+        release_session_lock();
 
         $this->client->refreshToken($refresh_token);
     }
@@ -199,6 +213,8 @@ class Google_sync
         array $customer,
         array $settings,
     ): Event {
+        release_session_lock();
+
         $event = new Google_Service_Calendar_Event();
         $event->setSummary(!empty($service) ? $service['name'] : 'Unavailable');
         $event->setDescription($appointment['notes']);
@@ -287,6 +303,8 @@ class Google_sync
         array $customer,
         array $settings,
     ): Event {
+        release_session_lock();
+
         $event = $this->service->events->get(
             $provider['settings']['google_calendar'],
             $appointment['id_google_calendar'],
@@ -372,6 +390,8 @@ class Google_sync
      */
     public function delete_appointment(array $provider, string $google_event_id): void
     {
+        release_session_lock();
+
         $this->service->events->delete($provider['settings']['google_calendar'], $google_event_id);
     }
 
@@ -387,6 +407,8 @@ class Google_sync
      */
     public function add_unavailability(array $provider, array $unavailability): Google_Service_Calendar_Event
     {
+        release_session_lock();
+
         $event = new Google_Service_Calendar_Event();
         $event->setSummary('Unavailable');
         $event->setDescription($unavailability['notes']);
@@ -417,6 +439,8 @@ class Google_sync
      */
     public function update_unavailability(array $provider, array $unavailability): Google_Service_Calendar_Event
     {
+        release_session_lock();
+
         $event = $this->service->events->get(
             $provider['settings']['google_calendar'],
             $unavailability['id_google_calendar'],
@@ -448,6 +472,8 @@ class Google_sync
      */
     public function delete_unavailability(array $provider, string $google_event_id): void
     {
+        release_session_lock();
+
         $this->service->events->delete($provider['settings']['google_calendar'], $google_event_id);
     }
 
@@ -463,6 +489,8 @@ class Google_sync
      */
     public function get_event(array $provider, string $google_event_id): Event
     {
+        release_session_lock();
+
         return $this->service->events->get($provider['settings']['google_calendar'], $google_event_id);
     }
 
@@ -479,6 +507,8 @@ class Google_sync
      */
     public function get_sync_events(string $google_calendar, string $start, string $end): Events
     {
+        release_session_lock();
+
         $params = [
             'timeMin' => date(DateTimeInterface::RFC3339, $start),
             'timeMax' => date(DateTimeInterface::RFC3339, $end),
@@ -542,6 +572,8 @@ class Google_sync
      */
     public function get_google_calendars(): array
     {
+        release_session_lock();
+
         $calendar_list = $this->service->calendarList->listCalendarList();
 
         $calendars = [];

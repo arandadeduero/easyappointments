@@ -89,6 +89,9 @@ class Api
                 throw new RuntimeException('The provided credentials do not match any admin user', 401);
             }
         } catch (Throwable) {
+            // Count failed API authentication separately from valid API traffic.
+            rate_limit($this->CI->input->ip_address(), 10, 300, 'api_auth_failure');
+
             $this->request_authentication();
         }
     }

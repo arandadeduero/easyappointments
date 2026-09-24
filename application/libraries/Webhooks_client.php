@@ -54,6 +54,9 @@ class Webhooks_client
      */
     public function trigger(string $action, array $payload)
     {
+        // Realtime updates must not wait behind third-party webhook endpoints.
+        $this->emit_realtime_event($action, $payload);
+
         $webhooks = $this->CI->webhooks_model->get();
 
         foreach ($webhooks as $webhook) {
@@ -63,8 +66,6 @@ class Webhooks_client
                 $this->call($webhook, $action, $payload);
             }
         }
-
-        $this->emit_realtime_event($action, $payload);
     }
 
     /**
@@ -150,7 +151,19 @@ class Webhooks_client
     private function call(array $webhook, string $action, array $payload): void
     {
         try {
-            $client = new Client();
+            $target_host = (string) parse_url($webhook['url'], PHP_URL_HOST);
+            $client = new Client([
+                'connect_timeout' => (float) config('external_connect_timeout', 3.0),
+                'timeout' => (float) config('external_webhook_timeout', 5.0),
+                'on_stats' => static function ($stats) use ($target_host): void {
+                    log_external_call_duration(
+                        'webhook',
+                        $stats->getTransferTime(),
+                        $stats->hasResponse() ? $stats->getResponse()->getStatusCode() : null,
+                        $target_host,
+                    );
+                },
+            ]);
 
             $headers = [];
 
@@ -158,7 +171,9 @@ class Webhooks_client
                 $headers[$webhook['secret_header']] = $webhook['secret_token'];
             }
 
-            $response = $client->post($webhook['url'], [
+            release_session_lock();
+
+            $client->post($webhook['url'], [
                 'verify' => $webhook['is_ssl_verified'],
                 'headers' => $headers,
                 'json' => [

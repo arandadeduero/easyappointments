@@ -116,7 +116,7 @@ class Email_messages
 
         $php_mailer->addStringAttachment($ics_stream, 'invitation.ics', PHPMailer::ENCODING_BASE64, 'text/calendar');
 
-        $php_mailer->send();
+        $this->send_message($php_mailer, 'appointment_saved');
     }
 
     /**
@@ -179,7 +179,7 @@ class Email_messages
 
         $php_mailer = $this->get_php_mailer($recipient_email, $subject, $html);
 
-        $php_mailer->send();
+        $this->send_message($php_mailer, 'appointment_deleted');
     }
 
     /**
@@ -207,7 +207,7 @@ class Email_messages
 
         $php_mailer = $this->get_php_mailer($recipient_email, $subject, $html);
 
-        $php_mailer->send();
+        $this->send_message($php_mailer, 'password');
     }
 
     /**
@@ -236,7 +236,7 @@ class Email_messages
 
         $php_mailer = $this->get_php_mailer($recipient_email, $subject, $html);
 
-        $php_mailer->send();
+        $this->send_message($php_mailer, 'password_reset');
     }
 
     /**
@@ -259,6 +259,8 @@ class Email_messages
 
         $php_mailer->CharSet = 'UTF-8';
         $php_mailer->SMTPDebug = config('smtp_debug') ? SMTP::DEBUG_SERVER : null;
+        $php_mailer->Timeout = (int) config('external_smtp_timeout', 15);
+        $php_mailer->getSMTPInstance()->Timelimit = (int) config('external_smtp_timeout', 15);
 
         if (config('protocol') === 'smtp') {
             $php_mailer->isSMTP();
@@ -328,5 +330,23 @@ class Email_messages
         }
 
         return $php_mailer;
+    }
+
+    /**
+     * Send a message without retaining the user's session lock during SMTP I/O.
+     *
+     * @throws Exception
+     */
+    private function send_message(PHPMailer $php_mailer, string $operation): void
+    {
+        release_session_lock();
+
+        $started_at = microtime(true);
+
+        try {
+            $php_mailer->send();
+        } finally {
+            log_external_call_duration('smtp_' . $operation, microtime(true) - $started_at);
+        }
     }
 }

@@ -51,6 +51,8 @@ App.Utils.CalendarTableView = (function () {
     let $popoverTarget = null;
     let popoverCloseTimeout = null;
     let lastFocusedEventData = null;
+    let reloadRequest = null;
+    let reloadQueued = false;
 
     // Helper Functions
 
@@ -1767,6 +1769,11 @@ App.Utils.CalendarTableView = (function () {
         // Reload appointments button
 
         $calendarToolbar.on('click', '#reload-appointments', () => {
+            if (reloadRequest) {
+                reloadQueued = true;
+                return;
+            }
+
             const dayInterval = $selectFilterItem.val();
 
             const currentDate = App.Utils.UI.getDateTimePickerValue($selectDate);
@@ -1777,50 +1784,60 @@ App.Utils.CalendarTableView = (function () {
                 .add(dayInterval - 1, 'days')
                 .toDate();
 
-            App.Http.Calendar.getCalendarAppointmentsForTableView(startDate, endDate).done((response) => {
-                let currentDateIter = startDate;
-                while (currentDateIter <= endDate) {
-                    $('.calendar-view .date-column').each((index, dateColumn) => {
-                        const $dateColumn = $(dateColumn);
+            reloadQueued = false;
+            reloadRequest = App.Http.Calendar.getCalendarAppointmentsForTableView(startDate, endDate)
+                .done((response) => {
+                    let currentDateIter = startDate;
+                    while (currentDateIter <= endDate) {
+                        $('.calendar-view .date-column').each((index, dateColumn) => {
+                            const $dateColumn = $(dateColumn);
 
-                        const date = new Date($dateColumn.data('date'));
+                            const date = new Date($dateColumn.data('date'));
 
-                        if (moment(currentDateIter).format('YYYY-MM-DD') !== moment(date).format('YYYY-MM-DD')) {
-                            return true;
-                        }
-
-                        $dateColumn
-                            .find('.date-column-title')
-                            .text(App.Utils.Date.format(date, vars('date_format'), vars('time_format')));
-                        $dateColumn.find('.provider-column').each((index, providerColumn) => {
-                            const $providerColumn = $(providerColumn);
-
-                            const provider = $providerColumn.data('provider');
-
-                            $providerColumn
-                                .find('.calendar-wrapper')
-                                .data('fullCalendar')
-                                .getEventSources()
-                                .forEach((eventSource) => eventSource.remove());
-                            createNonWorkingHours($providerColumn.find('.calendar-wrapper'), provider);
-                            createAppointments($providerColumn, response.appointments);
-                            createUnavailabilities($providerColumn, response.unavailabilities);
-                            createBlockedPeriods($providerColumn, response.blocked_periods);
-
-                            // Add provider breaks
-
-                            const workingPlan = JSON.parse(provider.settings.working_plan);
-
-                            const day = moment(date).format('dddd').toLowerCase();
-
-                            if (workingPlan[day]) {
-                                createBreaks($providerColumn, workingPlan[day].breaks);
+                            if (moment(currentDateIter).format('YYYY-MM-DD') !== moment(date).format('YYYY-MM-DD')) {
+                                return true;
                             }
+
+                            $dateColumn
+                                .find('.date-column-title')
+                                .text(App.Utils.Date.format(date, vars('date_format'), vars('time_format')));
+                            $dateColumn.find('.provider-column').each((index, providerColumn) => {
+                                const $providerColumn = $(providerColumn);
+
+                                const provider = $providerColumn.data('provider');
+
+                                $providerColumn
+                                    .find('.calendar-wrapper')
+                                    .data('fullCalendar')
+                                    .getEventSources()
+                                    .forEach((eventSource) => eventSource.remove());
+                                createNonWorkingHours($providerColumn.find('.calendar-wrapper'), provider);
+                                createAppointments($providerColumn, response.appointments);
+                                createUnavailabilities($providerColumn, response.unavailabilities);
+                                createBlockedPeriods($providerColumn, response.blocked_periods);
+
+                                // Add provider breaks
+
+                                const workingPlan = JSON.parse(provider.settings.working_plan);
+
+                                const day = moment(date).format('dddd').toLowerCase();
+
+                                if (workingPlan[day]) {
+                                    createBreaks($providerColumn, workingPlan[day].breaks);
+                                }
+                            });
                         });
-                    });
-                    currentDateIter = moment(currentDateIter).add({days: 1}).toDate();
-                }
-            });
+                        currentDateIter = moment(currentDateIter).add({days: 1}).toDate();
+                    }
+                })
+                .always(() => {
+                    reloadRequest = null;
+
+                    if (reloadQueued) {
+                        reloadQueued = false;
+                        App.deferUntilRateLimitEnds(() => $reloadAppointments.trigger('click'));
+                    }
+                });
         });
 
         // Window resize

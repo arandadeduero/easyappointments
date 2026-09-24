@@ -21,3 +21,11 @@ $config['realtime_ws_enabled'] = defined('Config::REALTIME_WS_ENABLED') ? Config
 $config['realtime_ws_url'] = defined('Config::REALTIME_WS_URL') ? Config::REALTIME_WS_URL : '';
 $config['realtime_ws_publish_url'] = defined('Config::REALTIME_WS_PUBLISH_URL') ? Config::REALTIME_WS_PUBLISH_URL : '';
 $config['realtime_ws_secret'] = defined('Config::REALTIME_WS_SECRET') ? Config::REALTIME_WS_SECRET : '';
+
+// External service safeguards. All values are expressed in seconds.
+$config['external_connect_timeout'] = 3.0;
+$config['external_google_timeout'] = 10.0;
+$config['external_caldav_timeout'] = 15.0;
+$config['external_webhook_timeout'] = 5.0;
+$config['external_smtp_timeout'] = 15;
+$config['external_slow_log_threshold'] = 2.0;

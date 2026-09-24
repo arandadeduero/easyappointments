@@ -2,7 +2,7 @@
 
 <?php section('content'); ?>
 
-<div class="container-fluid backend-page pt-0 pb-0" id="calendar-page">
+<div class="container-fluid backend-page pt-0" id="calendar-page">
     <div class="row mb-3 text-white py-3 bg-dark" id="calendar-toolbar">
         <div id="calendar-filter" class="col-lg-3">
             <div class="calendar-filter-items">
@@ -185,4 +185,3 @@
 <script src="<?= asset_url('assets/js/pages/calendar_active_calls.js') ?>"></script>
 
 <?php end_section('scripts'); ?>
-

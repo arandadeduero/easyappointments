@@ -5,6 +5,10 @@
 App.Pages.Turnos = (function () {
     const CALL_DISPLAY_MS = 30000;
     const REFRESH_INTERVAL_MS = 5000;
+    const RECONNECT_BASE_DELAY_MS = 2000;
+    const RECONNECT_MAX_DELAY_MS = 30000;
+    const RECONNECT_JITTER_MS = 1000;
+    const STABLE_CONNECTION_MS = 30000;
 
     const $date = $('#queue-date');
     const $time = $('#queue-time');
@@ -13,7 +17,14 @@ App.Pages.Turnos = (function () {
 
     let socket = null;
     let reconnectTimer = null;
+    let reconnectAttempts = 0;
+    let stableConnectionTimer = null;
+    let pollTimer = null;
     let refreshTimer = null;
+    let refreshRequest = null;
+    let refreshQueued = false;
+    let refreshWhenVisible = false;
+    let refreshAfterReconnect = false;
     let currentDate = null;
     let previousCalledSignatures = null;
     let displayedCall = null;
@@ -32,7 +43,9 @@ App.Pages.Turnos = (function () {
         connectRealtime();
 
         setInterval(updateClock, 1000);
-        setInterval(refresh, REFRESH_INTERVAL_MS);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        document.addEventListener('aad:rate-limit', handleRateLimit);
+        window.addEventListener('online', handleOnline);
     }
 
     function updateClock() {
@@ -50,18 +63,92 @@ App.Pages.Turnos = (function () {
     }
 
     function scheduleRefresh() {
+        if (document.hidden) {
+            refreshWhenVisible = true;
+            return;
+        }
+
         if (refreshTimer) {
             return;
         }
 
+        const delay = Math.max(350, App.getRateLimitDelay?.() || 0);
+
         refreshTimer = setTimeout(() => {
             refreshTimer = null;
             refresh();
-        }, 350);
+        }, delay);
     }
 
     function refresh() {
-        App.Http.Turnos.getData().done(render);
+        if (document.hidden) {
+            refreshWhenVisible = true;
+            return refreshRequest;
+        }
+
+        if (refreshRequest) {
+            refreshQueued = true;
+            return refreshRequest;
+        }
+
+        const retryDelay = App.getRateLimitDelay?.() || 0;
+
+        if (retryDelay > 0) {
+            schedulePoll(retryDelay);
+            return null;
+        }
+
+        refreshQueued = false;
+        refreshRequest = App.Http.Turnos.getData()
+            .done(render)
+            .always(() => {
+                refreshRequest = null;
+
+                if (refreshQueued) {
+                    refreshQueued = false;
+                    scheduleRefresh();
+                    return;
+                }
+
+                schedulePoll();
+            });
+
+        return refreshRequest;
+    }
+
+    function isRealtimeConnected() {
+        return Boolean(socket && 'WebSocket' in window && socket.readyState === window.WebSocket.OPEN);
+    }
+
+    function schedulePoll(delay = REFRESH_INTERVAL_MS) {
+        if (document.hidden || window.navigator.onLine === false || isRealtimeConnected() || pollTimer) {
+            return;
+        }
+
+        delay = Math.max(delay, App.getRateLimitDelay?.() || 0);
+        pollTimer = setTimeout(() => {
+            pollTimer = null;
+            refresh();
+        }, delay);
+    }
+
+    function stopPolling() {
+        if (!pollTimer) {
+            return;
+        }
+
+        clearTimeout(pollTimer);
+        pollTimer = null;
+    }
+
+    function handleRateLimit() {
+        if (refreshTimer) {
+            clearTimeout(refreshTimer);
+            refreshTimer = null;
+        }
+
+        stopPolling();
+        schedulePoll();
     }
 
     function render(response) {
@@ -311,41 +398,134 @@ App.Pages.Turnos = (function () {
         const wsUrl = vars('realtime_ws_url');
 
         if (!isEnabled || !wsUrl || !('WebSocket' in window)) {
+            schedulePoll();
             return;
         }
 
+        if (document.hidden || socket?.readyState === WebSocket.CONNECTING || isRealtimeConnected()) {
+            return;
+        }
+
+        let connection;
         try {
-            socket = new WebSocket(wsUrl);
+            connection = new WebSocket(wsUrl);
+            socket = connection;
         } catch (error) {
             console.error('Queue display websocket init failed:', error);
+            socket = null;
+            schedulePoll();
+            scheduleReconnect();
             return;
         }
 
-        socket.addEventListener('open', () => {
+        connection.addEventListener('open', () => {
+            if (socket !== connection) {
+                connection.close();
+                return;
+            }
+
+            stopPolling();
+
+            if (stableConnectionTimer) {
+                clearTimeout(stableConnectionTimer);
+            }
+
+            stableConnectionTimer = setTimeout(() => {
+                reconnectAttempts = 0;
+                stableConnectionTimer = null;
+            }, STABLE_CONNECTION_MS);
+
             if (reconnectTimer) {
                 clearTimeout(reconnectTimer);
                 reconnectTimer = null;
             }
+
+            if (refreshAfterReconnect) {
+                refreshAfterReconnect = false;
+                scheduleRefresh();
+            }
         });
 
-        socket.addEventListener('message', handleRealtimeMessage);
+        connection.addEventListener('message', handleRealtimeMessage);
 
-        socket.addEventListener('close', () => {
-            if (reconnectTimer) {
+        connection.addEventListener('close', () => {
+            if (socket !== connection) {
                 return;
             }
 
-            reconnectTimer = setTimeout(() => {
-                reconnectTimer = null;
-                connectRealtime();
-            }, 2000);
+            if (stableConnectionTimer) {
+                clearTimeout(stableConnectionTimer);
+                stableConnectionTimer = null;
+            }
+
+            socket = null;
+
+            refreshAfterReconnect = true;
+            schedulePoll(0);
+            scheduleReconnect();
         });
 
-        socket.addEventListener('error', () => {
-            if (socket) {
-                socket.close();
-            }
+        connection.addEventListener('error', () => {
+            connection.close();
         });
+    }
+
+    function scheduleReconnect() {
+        const isEnabled = Boolean(Number(vars('realtime_ws_enabled')));
+
+        if (
+            !isEnabled ||
+            document.hidden ||
+            window.navigator.onLine === false ||
+            reconnectTimer ||
+            isRealtimeConnected()
+        ) {
+            return;
+        }
+
+        const exponentialDelay = Math.min(
+            RECONNECT_MAX_DELAY_MS,
+            RECONNECT_BASE_DELAY_MS * 2 ** Math.min(reconnectAttempts, 4),
+        );
+        const reconnectDelay = exponentialDelay + Math.floor(Math.random() * RECONNECT_JITTER_MS);
+
+        reconnectAttempts += 1;
+        reconnectTimer = setTimeout(() => {
+            reconnectTimer = null;
+            connectRealtime();
+        }, reconnectDelay);
+    }
+
+    function handleVisibilityChange() {
+        if (document.hidden) {
+            stopPolling();
+
+            if (reconnectTimer) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = null;
+            }
+
+            return;
+        }
+
+        if (refreshWhenVisible || !isRealtimeConnected()) {
+            refreshWhenVisible = false;
+            scheduleRefresh();
+        }
+
+        if (!isRealtimeConnected()) {
+            connectRealtime();
+        }
+    }
+
+    function handleOnline() {
+        if (document.hidden || isRealtimeConnected()) {
+            return;
+        }
+
+        reconnectAttempts = 0;
+        scheduleRefresh();
+        connectRealtime();
     }
 
     function handleRealtimeMessage(event) {
@@ -354,6 +534,15 @@ App.Pages.Turnos = (function () {
             const eventName = payload.event || '';
 
             if (!eventName.startsWith('calendar.')) {
+                return;
+            }
+
+            if (eventName === 'calendar.connected') {
+                return;
+            }
+
+            if (document.hidden) {
+                refreshWhenVisible = true;
                 return;
             }
 

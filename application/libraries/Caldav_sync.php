@@ -421,9 +421,22 @@ class Caldav_sync
             throw new InvalidArgumentException('Missing CalDAV password');
         }
 
+        $target_host = (string) parse_url($caldav_url, PHP_URL_HOST);
+
+        release_session_lock();
+
         return new Client([
             'base_uri' => rtrim($caldav_url, '/') . '/',
-            'connect_timeout' => 15,
+            'connect_timeout' => (float) config('external_connect_timeout', 3.0),
+            'timeout' => (float) config('external_caldav_timeout', 15.0),
+            'on_stats' => static function ($stats) use ($target_host): void {
+                log_external_call_duration(
+                    'caldav',
+                    $stats->getTransferTime(),
+                    $stats->hasResponse() ? $stats->getResponse()->getStatusCode() : null,
+                    $target_host,
+                );
+            },
             'headers' => [
                 'Content-Type' => 'text/xml',
             ],

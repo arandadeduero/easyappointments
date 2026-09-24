@@ -12,6 +12,8 @@ App.Pages.CalendarActiveCalls = (function () {
     // Module state
     let activeCalls = [];
     let selectedCallId = null;
+    let refreshRequest = null;
+    let refreshQueued = false;
 
     // DOM references (resolved after DOMContentLoaded)
     const $bar = $('#aad-active-calls-bar');
@@ -135,7 +137,13 @@ App.Pages.CalendarActiveCalls = (function () {
      * Fetch active calls and update the bar.
      */
     function refresh() {
-        App.Http.Calendar.getActiveCalls(getSelectedProviderId())
+        if (refreshRequest) {
+            refreshQueued = true;
+            return refreshRequest;
+        }
+
+        refreshQueued = false;
+        refreshRequest = App.Http.Calendar.getActiveCalls(getSelectedProviderId())
             .done((response) => {
                 activeCalls = (response.active_calls || []).map((call) => ({
                     ...call,
@@ -158,7 +166,17 @@ App.Pages.CalendarActiveCalls = (function () {
             })
             .fail(() => {
                 // Silent fail – do not interrupt the calendar experience.
+            })
+            .always(() => {
+                refreshRequest = null;
+
+                if (refreshQueued) {
+                    refreshQueued = false;
+                    App.deferUntilRateLimitEnds(refresh);
+                }
             });
+
+        return refreshRequest;
     }
 
     /**
@@ -221,7 +239,7 @@ App.Pages.CalendarActiveCalls = (function () {
                 .done(() => {
                     selectedCallId = null;
                     refresh();
-                    $('#reload-appointments').trigger('click');
+                    $('#reload-appointments').trigger('click', [{source: 'active_calls'}]);
                     App.Layouts.Backend.displayNotification(lang('active_calls_finish_success'));
                 })
                 .fail(() => {
@@ -246,7 +264,7 @@ App.Pages.CalendarActiveCalls = (function () {
                 .done((response) => {
                     selectedCallId = null;
                     refresh();
-                    $('#reload-appointments').trigger('click');
+                    $('#reload-appointments').trigger('click', [{source: 'active_calls'}]);
 
                     if (response.next_called) {
                         App.Layouts.Backend.displayNotification(lang('active_calls_finish_next_success'));
@@ -270,7 +288,11 @@ App.Pages.CalendarActiveCalls = (function () {
         refresh();
 
         // Keep the fixed bar aligned with explicit calendar reloads.
-        $('#reload-appointments').on('click.activeCalls', () => {
+        $('#reload-appointments').on('click.activeCalls', (event, options = {}) => {
+            if (options.source === 'realtime' || options.source === 'active_calls') {
+                return;
+            }
+
             setTimeout(refresh, 1000);
         });
 

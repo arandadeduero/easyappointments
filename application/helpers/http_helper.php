@@ -208,6 +208,43 @@ if (!function_exists('abort')) {
     }
 }
 
+if (!function_exists('log_external_call_duration')) {
+    /**
+     * Log only slow external calls, without recording full URLs or payloads.
+     */
+    function log_external_call_duration(
+        string $service,
+        float $duration,
+        ?int $status_code = null,
+        ?string $target_host = null,
+    ): void {
+        $threshold = (float) config('external_slow_log_threshold', 2.0);
+
+        if ($duration < $threshold) {
+            return;
+        }
+
+        $parts = [
+            'service=' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $service),
+            'duration_ms=' . (int) round($duration * 1000),
+        ];
+
+        if ($status_code !== null) {
+            $parts[] = 'status=' . $status_code;
+        }
+
+        if ($target_host !== null && $target_host !== '') {
+            $parts[] = 'host=' . preg_replace('/[^a-zA-Z0-9.:-]/', '_', $target_host);
+        }
+
+        // Production currently records error-level messages only. Write
+        // directly through the logger to avoid attaching a stack trace to a
+        // performance metric on every slow call.
+        $CI = &get_instance();
+        $CI->log->write_log('error', 'External call performance warning: ' . implode(' ', $parts));
+    }
+}
+
 if (!function_exists('trace')) {
     /**
      * Prepare a well formatted string for an exception

@@ -52,6 +52,8 @@ App.Utils.CalendarDefaultView = (function () {
     let fullCalendar = null;
     let popoverCloseTimeout = null;
     let lastFocusedEventData = null;
+    let calendarRefreshRequest = null;
+    let queuedCalendarRefresh = null;
 
     // Helper Functions
 
@@ -1034,12 +1036,28 @@ App.Utils.CalendarDefaultView = (function () {
      * @param {Date} endDate - View end date.
      */
     function refreshCalendarAppointments($calendar, recordId, filterType, startDate, endDate) {
+        if (calendarRefreshRequest) {
+            queuedCalendarRefresh = {
+                $calendar,
+                recordId,
+                filterType,
+                startDate,
+                endDate,
+            };
+            return calendarRefreshRequest;
+        }
+
         $('#loading').css('visibility', 'hidden');
 
         const formattedStartDate = moment(startDate).format('YYYY-MM-DD');
         const formattedEndDate = moment(endDate).format('YYYY-MM-DD');
 
-        App.Http.Calendar.getCalendarAppointments(recordId, formattedStartDate, formattedEndDate, filterType)
+        calendarRefreshRequest = App.Http.Calendar.getCalendarAppointments(
+            recordId,
+            formattedStartDate,
+            formattedEndDate,
+            filterType,
+        )
             .done((response) => {
                 // Clear existing events
                 fullCalendar.getEventSources().forEach((source) => source.remove());
@@ -1064,7 +1082,26 @@ App.Utils.CalendarDefaultView = (function () {
             })
             .always(() => {
                 $('#loading').css('visibility', '');
+
+                calendarRefreshRequest = null;
+
+                if (queuedCalendarRefresh) {
+                    const nextRefresh = queuedCalendarRefresh;
+                    queuedCalendarRefresh = null;
+
+                    App.deferUntilRateLimitEnds(() => {
+                        refreshCalendarAppointments(
+                            nextRefresh.$calendar,
+                            nextRefresh.recordId,
+                            nextRefresh.filterType,
+                            nextRefresh.startDate,
+                            nextRefresh.endDate,
+                        );
+                    });
+                }
             });
+
+        return calendarRefreshRequest;
     }
 
     /**
@@ -1594,21 +1631,6 @@ App.Utils.CalendarDefaultView = (function () {
         if (!$selectFilterItem.find('option').length) {
             $('#calendar-actions button').prop('disabled', true);
         }
-
-        // Auto-refresh every 60 seconds
-        setInterval(() => {
-            if ($('.popover').length || App.Utils.CalendarSync.isCurrentlySyncing()) {
-                return;
-            }
-
-            refreshCalendarAppointments(
-                $calendar,
-                $selectFilterItem.val(),
-                getSelectedFilterType(),
-                fullCalendar.view.activeStart,
-                fullCalendar.view.activeEnd,
-            );
-        }, 60000);
     }
 
     // Public API

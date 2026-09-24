@@ -44,9 +44,18 @@ class Realtime_events
         $secret = (string) config('realtime_ws_secret', '');
 
         try {
+            $target_host = (string) parse_url($publish_url, PHP_URL_HOST);
             $client = new Client([
                 'timeout' => 1.0,
                 'connect_timeout' => 0.5,
+                'on_stats' => static function ($stats) use ($target_host): void {
+                    log_external_call_duration(
+                        'realtime',
+                        $stats->getTransferTime(),
+                        $stats->hasResponse() ? $stats->getResponse()->getStatusCode() : null,
+                        $target_host,
+                    );
+                },
             ]);
 
             $headers = [
@@ -56,6 +65,8 @@ class Realtime_events
             if (!empty($secret)) {
                 $headers['X-Realtime-Secret'] = $secret;
             }
+
+            release_session_lock();
 
             $client->post($publish_url, [
                 'headers' => $headers,

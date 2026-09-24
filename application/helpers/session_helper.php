@@ -54,3 +54,18 @@ if (!function_exists('session')) {
         return $value ?? $default;
     }
 }
+
+if (!function_exists('release_session_lock')) {
+    /**
+     * Persist the current session and release its file lock before slow I/O.
+     *
+     * This is safe to call repeatedly. Code executing afterwards must treat
+     * the session as read-only for the remainder of the request.
+     */
+    function release_session_lock(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+    }
+}
