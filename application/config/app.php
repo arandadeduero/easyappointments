@@ -15,7 +15,7 @@ $config['url'] = Config::BASE_URL;
 
 $config['debug'] = Config::DEBUG_MODE;
 
-$config['cache_busting_token'] = 'TSJ96';
+$config['cache_busting_token'] = 'TSJ97';
 
 $config['realtime_ws_enabled'] = defined('Config::REALTIME_WS_ENABLED') ? Config::REALTIME_WS_ENABLED : false;
 $config['realtime_ws_url'] = defined('Config::REALTIME_WS_URL') ? Config::REALTIME_WS_URL : '';
