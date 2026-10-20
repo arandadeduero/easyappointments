@@ -20,4 +20,4 @@ Personalización del Ayuntamiento de Aranda de Duero:
 - [Cambios respecto al original](aranda-cambios.md)
 - [Revisión del código](aranda-revision.md)
 
-*This document applies to Easy!Appointments v1.6.0.*
+*This document applies to Easy!Appointments v1.6.1.*

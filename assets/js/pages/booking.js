@@ -69,11 +69,15 @@ App.Pages.Booking = (function () {
     function updateDocumentationStep() {
         const hasDocumentation = Boolean(getSelectedServiceDocumentation());
 
-        $('#step-documentation').toggleClass('d-none', !hasDocumentation).toggleClass('d-inline-block', hasDocumentation);
+        $('#step-documentation')
+            .toggleClass('d-none', !hasDocumentation)
+            .toggleClass('d-inline-block', hasDocumentation);
         $('#steps').css('width', hasDocumentation ? '247px' : '200px');
 
         $('#steps .book-step:visible').each((index, bookStepEl) => {
-            $(bookStepEl).find('strong').text(index + 1);
+            $(bookStepEl)
+                .find('strong')
+                .text(index + 1);
         });
     }
 
@@ -93,14 +97,22 @@ App.Pages.Booking = (function () {
     }
 
     function prepareBookingCalendar() {
-        const earliestBookingMoment = getEarliestBookingMoment();
+        // While in manage mode the appointment date must stay preselected, instead of resetting to the earliest day.
+        const appointmentDate = manageMode ? App.Utils.UI.getDateTimePickerValue($selectDate) : null;
 
-        App.Utils.UI.setDateTimePickerValue($selectDate, earliestBookingMoment.toDate());
+        const selectedMoment = appointmentDate ? moment(appointmentDate) : getEarliestBookingMoment();
+
+        App.Utils.UI.setDateTimePickerValue($selectDate, selectedMoment.toDate());
         App.Http.Booking.getUnavailableDates(
             $selectProvider.val(),
             $selectService.val(),
-            earliestBookingMoment.format('YYYY-MM-DD'),
+            selectedMoment.format('YYYY-MM-DD'),
         );
+
+        if (appointmentDate) {
+            // The unavailable dates request will not refresh the hours while in manage mode.
+            App.Http.Booking.getAvailableHours(selectedMoment.format('YYYY-MM-DD'));
+        }
     }
 
     /**
@@ -277,10 +289,7 @@ App.Pages.Booking = (function () {
 
             $selectProvider.trigger('change');
 
-            if (
-                selectedServiceId &&
-                $selectService.find('option[value="' + selectedServiceId + '"]').length > 0
-            ) {
+            if (selectedServiceId && $selectService.find('option[value="' + selectedServiceId + '"]').length > 0) {
                 $selectService.val(String(selectedServiceId)).trigger('change');
             }
 
@@ -455,12 +464,20 @@ App.Pages.Booking = (function () {
             $selectService.find('option[value=""]').remove();
         }
 
-        if (
-            selectedServiceId !== null &&
-            $selectService.find('option[value="' + selectedServiceId + '"]').length > 0
-        ) {
+        if (selectedServiceId !== null && $selectService.find('option[value="' + selectedServiceId + '"]').length > 0) {
             $selectService.val(String(selectedServiceId));
         }
+    }
+
+    /**
+     * Remove the missing service / provider selection prompt of the first step.
+     */
+    function clearServiceAndProviderPrompt() {
+        $('#select-service-prompt').remove();
+
+        $selectService.removeClass('is-invalid');
+
+        $selectProvider.removeClass('is-invalid');
     }
 
     /**
@@ -488,6 +505,8 @@ App.Pages.Booking = (function () {
          * Whenever the provider changes the available appointment date - time periods must be updated.
          */
         $selectProvider.on('change', () => {
+            clearServiceAndProviderPrompt();
+
             const providerId = $selectProvider.val();
             const previousServiceId = $selectService.val();
 
@@ -506,6 +525,8 @@ App.Pages.Booking = (function () {
          * Update the booking summary when the service changes.
          */
         $selectService.on('change', () => {
+            clearServiceAndProviderPrompt();
+
             const serviceId = $selectService.val();
 
             App.Pages.Booking.updateConfirmFrame();
@@ -534,6 +555,20 @@ App.Pages.Booking = (function () {
 
             // If we are on the first step and provider/service are not selected do not continue.
             if ($target.attr('data-step_index') === '1' && (!$selectProvider.val() || !$selectService.val())) {
+                if (!$selectProvider.val()) {
+                    $selectProvider.addClass('is-invalid');
+                } else {
+                    $selectService.addClass('is-invalid');
+                }
+
+                if (!$('#select-service-prompt').length) {
+                    $('<div/>', {
+                        'id': 'select-service-prompt',
+                        'class': 'text-danger mb-4',
+                        'text': lang('service_and_provider_missing'),
+                    }).appendTo('#wizard-frame-1 .frame-content .col');
+                }
+
                 return;
             }
 
@@ -571,7 +606,7 @@ App.Pages.Booking = (function () {
                     return; // Validation failed, do not continue.
                 } else {
                     App.Pages.Booking.updateConfirmFrame();
-                    
+
                     // Initialize ALTCHA widget if present
                     if ($('#altcha-widget').length && App.Utils.Altcha) {
                         App.Utils.Altcha.initialize('altcha-widget');
@@ -858,10 +893,10 @@ App.Pages.Booking = (function () {
         $('#appointment-details').html(`
             <div>
                 <div class="mb-2 fw-bold fs-3">
-                    ${providerOptionText}
+                    ${App.Utils.String.escapeHtml(providerOptionText)}
                 </div> 
                 <div class="mb-2 fw-bold text-muted">
-                    ${serviceOptionText}
+                    ${App.Utils.String.escapeHtml(serviceOptionText)}
                 </div>
                 <div class="mb-2">
                     <i class="fas fa-calendar-day me-2"></i>
@@ -874,11 +909,11 @@ App.Pages.Booking = (function () {
                 </div>
                 <div class="mb-2">
                     <i class="fas fa-globe me-2"></i>
-                    ${timezoneOptionText}
+                    ${App.Utils.String.escapeHtml(timezoneOptionText)}
                 </div> 
                 <div class="mb-2" ${!Number(service.price) ? 'hidden' : ''}>
                     <i class="fas fa-cash-register me-2"></i>
-                    ${Number(service.price).toFixed(2)} ${service.currency}
+                    ${Number(service.price).toFixed(2)} ${App.Utils.String.escapeHtml(service.currency)}
                 </div>
             </div>     
         `);
@@ -965,6 +1000,7 @@ App.Pages.Booking = (function () {
 
         if (manageMode) {
             data.appointment.id = vars('appointment_data').id;
+            data.appointment_hash = vars('appointment_data').hash;
             data.customer.id = vars('customer_data').id;
         }
 
@@ -1088,11 +1124,13 @@ App.Pages.Booking = (function () {
         const additionalInfoParts = [];
 
         if (Number(service.price) > 0) {
-            additionalInfoParts.push(`${lang('price')}: ${Number(service.price).toFixed(2)} ${service.currency}`);
+            additionalInfoParts.push(
+                `${lang('price')}: ${Number(service.price).toFixed(2)} ${App.Utils.String.escapeHtml(service.currency)}`,
+            );
         }
 
         if (service.location) {
-            additionalInfoParts.push(`${lang('location')}: ${service.location}`);
+            additionalInfoParts.push(`${lang('location')}: ${App.Utils.String.escapeHtml(service.location)}`);
         }
 
         if (additionalInfoParts.length) {

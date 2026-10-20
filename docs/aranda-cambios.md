@@ -16,15 +16,18 @@ construyó. La revisión del código, con los problemas detectados, está en [ar
   4. La configuración de secretos descrita más abajo.
 - La contraseña SMTP que el contratista había guardado en `application/config/email.php` se eliminó de **todos** los
   commits antes de publicar la rama. No existe en el historial de `aranda`.
-- La rama **no incluye** los cambios de la release 1.6.1 del proyecto original. Para incorporarlos hay que fusionar
-  `main` en `aranda`.
+- El 20-10-2026 se fusionó `main` (release **1.6.1**, 12-10-2026) en `aranda`. En los conflictos se mantuvo la
+  funcionalidad del contratista y se incorporaron todas las correcciones de seguridad de la 1.6.1: verificación del
+  hash de la cita al modificarla desde la página pública, control de acceso a clientes y confirmación de solapamientos
+  en el calendario, filtrado de los datos sensibles de los proveedores, permisos en la conexión OAuth de Google y
+  restricción de las peticiones CalDAV al mismo servidor. Detalles en el commit de fusión.
 
 Para ver todas las diferencias respecto al original:
 
 ```bash
-git diff 1.6.0 aranda --stat
-git diff 1.6.0 aranda -- application   # solo backend
-git log 1.6.0..aranda                  # commits del contratista
+git diff main aranda --stat
+git diff main aranda -- application    # solo backend
+git log 1.6.0..aranda --no-merges      # commits del contratista y posteriores
 ```
 
 ## Configuración
@@ -145,7 +148,8 @@ Se crean mediante migraciones y se editan desde el backend:
 - El intervalo del calendario pasa de 15 a 5 minutos.
 - El color de cada cita depende de su **estado** ("Reservado", "En proceso", "Finalizada"), no del servicio. Los
   estados están escritos en castellano en el código.
-- Se elimina la detección de solapamientos al crear citas desde el calendario del backend.
+- El contratista había eliminado la detección de solapamientos al crear citas desde el calendario del backend; la
+  fusión de la 1.6.1 la recupera como pregunta de confirmación, compatible con la capacidad compartida.
 - Todas las citas, también las online, reciben número de turno y una nota "Cita #N".
 - El tema visual queda fijado a `minty` y desaparece el selector de tema.
 - Se eliminan del backend el menú "Acerca de", el enlace "Premium" y el contenido del pie. En la página pública el pie

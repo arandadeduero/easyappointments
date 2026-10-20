@@ -178,7 +178,7 @@ class Api
      */
     public function request_limit(): ?int
     {
-        return request('length', $this->default_length);
+        return max(1, (int) request('length', $this->default_length));
     }
 
     /**
@@ -188,11 +188,9 @@ class Api
      */
     public function request_offset(): ?int
     {
-        $page = request('page', 1);
+        $page = max(1, (int) request('page', 1));
 
-        $length = request('length', $this->default_length);
-
-        return ($page - 1) * $length;
+        return ($page - 1) * $this->request_limit();
     }
 
     /**

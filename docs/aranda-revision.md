@@ -42,8 +42,9 @@ Los puntos marcados "no ejecutado" se dedujeron leyendo el código; conviene rep
    proveedora de ejemplo sin ese campo (`application/controllers/Installation.php:183-192`), igual que `console seed`
    y la API REST `POST/PUT /api/v1/providers`.
 10. **Pérdida de control de solapamientos.** Se eliminó `has_provider_conflict`/`force_save` del calendario del
-    backend (`Calendar.php`, bloque 760-777 original). Dos citas al mismo proveedor y hora se guardan sin aviso salvo
-    que `attendants_number` esté configurado.
+    backend (`Calendar.php`, bloque 760-777 original). Dos citas al mismo proveedor y hora se guardaban sin aviso salvo
+    que `attendants_number` estuviera configurado. **Resuelto el 20-10-2026** con la fusión de la 1.6.1, que vuelve a
+    pedir confirmación antes de guardar una cita solapada.
 11. **Migración 081 destruye el valor configurado** de `book_advance_timeout`: lo fija a 1 sin convertir minutos a
     días, y su `down` lo pone a 30.
 12. **Número de turno aleatorio.** `get_random_queue_number` puede hacer hasta 200 consultas por cita
@@ -92,7 +93,7 @@ Los puntos marcados "no ejecutado" se dedujeron leyendo el código; conviene rep
 
 1. Rotar la contraseña SMTP y ponerla en `.env`.
 2. Pedir al contratista que corrija los puntos 2, 3, 6, 9, 10 y 11 antes de ponerlo en producción.
-3. Fusionar `main` (1.6.1) en `aranda`.
+3. ~~Fusionar `main` (1.6.1) en `aranda`.~~ Hecho el 20-10-2026.
 4. Añadir tests para disponibilidad con capacidad compartida, kiosko y llamadas, y documentar las rutas nuevas en
    `openapi.yml`.
 5. Documentar el despliegue de `realtime-server` y `local-print-service` (servicio del sistema, proxy `wss://`,

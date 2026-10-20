@@ -32,6 +32,7 @@
 
 # IDE settings
 /.idea/
+/.playwright-mcp/
 /.vscode/
 *.code-workspace
 ./node_modules/

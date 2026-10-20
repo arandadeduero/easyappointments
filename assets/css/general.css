@@ -59,7 +59,10 @@ body .ui-widget {
   font-family: var(--bs-body-font-family);
   font-size: 1.1em;
 }
-body .ui-widget input, body .ui-widget select, body .ui-widget textarea, body .ui-widget button {
+body .ui-widget input,
+body .ui-widget select,
+body .ui-widget textarea,
+body .ui-widget button {
   font-family: var(--bs-body-font-family);
   font-size: 1rem;
 }
@@ -136,7 +139,8 @@ body .ui-datepicker th {
 body .ui-datepicker tbody tr:first-child td {
   margin-top: 5px;
 }
-body .ui-datepicker td a, body .ui-datepicker td span {
+body .ui-datepicker td a,
+body .ui-datepicker td span {
   border: none !important;
   background: none !important;
   color: var(--bs-primary) !important;

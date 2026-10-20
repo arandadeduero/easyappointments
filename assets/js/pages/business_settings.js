@@ -138,7 +138,7 @@ App.Pages.BusinessSettings = (function () {
      */
     function onSaveSettingsClick() {
         if (isInvalid()) {
-            App.Layouts.Backend.displayNotification(lang('settings_are_invalid'));
+            App.Layouts.Backend.displayNotification(lang('user_settings_are_invalid'));
 
             return;
         }
@@ -168,23 +168,21 @@ App.Pages.BusinessSettings = (function () {
             {
                 text: 'OK',
                 click: (event, messageModal) => {
+                    // Close this dialog first, as the working plan validation displays a dialog of its own.
+                    messageModal.hide();
+
                     const workingPlan = workingPlanManager.get();
 
                     if (workingPlan === null) {
-                        messageModal.hide();
                         return;
                     }
 
                     App.Http.BusinessSettings.applyGlobalWorkingPlan(
                         workingPlan,
                         currentPlanType || APPOINTMENT_TYPE_BOOKING,
-                    )
-                        .done(() => {
-                            App.Layouts.Backend.displayNotification(lang('working_plans_got_updated'));
-                        })
-                        .always(() => {
-                            messageModal.hide();
-                        });
+                    ).done(() => {
+                        App.Layouts.Backend.displayNotification(lang('working_plans_got_updated'));
+                    });
                 },
             },
         ];
@@ -210,7 +208,6 @@ App.Pages.BusinessSettings = (function () {
             if (businessSetting.name === 'company_working_plan_walkin') {
                 companyWorkingPlanWalkin = JSON.parse(businessSetting.value);
             }
-
         });
 
         if (!Object.keys(companyWorkingPlanWalkin).length) {

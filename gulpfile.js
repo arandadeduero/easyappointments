@@ -14,7 +14,7 @@ const changed = require('gulp-changed');
 const cached = require('gulp-cached');
 const childProcess = require('child_process');
 const css = require('gulp-clean-css');
-const del = require('del');
+const {deleteSync} = require('del');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const plumber = require('gulp-plumber');
@@ -24,7 +24,8 @@ const zip = require('zip-dir');
 const debug = require('gulp-debug');
 
 function archive(done) {
-    const filename = 'easyappointments-0.0.0.zip';
+    const version = /\$config\['version'\] = '([^']+)'/.exec(fs.readFileSync('application/config/app.php', 'utf8'))[1];
+    const filename = `easyappointments-${version}.zip`;
 
     fs.removeSync('build');
     fs.removeSync(filename);
@@ -61,13 +62,28 @@ function archive(done) {
     fs.copySync('README.md', 'build/README.md');
     fs.copySync('LICENSE', 'build/LICENSE');
 
+    // Composer runs on the host when it is installed, otherwise inside the php-fpm container, mapped to the host
+    // user so the build output stays writable.
+    let composer = 'composer --working-dir=build';
+
+    try {
+        childProcess.execSync('composer --version', {stdio: 'ignore'});
+    } catch {
+        composer =
+            'docker compose exec -T -u $(id -u):$(id -g) -e COMPOSER_HOME=/tmp -w /var/www/html/build php-fpm composer';
+    }
+
     childProcess.execSync(
-        'cd build && composer install --no-interaction --no-dev --optimize-autoloader --ignore-platform-reqs',
+        `${composer} install --no-interaction --no-dev --optimize-autoloader --ignore-platform-reqs && ` +
+            `${composer} run cleanup-vendor`,
+        {stdio: 'inherit'},
     );
 
     fs.removeSync('build/composer.lock');
-    del.sync('**/.DS_Store');
-    del.sync('build/**/.git');
+    deleteSync('build/**/.DS_Store');
+    deleteSync('build/**/.git');
+    deleteSync('build/assets/css/**/*.scss');
+    deleteSync(['build/vendor/**/.github', 'build/vendor/**/.editorconfig', 'build/vendor/**/.repo-metadata.json']);
 
     zip('build', {saveTo: filename}, function (error) {
         if (error) {
@@ -129,7 +145,7 @@ function watch(done) {
 }
 
 function vendor(done) {
-    del.sync(['assets/vendor/**', '!assets/vendor/index.html']);
+    deleteSync(['assets/vendor/**', '!assets/vendor/index.html']);
 
     // bootstrap
     gulp.src([
@@ -141,6 +157,7 @@ function vendor(done) {
     gulp.src([
         'node_modules/@fortawesome/fontawesome-free/js/fontawesome.min.js',
         'node_modules/@fortawesome/fontawesome-free/js/solid.min.js',
+        'node_modules/@fortawesome/fontawesome-free/js/brands.min.js',
     ]).pipe(gulp.dest('assets/vendor/@fortawesome-fontawesome-free'));
 
     // cookieconsent
