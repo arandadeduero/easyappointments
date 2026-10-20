@@ -11,7 +11,7 @@ $config['mailtype'] = 'html';
 $config['smtp_auth'] = true;
 $config['smtp_host'] = 'mail.viavox.com';
 $config['smtp_user'] = 'citaprevia@arandadeduero.es';
-$config['smtp_pass'] = '';
+$config['smtp_pass'] = env('SMTP_PASSWORD', ''); // Set SMTP_PASSWORD in the root ".env" file, see ".env.example".
 $config['smtp_crypto'] = 'tls';
 $config['smtp_port'] = 587;
 

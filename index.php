@@ -47,6 +47,11 @@
  *
  */
 
+// Load local secrets from the optional ".env" file (see ".env.example") before the configuration is read.
+require_once __DIR__ . '/application/helpers/env_helper.php';
+
+load_env_file(__DIR__ . '/.env');
+
 if (!file_exists(__DIR__ . '/config.php')) {
     die(
         'The root "config.php" file is missing, please copy "config-sample.php" to "config.php" and update it with your server data.'
