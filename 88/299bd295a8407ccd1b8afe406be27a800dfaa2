@@ -1,0 +1,675 @@
+composer.json
+  s_0b46cbe83a43bb::t_55d23609dadf7b 4,50,64-65,67-69,83-84,94-95
+application/controllers/General_settings.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 135-143
+application/views/pages/integrations.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 164-185
+  s_0b46cbe83a43bb::t_e76f2192416d1b 163
+application/language/finnish/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+assets/css/frontend.scss
+  s_0b46cbe83a43bb::t_55d23609dadf7b 39,46,81
+assets/js/pages/services.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 302-319
+assets/js/utils/working_plan.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 218,328-329,643-644,650-653,655-656,658,661-662,664,667-675,820-823,955-960,962,964,966,968,970,972
+application/controllers/Caldav_settings.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-93
+application/libraries/Synchronization.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 37,53,59,61-63,80-81,83,85-86,95-96,109-111,114-115,117,119-120,122-123,136-138,149-150,152,154-155,162-163,176-178,181-182,184,186-187,189-190,198-200,203,207-211,213-215,217,219-220,222-269
+docs/docker.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 37-38,61-64,71
+assets/css/themes/litera.css
+  s_0b46cbe83a43bb::t_360c2f67716515 1-12037
+application/views/pages/business_settings.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 113
+application/language/uzbek/unit_test_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-58
+application/controllers/Captcha.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 40-41,62-63,67-72
+application/controllers/Working_plan_exceptions.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 33-35,46,74,76,90-99,122-123,177-178,208-214,268-269,297,301-302,310-346
+application/hooks/security_headers.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 22,25-26,29-46
+application/controllers/api/v1/Webhooks_api_v1.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 161-163
+tests/Unit/Helper/PermissionHelperTest.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-124
+assets/js/http/caldav_settings_http_client.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-39
+package.json
+  s_0b46cbe83a43bb::t_55d23609dadf7b 2-68
+application/config/database.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 50,58-60,65-66
+docs/installation-guide.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 57-68,99
+application/language/uzbek/upload_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-55
+assets/js/pages/business_settings.js
+  s_0b46cbe83a43bb::t_bb0d7e2d5dff00 183
+  s_0b46cbe83a43bb::t_55d23609dadf7b 141,171-173,184-185
+application/language/uzbek/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-594
+.run/Start.run.xml
+  s_0b46cbe83a43bb::t_55d23609dadf7b 3,10
+application/language/dutch/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/libraries/EA_Migration.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-55
+assets/js/utils/calendar_sync.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 26,31-63,250-259,263-269,271,273-274,276-277,279-280,282-285,287-296,298-301,303-315,319-321,323,325-326,328,330,332,334,336-350,356-359,406-407,413,493
+application/controllers/Legal_settings.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 102
+application/libraries/Availability.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 54-55,65,68-70
+  s_0b46cbe83a43bb::t_653d4d9ef9681e 464,720
+application/language/lithuanian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/views/pages/recovery.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 63-65
+application/models/Secretaries_model.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 82-83,85-91,120-133,401-402,465
+assets/js/pages/google_analytics_settings.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 83
+application/views/layouts/message_layout.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 67
+application/language/uzbek/migration_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-47
+application/models/Services_model.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 111-115,125-135,142,145-160
+docs/console.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 97
+assets/css/themes/cosmo.css
+  s_0b46cbe83a43bb::t_360c2f67716515 1-11607
+application/views/errors/html/error_general.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 16-18
+application/language/polish/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/controllers/api/v1/Blocked_periods_api_v1.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 190-192
+application/language/hungarian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/config/config.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 93,116,121,128,131,136-150,158,214,416-437,455,509-514,517
+application/language/french/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/language/traditional-chinese/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/controllers/Webhooks.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 135,137
+assets/js/pages/api_settings.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 83
+application/language/japanese/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+tests/bootstrap.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-97
+application/views/pages/update.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 7-30,47,51
+assets/js/utils/calendar_event_popover.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 276-281
+docs/manage-translations.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 45
+application/language/uzbek/db_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-63
+assets/js/http/caldav_http_client.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 87,96
+application/controllers/Service_categories.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 105,107
+build.sh
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-3
+tests/Unit/Helper/ArrayHelperTest.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 7-8,28,31,34
+assets/js/pages/jitsi_settings.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 78
+docs/caldav-calendar-sync.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 33,37-66
+assets/js/http/account_http_client.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 22,26,32
+.gitignore
+  s_0b46cbe83a43bb::t_7dfe0591d6cb41 35
+tests/Unit/Helper/ValidationHelperTest.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 7-8,18-36
+application/language/uzbek/profiler_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-60
+application/controllers/Login.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 71-84,113-120,176-177,193-211,213-216,218,221,223-224,230-232,235-240,246-262
+  s_0b46cbe83a43bb::t_8a7e6b1754a6bf 263-264
+docs/ldap.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 104
+application/controllers/Admins.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 133,135,139,207
+application/controllers/Secretaries.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 31,147,149,153,221
+application/models/Providers_model.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 84-85,87-93,122-130,452-453,516,604-606
+application/language/portuguese-br/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/models/Unavailabilities_model.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 80-82,111-117,232,246-248
+docker-compose.yml
+  s_0b46cbe83a43bb::t_55d23609dadf7b 2-9,11-18,20-26,28-38,40-46,48-52,54-62,64-103
+application/controllers/Privacy.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 42-43
+application/controllers/Recovery.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 91-98,137-139,259-266
+application/models/Webhooks_model.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 40,79-88,331,366-368
+  s_0b46cbe83a43bb::t_d214078a0a88e1 369
+application/views/components/booking_cancellation_frame.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 12-13,16,22,24,30-31,34-35
+application/language/uzbek/ftp_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-51
+assets/css/themes/default.css
+  s_0b46cbe83a43bb::t_360c2f67716515 1-12351
+docs/google-calendar-sync.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 57
+application/language/slovenian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/language/romanian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+.github/workflows/ci.yml
+  s_0b46cbe83a43bb::t_55d23609dadf7b 9-13,16,21,27-32,35-58
+application/libraries/Caldav_sync.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 17-19,21,23,36-39,88-92,134-138,169-184,208-224,262,460,470,472-488,492-493,508-531,536-538,540,553-556,561-562,564,568-621,624-711,759-767,771-773,780-809,828-913,1030,1043-1055,1057-1059
+  s_0b46cbe83a43bb::t_7883e0ffb6cc1d 471
+tests/Unit/Model/CustomersModelTest.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-84
+application/controllers/api/v1/Appointments_api_v1.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 301-303
+assets/js/pages/login.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 47-48,57-62,66,69,73,98,101,105,110,123,136
+application/language/turkish/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/controllers/api/v1/Secretaries_api_v1.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 166-168
+application/language/uzbek/pagination_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-43
+assets/js/pages/booking.js
+  s_0b46cbe83a43bb::t_653d4d9ef9681e 72-74,78-80,292,467,1127-1129
+  s_0b46cbe83a43bb::t_55d23609dadf7b 473-480,528-529,559,562-571,609,899,912,916,1003,1133
+  s_0b46cbe83a43bb::t_bb0d7e2d5dff00 472,508-509,558,560-561,896
+  s_0b46cbe83a43bb::t_7883e0ffb6cc1d 100-101,103-105,109,111-115
+  s_0b46cbe83a43bb::t_d9131744cf30d6 481-482
+application/core/EA_Controller.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 56,86,179-224
+assets/js/pages/recovery.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 54,57,88,91,95,99,119,132
+application/language/catalan/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/language/uzbek/form_validation_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-69
+docs/readme.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 23
+application/views/components/working_plan_exceptions_modal.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 12-14,20-22,38-40
+application/controllers/api/v1/Settings_api_v1.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 21-27,62-65,88-93,113-118,131-143
+  s_0b46cbe83a43bb::t_a865421e7ac571 144-145
+application/language/latvian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 3-6,8-10,12-16,20-24,26-42,44-46,48-59,61-63,66-68,71,74-77,79-92,94-95,97-101,103-118,129,133-134,138,141,154,182,192,221-222,233,236,252,254,257,294,304,307,348,364,377,386,412-418,423-425,428,435,578-593
+application/config/app.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 12
+  s_0b46cbe83a43bb::t_7dfe0591d6cb41 18
+.run/Stop.run.xml
+  s_0b46cbe83a43bb::t_55d23609dadf7b 3,10,17
+application/config/routes.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 64-68,76-77,79-80,84-96,99-102,105,108,113,171
+  s_0b46cbe83a43bb::t_c9f4bbb27bd15e 172
+application/controllers/api/v1/Admins_api_v1.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 170-172
+application/controllers/api/v1/Customers_api_v1.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 164-166
+assets/js/pages/calendar.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 97
+assets/js/utils/calendar_default_view.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 488-499,501-519,521-522,524-528,530-534,536-537,713-715,726,822-824,833,1344-1348,1364-1365
+application/controllers/Account.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 143-146,164-179
+  s_0b46cbe83a43bb::t_08e5f3d76be457 180-182
+application/language/hebrew/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+assets/js/pages/caldav_settings.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-72
+application/language/danish/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/views/components/company_color_style.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 62-65,120,134
+tests/Unit/Library/CaldavSyncTest.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-370
+babel.config.json
+  s_0b46cbe83a43bb::t_55d23609dadf7b 2
+CHANGELOG.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 3,20-105,125,206,310,337,348,367,372,384,412,419,451,463,483,487,500,510-511,532,534,538,544,566,591,604
+  s_0b46cbe83a43bb::t_62f853da915713 16-19
+application/controllers/Calendar.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 79-88,187-200,421-459,596,603-604,619-627,639-640,652-683,691-694,785,933-935,939-960,1032-1033,1063-1067,1115-1117,1169-1171,1276-1278,1364-1366
+  s_0b46cbe83a43bb::t_bb0d7e2d5dff00 420,628,684-685
+  s_0b46cbe83a43bb::t_653d4d9ef9681e 339-340,408,719-720,1440,1536-1547
+  s_0b46cbe83a43bb::t_df88150ae53525 594
+  s_0b46cbe83a43bb::t_667b8f82aa30a5 460-462
+application/controllers/Consents.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 24-32,55
+  s_0b46cbe83a43bb::t_c78b1104224c48 23,56
+application/language/chinese/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/language/norwegian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+assets/css/themes/default.scss
+  s_0b46cbe83a43bb::t_55d23609dadf7b 307,330,383,385,387,390-395,400,407,503,569,603-604,649,665,669,699,757,760-873
+.run/Deploy.run.xml
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-17
+application/language/portuguese/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+assets/js/pages/matomo_analytics_settings.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 83
+application/config/testing/routes.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 16
+application/language/spanish/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30-31,34,137-138,296,671-686
+application/views/emails/appointment_deleted_email.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 534
+assets/css/themes/materia.css
+  s_0b46cbe83a43bb::t_360c2f67716515 1-12977
+assets/js/pages/ldap_settings.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 105
+tests/Unit/Model/WorkingPlanExceptionsModelTest.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-122
+assets/js/utils/altcha.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 122-124,269-271
+gulpfile.js
+  s_0b46cbe83a43bb::t_360c2f67716515 17,84-86
+  s_0b46cbe83a43bb::t_55d23609dadf7b 27-28,65-75,77-79
+  s_0b46cbe83a43bb::t_0cf2002230b33c 83,148,160
+application/controllers/Booking_cancellation.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 52-53,65-70,75,158-159,161,163-164
+application/controllers/Services.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 41,144,146
+application/config/migration.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 12
+application/views/components/booking_header.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 11
+README.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 87,92,121-123,140-143,149-150,156-158,164-166
+application/controllers/Booking.php
+  s_0b46cbe83a43bb::t_bb0d7e2d5dff00 580-581,889-891
+  s_0b46cbe83a43bb::t_55d23609dadf7b 35-36,337-338,485,612-630,652-655,736-743,883,1003-1004,1096
+  s_0b46cbe83a43bb::t_7883e0ffb6cc1d 704
+  s_0b46cbe83a43bb::t_653d4d9ef9681e 203,826-827,892,956
+  s_0b46cbe83a43bb::t_168636042ebfd5 656,884,1097
+assets/js/http/booking_http_client.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 129-130,135-136,174-179,183,186,190,204,248,255,350
+application/language/ukrainian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/controllers/About.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 23-37,108-116,137,144,164-169,174-208
+docs/aranda-cambios.md
+  s_0b46cbe83a43bb::t_094a9e6f853bfb 19-23,28-30,151-152
+assets/css/themes/sketchy.css
+  s_0b46cbe83a43bb::t_360c2f67716515 1-12224
+assets/js/pages/altcha_settings.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 86
+application/language/croatian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+.run/SSH.run.xml
+  s_0b46cbe83a43bb::t_55d23609dadf7b 3,10
+assets/css/themes/litera.scss
+  s_0b46cbe83a43bb::t_55d23609dadf7b 62-64
+application/helpers/security_helper.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 46-66,224-254
+  s_0b46cbe83a43bb::t_2f0b5def233367 255
+assets/css/backend.scss
+  s_0b46cbe83a43bb::t_55d23609dadf7b 23-30,175,592
+assets/js/http/login_http_client.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 40
+assets/js/utils/calendar_table_view.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 416,460-471,473-491,493-506,508-509,752-754,766,862-864,872
+tests/Unit/Library/AvailabilityTest.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-180
+application/controllers/Google.php
+  s_0b46cbe83a43bb::t_daa9409589d882 559
+  s_0b46cbe83a43bb::t_55d23609dadf7b 14-15,176-183,196,253-261,266-269,302-305,321-335,364-369,489,605-608,647,683
+assets/css/backend.css
+  s_0b46cbe83a43bb::t_360c2f67716515 24-31,714
+application/helpers/permission_helper.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 73-163
+.github/copilot-instructions.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 51
+application/language/uzbek/imglib_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-57
+assets/css/general.scss
+  s_0b46cbe83a43bb::t_55d23609dadf7b 80-83,179-180,451-456,460-465
+assets/js/http/password_reset_http_client.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 42
+application/controllers/api/v1/Services_api_v1.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 164-166
+application/views/pages/calendar.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 101-116
+docs/faq.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 108
+application/language/luxembourgish/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/libraries/Notifications.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 67-68,70
+assets/js/pages/password_reset.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 73,76,80,108,111,115,119,121,157,173
+tests/Unit/Model/ServicesModelTest.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-89
+application/controllers/Providers.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,179,181,185,253
+application/helpers/html_helper.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 192-197
+application/libraries/Cleanup.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 91,117,152-153,155-160,163-166,169-171,186-188
+assets/js/pages/account.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 32,75-79,107,170,173-175
+  s_0b46cbe83a43bb::t_2a17f4438c9bfe 176
+application/views/pages/caldav_settings.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-68
+application/views/pages/account.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 112-118
+  s_0b46cbe83a43bb::t_6224036d45c21b 111
+assets/js/http/calendar_http_client.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 70-99,145-146,150,156,161-188,354,448
+  s_0b46cbe83a43bb::t_1a5d7082cc0b32 69
+application/libraries/Ldap_client.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 137
+assets/css/themes/zephyr.css
+  s_0b46cbe83a43bb::t_360c2f67716515 1-12077
+assets/js/pages/general_settings.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 106
+application/controllers/Customers.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 197,199,264
+application/language/uzbek/date_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-94
+application/views/components/booking_final_step.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 48
+assets/js/pages/legal_settings.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 158
+application/views/emails/appointment_saved_email.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 553,633-641,652-654,663
+  s_0b46cbe83a43bb::t_653d4d9ef9681e 409-411
+index.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 144-146
+application/models/Working_plan_exceptions_model.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 339,344-347
+application/language/czech/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+assets/js/components/appointments_modal.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 77-84,167-193,195-196,202,209,214-246,636-644,662-665
+  s_0b46cbe83a43bb::t_33a42bab61e348 76
+application/language/russian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/libraries/Altcha_client.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 37,60,62-63
+assets/css/themes/flatly.css
+  s_0b46cbe83a43bb::t_360c2f67716515 1-11940
+application/language/marathi/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/controllers/Booking_settings.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 107,118,122
+application/language/persian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/language/uzbek/number_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-44
+application/controllers/api/v1/Working_plan_exceptions_api_v1.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 193-194
+  s_0b46cbe83a43bb::t_f2b18454d2c94d 192
+tests/Unit/Model/ServiceCategoriesModelTest.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-37
+assets/css/themes/materia.scss
+  s_0b46cbe83a43bb::t_55d23609dadf7b 467-468,564-565
+application/language/german/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+tests/Unit/Library/TimezonesTest.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-56
+application/language/greek/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/language/serbian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/controllers/api/v1/Service_categories_api_v1.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 164-166
+application/views/errors/html/error_404.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 16-18
+application/language/uzbek/calendar_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-84
+docker/php-fpm/Dockerfile
+  s_0b46cbe83a43bb::t_55d23609dadf7b 14
+application/controllers/Caldav.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 55,59,67-78,81-82,101-102,105-110,114,212-217,238-246,254-256,260,265-269,300,308-312,364-367,404-415,449
+application/models/Customers_model.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 65-67,72,89-91,93-99,300-304,320-329,350,362-364,398
+  s_0b46cbe83a43bb::t_bb0d7e2d5dff00 71
+application/libraries/Timezones.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 34,36-41,60-63,67-122,179-180,184-206
+tests/Unit/Model/BlockedPeriodsModelTest.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-97
+application/views/pages/password_reset.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 72-74
+application/libraries/Google_sync.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 26-38,223,278-283,307,375-379,386-422,680,736
+application/controllers/Booking_confirmation.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 47-48
+application/controllers/Installation.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 86
+application/language/hindi/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/language/slovak/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,286,307,578-593
+application/models/Blocked_periods_model.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 94-100,438-440,448,450-451,453
+tests/TestCase.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 10-12
+application/language/thai/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/language/estonian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+phpunit.xml
+  s_0b46cbe83a43bb::t_55d23609dadf7b 4
+openapi.yml
+  s_0b46cbe83a43bb::t_55d23609dadf7b 3-13,15-16,18-19,21-33,35-2151,2153-2158,2161-2207,2210-3216
+assets/css/themes/lumen.css
+  s_0b46cbe83a43bb::t_360c2f67716515 1-12159
+application/language/english/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,112,137-138,232,436,671-686
+.run/Build.run.xml
+  s_0b46cbe83a43bb::t_55d23609dadf7b 3,10
+application/controllers/Appointments.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 56,101,103,168-169,174-180,217,255-256,261-267,300
+application/helpers/http_helper.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 143-148,165-168
+application/controllers/Update.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 40,42-44,48-50,52-55,57-58,60-72,74-75,84-85,90-109
+docs/get-involved.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 21
+application/language/italian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/config/constants.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 97-99,164-203
+  s_0b46cbe83a43bb::t_9fbeb5a681bad0 204
+application/hooks/storage_cleanup.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 16
+docs/update-guide.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 75
+application/language/bulgarian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 3,23,30,34,133-134,223,256,345,578-593
+CLAUDE.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-55
+application/controllers/Localization.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 35-36
+application/controllers/Blocked_periods.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 110,112
+application/helpers/validation_helper.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 25-37
+application/controllers/api/v1/Unavailabilities_api_v1.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 164-166
+application/models/Admins_model.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 82-83,85-91,352-353,402
+tests/Unit/Library/GoogleSyncTest.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-101
+assets/css/general.css
+  s_0b46cbe83a43bb::t_360c2f67716515 62-65,142-143
+assets/js/pages/google_calendar_settings.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 76
+.prettierignore
+  s_0b46cbe83a43bb::t_55d23609dadf7b 2,4,6,8-9,13
+assets/css/themes/darkly.css
+  s_0b46cbe83a43bb::t_360c2f67716515 1-11943
+application/language/arabic/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/models/Appointments_model.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 290-292,325-335,361,545-547,624-626,629,633-637,642,656,684,686,721,723,1058,1067,1069-1072,1079-1081
+  s_0b46cbe83a43bb::t_c801788027b4a4 1082
+application/controllers/Unavailabilities.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 49,74,76,129-138,187,213-218,221-222,271,275-276,279-280
+application/language/uzbek/index.html
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-10
+application/language/albanian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/models/Users_model.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 94
+application/controllers/Matomo_analytics_settings.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 90-98
+assets/js/components/working_plan_exceptions_modal.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 34-38,193-196,255,274,280
+application/core/EA_Security.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 110-111,113-117,120-132,137-141
+  s_0b46cbe83a43bb::t_419071f634a9fb 112,118-119,133-136
+assets/js/http/recovery_http_client.js
+  s_0b46cbe83a43bb::t_55d23609dadf7b 40
+docs/rest-api.md
+  s_0b46cbe83a43bb::t_55d23609dadf7b 425
+docs/aranda-revision.md
+  s_0b46cbe83a43bb::t_094a9e6f853bfb 45-47,96
+application/libraries/Api.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 181,191,193
+application/language/uzbek/email_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 1-58
+application/language/bosnian/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/language/swedish/translations_lang.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 30,34,133-134,578-593
+application/views/pages/login.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 57-59
+application/controllers/api/v1/Providers_api_v1.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 180-182
+system/core/Controller.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 85-94
+application/migrations/067_add_id_users_to_consents_table.php
+  s_0b46cbe83a43bb::t_55d23609dadf7b 37-44,46-47
+assets/css/backend.min.css
+  s_0b46cbe83a43bb::t_78945301315d6d 1
+assets/css/themes/cosmo.min.css
+  s_0b46cbe83a43bb::t_b9c9ec5c48eb28 1-5
+assets/css/themes/darkly.min.css
+  s_0b46cbe83a43bb::t_d80dc27ca50ee9 1-5
+assets/css/themes/default.min.css
+  s_0b46cbe83a43bb::t_e8a2c47d21344e 1-5
+assets/css/themes/flatly.min.css
+  s_0b46cbe83a43bb::t_dc0d03324c5634 1-5
+assets/css/themes/litera.min.css
+  s_0b46cbe83a43bb::t_633c0df9307059 1-5
+assets/css/themes/lumen.min.css
+  s_0b46cbe83a43bb::t_b3a3acb092f69f 1-5
+assets/css/themes/materia.min.css
+  s_0b46cbe83a43bb::t_2d9ee9b19cedd5 1-5
+assets/css/themes/sketchy.min.css
+  s_0b46cbe83a43bb::t_d533c13ead8969 1-5
+assets/css/themes/zephyr.min.css
+  s_0b46cbe83a43bb::t_5754059e780294 1-5
+assets/js/app.min.js
+  s_0b46cbe83a43bb::t_bc2c0028bdf63f 1
+assets/js/components/appointments_modal.min.js
+  s_0b46cbe83a43bb::t_b8b329d95d790d 1
+assets/js/components/working_plan_exceptions_modal.min.js
+  s_0b46cbe83a43bb::t_4c9d85919c9ce3 1
+assets/js/http/account_http_client.min.js
+  s_0b46cbe83a43bb::t_739f4230217897 1
+assets/js/http/booking_http_client.min.js
+  s_0b46cbe83a43bb::t_453edddfe26c3b 1
+assets/js/http/caldav_http_client.min.js
+  s_0b46cbe83a43bb::t_a8f140229c0a15 1
+assets/js/http/caldav_settings_http_client.min.js
+  s_0b46cbe83a43bb::t_b30c40414926ae 1
+assets/js/http/calendar_http_client.min.js
+  s_0b46cbe83a43bb::t_09988bd8f5b2ee 1
+assets/js/pages/account.min.js
+  s_0b46cbe83a43bb::t_2fd2b2f80ae726 1
+assets/js/pages/altcha_settings.min.js
+  s_0b46cbe83a43bb::t_ac8963c5a0fbe4 1
+assets/js/pages/api_settings.min.js
+  s_0b46cbe83a43bb::t_96d26a273138c7 1
+assets/js/pages/booking.min.js
+  s_0b46cbe83a43bb::t_2a77c3747d5d52 1
+assets/js/pages/business_settings.min.js
+  s_0b46cbe83a43bb::t_de3583131fb7cf 1
+assets/js/pages/caldav_settings.min.js
+  s_0b46cbe83a43bb::t_ca1669ed65aef4 1
+assets/js/pages/calendar_active_calls.min.js
+  s_0b46cbe83a43bb::t_b5dbdc0abcd770 1
+assets/js/pages/general_settings.min.js
+  s_0b46cbe83a43bb::t_48ae41d4906b5f 1
+assets/js/pages/google_analytics_settings.min.js
+  s_0b46cbe83a43bb::t_2bff5917879cb7 1
+assets/js/pages/google_calendar_settings.min.js
+  s_0b46cbe83a43bb::t_3d707603bc7f3a 1
+assets/js/pages/jitsi_settings.min.js
+  s_0b46cbe83a43bb::t_7a0ed5c7f92e0d 1
+assets/js/pages/ldap_settings.min.js
+  s_0b46cbe83a43bb::t_db7a2e1552b0d8 1
+assets/js/pages/legal_settings.min.js
+  s_0b46cbe83a43bb::t_7b1a81bdff2bfb 1
+assets/js/pages/login.min.js
+  s_0b46cbe83a43bb::t_55f45b17b1dd2a 1
+assets/js/pages/matomo_analytics_settings.min.js
+  s_0b46cbe83a43bb::t_a6300731a65d3b 1
+assets/js/pages/services.min.js
+  s_0b46cbe83a43bb::t_e03d91ddd21795 1
+assets/js/pages/turnos.min.js
+  s_0b46cbe83a43bb::t_8ff6826b5a7462 1
+assets/js/utils/calendar_default_view.min.js
+  s_0b46cbe83a43bb::t_7b24bd8185c942 1
+assets/js/utils/calendar_event_popover.min.js
+  s_0b46cbe83a43bb::t_14cab5ef0350c7 1
+assets/js/utils/calendar_realtime.min.js
+  s_0b46cbe83a43bb::t_37e05af70b4007 1
+assets/js/utils/calendar_sync.min.js
+  s_0b46cbe83a43bb::t_d867bdde3a0e73 1
+assets/js/utils/calendar_table_view.min.js
+  s_0b46cbe83a43bb::t_767f79fa77a3d1 1
+assets/js/utils/working_plan.min.js
+  s_0b46cbe83a43bb::t_c58cba2d05b15c 1
+assets/vendor/@fortawesome-fontawesome-free/brands.min.js
+  s_0b46cbe83a43bb::t_97af2585d5e503 1-6
+assets/vendor/@fortawesome-fontawesome-free/fontawesome.min.js
+  s_0b46cbe83a43bb::t_017d4f08c7fd65 2,4,6
+assets/vendor/@fortawesome-fontawesome-free/solid.min.js
+  s_0b46cbe83a43bb::t_299b431ecb74b0 2,4,6
+assets/vendor/fullcalendar-moment/index.global.min.js
+  s_0b46cbe83a43bb::t_67326cbfa7cc1d 2
+assets/vendor/fullcalendar/index.global.min.js
+  s_0b46cbe83a43bb::t_789b47ca6ab3c1 2,6
+assets/vendor/moment-timezone/moment-timezone-with-data.min.js
+  s_0b46cbe83a43bb::t_058a89c576a52a 1
+assets/vendor/moment/moment.min.js
+  s_0b46cbe83a43bb::t_c486928a12f821 1-8
+composer.lock
+  s_0b46cbe83a43bb::t_4cda5c83e5b170 7,122,127,415,419,423-424,429-430,433-434,442-443,445,523,539,543,547,551-552,556-557,561,607,623,627,631,635-636,643-645,653-655,726,742,1102,1106,1110-1111,1192,1208,1748,1752,1756-1757,1770,1795,1806-1809,1815,1884-1967,3674
+package-lock.json
+  s_0b46cbe83a43bb::t_6728df8c70dc69 2-6077
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "88299bd295a8407ccd1b8afe406be27a800dfaa2",
+  "prompts": {},
+  "sessions": {
+    "s_0b46cbe83a43bb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dfbe29dd-20dd-459c-84f3-fd926ea53327",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Guillermo López <willyaranda@gmail.com>"
+    }
+  }
+}
