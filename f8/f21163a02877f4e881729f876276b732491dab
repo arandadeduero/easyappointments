@@ -1,0 +1,29 @@
+tests/Unit/Helper/EnvHelperTest.php
+  s_0b46cbe83a43bb::t_34f4e8fa37ac24 1-69
+.env.example
+  s_0b46cbe83a43bb::t_8677902fbd45d3 1-12
+application/helpers/env_helper.php
+  s_0b46cbe83a43bb::t_c454a02f4e2c78 115-116,124
+  s_0b46cbe83a43bb::t_e77bff3041abd4 19-20
+  s_0b46cbe83a43bb::t_7a4d784023f8f2 1,13-18,21-106,122,128-134
+application/config/email.php
+  s_0b46cbe83a43bb::t_5615e6b9ed9790 14
+index.php
+  s_0b46cbe83a43bb::t_4bb5ca72f14785 50-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f8f21163a02877f4e881729f876276b732491dab",
+  "prompts": {},
+  "sessions": {
+    "s_0b46cbe83a43bb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dfbe29dd-20dd-459c-84f3-fd926ea53327",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Guillermo López <willyaranda@gmail.com>"
+    }
+  }
+}
