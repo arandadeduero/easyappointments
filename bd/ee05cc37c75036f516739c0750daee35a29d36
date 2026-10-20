@@ -1,0 +1,91 @@
+.gitignore
+  s_0b46cbe83a43bb::t_37f518cd416e33 37,49
+application/config/email.php
+  s_0b46cbe83a43bb::t_f93401ca5462b4 14
+assets/css/backend.css
+  s_0b46cbe83a43bb::t_c388c6b996a4be 16-19,23,638
+assets/css/backend.min.css
+  s_0b46cbe83a43bb::t_cf5dddf253918f 1
+assets/css/backend.scss
+  s_0b46cbe83a43bb::t_26c6c2a3936fb2 16-18
+assets/css/themes/minty.css
+  s_0b46cbe83a43bb::t_2ba8bea5a2df30 2-11,44,52,59-64,67-73,75-80,110,114,153,155-160,163-168,171-176,180-181,183-184,186,189-192,1872,1876,1878,1880,1950-1951,1953,1955,1963-1965,1967,1969,1978-1979,1981,1983,1992-1993,1995,1997,2006-2007,2009,2011,2020-2021,2023,2025,2034-2035,2037,2039,2048-2049,2051,2053,2153,2298,2382,2429,2499,2525,2988-2989,2992-2993,3002-3003,3005-3007,3009-3010,3013-3014,3022-3023,3026-3027,3039-3040,3043-3044,3056-3057,3060-3061,3073-3074,3077-3078,3090-3091,3094-3095,3107-3108,3111-3112,3137-3138,3140-3142,3144-3145,3147,3149,3372,3598,3884-3887,3891-3892,4294-4295,4301,4305,4511,4628-4629,4674-4675,4680-4681,6826-6827,11878-11885,11905,11935
+assets/css/themes/minty.min.css
+  s_0b46cbe83a43bb::t_003e4cd3d16466 5
+assets/js/components/appointments_modal.min.js
+  s_0b46cbe83a43bb::t_92adaf87f15fbc 1
+assets/js/http/booking_http_client.min.js
+  s_0b46cbe83a43bb::t_88cc9336fb8fe7 1
+assets/js/http/booking_settings_http_client.min.js
+  s_0b46cbe83a43bb::t_d059274cd206dd 1
+assets/js/http/business_settings_http_client.min.js
+  s_0b46cbe83a43bb::t_8f1710a8ee3ac5 1
+assets/js/http/calendar_http_client.min.js
+  s_0b46cbe83a43bb::t_19f8c4002397d2 1
+assets/js/http/in_person_appointments_http_client.min.js
+  s_0b46cbe83a43bb::t_010b6a78d0dc19 1
+assets/js/http/turnos_http_client.min.js
+  s_0b46cbe83a43bb::t_39f51203bb6350 1
+assets/js/pages/account.min.js
+  s_0b46cbe83a43bb::t_b2a0b411e18aa2 1
+assets/js/pages/admins.min.js
+  s_0b46cbe83a43bb::t_4d805b90535efc 1
+assets/js/pages/booking.min.js
+  s_0b46cbe83a43bb::t_f78a956e0c8375 1
+assets/js/pages/booking_settings.min.js
+  s_0b46cbe83a43bb::t_d647ba285eaa76 1
+assets/js/pages/business_settings.min.js
+  s_0b46cbe83a43bb::t_689556eded0139 1
+assets/js/pages/calendar.min.js
+  s_0b46cbe83a43bb::t_a950673df75d08 1
+assets/js/pages/calendar_active_calls.min.js
+  s_0b46cbe83a43bb::t_2b684d9ec1152d 1
+assets/js/pages/in_person_appointments.min.js
+  s_0b46cbe83a43bb::t_dfdbaa2e18e26c 1
+assets/js/pages/in_person_confirmation.min.js
+  s_0b46cbe83a43bb::t_471b9b2d280516 1
+assets/js/pages/providers.min.js
+  s_0b46cbe83a43bb::t_8a4cac5126124a 1
+assets/js/pages/secretaries.min.js
+  s_0b46cbe83a43bb::t_86672181380705 1
+assets/js/pages/services.min.js
+  s_0b46cbe83a43bb::t_84049f9a296367 1
+assets/js/pages/turnos-slider.min.js
+  s_0b46cbe83a43bb::t_2c12017ffc22bd 1
+assets/js/pages/turnos.min.js
+  s_0b46cbe83a43bb::t_c54f2b021bc11b 1
+assets/js/utils/calendar_default_view.min.js
+  s_0b46cbe83a43bb::t_b5ce415d230e62 1
+assets/js/utils/calendar_event_popover.min.js
+  s_0b46cbe83a43bb::t_e9b20f724067ea 1
+assets/js/utils/calendar_realtime.min.js
+  s_0b46cbe83a43bb::t_310c23952d42de 1
+assets/js/utils/calendar_table_view.min.js
+  s_0b46cbe83a43bb::t_674a8aa8068834 1
+assets/js/utils/local_printing.min.js
+  s_0b46cbe83a43bb::t_ac22470bf3e7bf 1
+babel.config.json
+  s_0b46cbe83a43bb::t_dd4ada69299b13 1-6
+gulpfile.js
+  s_0b46cbe83a43bb::t_038ab1e45dce8b 1-204
+package-lock.json
+  s_0b46cbe83a43bb::t_0a56e63fad657d 1-6020
+package.json
+  s_0b46cbe83a43bb::t_3bcb3e9a35ba1e 1-67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bdee05cc37c75036f516739c0750daee35a29d36",
+  "prompts": {},
+  "sessions": {
+    "s_0b46cbe83a43bb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dfbe29dd-20dd-459c-84f3-fd926ea53327",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Guillermo López <willyaranda@gmail.com>"
+    }
+  }
+}
