@@ -1,0 +1,383 @@
+.gitignore
+  s_0b46cbe83a43bb::t_3c2e1fc150e8e1 1,3-11,25,27-38,40-48
+application/config/app.php
+  s_0b46cbe83a43bb::t_9a50371e7c428a 18-23
+application/config/constants.php
+  s_0b46cbe83a43bb::t_a36c732eb1e43f 86-87
+application/controllers/Booking.php
+  s_0b46cbe83a43bb::t_fc55e4482fad63 26-31,60-61,109-251,284,351,437-439,456-457,537-547,589,591-592,595-599,601-623,714-715,717,752,775,788-793,809,839-844,858-864,901-909,944,963,998-1006,1037
+application/controllers/Booking_confirmation.php
+  s_0b46cbe83a43bb::t_77c5e9dfc9aeb2 67-68
+application/controllers/Booking_settings.php
+  s_0b46cbe83a43bb::t_3c815b4af69d56 134-137
+application/controllers/Business_settings.php
+  s_0b46cbe83a43bb::t_a3edbddeeb61eb 107-110,143,146-148,153
+application/controllers/Calendar.php
+  s_0b46cbe83a43bb::t_9e0fd68a276624 23-29,63-65,204,241-242,260,274-429,482,498-501,530-550,694-737,912-919,1075-1082,1184-1392
+application/controllers/In_person_appointments.php
+  s_0b46cbe83a43bb::t_19745c4a116b6d 1-2,7-77,80-81,84,87-92,95-100,103-105,107-108,110,113-130,133,135,137-138,141,143-144,147-148,150-153,156-160,162-168,170-171,173-176,178-179,182,184-185,187-188,191-192,194-195,198-199,202-203,205-207,209-211,213-215,217,219-221,223-303,307-311,313-314,316-322,324-325,328-329,331-333,335-338,341,344-346
+application/controllers/In_person_confirmation.php
+  s_0b46cbe83a43bb::t_b82743c133d9b9 1-53
+application/controllers/Providers.php
+  s_0b46cbe83a43bb::t_afccd1b3bfbade 53-54,62-63,84-87,126
+application/controllers/Services.php
+  s_0b46cbe83a43bb::t_71d496be0de382 30
+application/controllers/Turnos.php
+  s_0b46cbe83a43bb::t_da6ca024c196d6 1-178
+application/language/english/translations_lang.php
+  s_0b46cbe83a43bb::t_13d67617481ec1 122-124,348-351,354,585-612
+application/language/spanish/translations_lang.php
+  s_0b46cbe83a43bb::t_7e0eadd59c1957 4,6,45,79-81,84,87,122-124,127,138,141,160,180-181,216,280,326,328-330,348-351,354,375,389-390,443,454,515,534,538,585-612
+application/libraries/Availability.php
+  s_0b46cbe83a43bb::t_d209196e713b00 65,72-78,80-85,114,123,125,347-352,355,357,664-726
+application/libraries/Realtime_events.php
+  s_0b46cbe83a43bb::t_fc3386542ba611 1,3-6,8,11-13,15-16,20-25,28,30,32-70
+application/libraries/Webhooks_client.php
+  s_0b46cbe83a43bb::t_5e95cb7dc3524a 44,66-140
+application/migrations/070_add_walkin_appointment_type_and_working_plan.php
+  s_0b46cbe83a43bb::t_850ef8bec2adc9 1-2,11,14,16-95
+application/migrations/071_add_caller_user_column_to_appointments_table.php
+  s_0b46cbe83a43bb::t_772d53b6b5cb8d 1-34
+application/migrations/071_add_documentation_requirements_to_services_table.php
+  s_0b46cbe83a43bb::t_f03dd1c4c1560e 1-35
+application/migrations/072_add_disable_appointment_type_settings.php
+  s_0b46cbe83a43bb::t_756e1e61eb31b4 1-43
+application/models/Appointments_model.php
+  s_0b46cbe83a43bb::t_0c171cbb42832e 30-31,46-48,78-234
+application/models/Providers_model.php
+  s_0b46cbe83a43bb::t_cfcf875e3eb7c7 265-275
+application/models/Services_model.php
+  s_0b46cbe83a43bb::t_6e3d49473317de 44
+application/views/components/appointments_modal.php
+  s_0b46cbe83a43bb::t_a14d1c99a98910 139-151
+application/views/components/backend_footer.php
+  s_0b46cbe83a43bb::t_5bd63d39cff25a 9
+application/views/components/backend_header.php
+  s_0b46cbe83a43bb::t_8a42aa86820178 11-12,34-35
+application/views/components/booking_header.php
+  s_0b46cbe83a43bb::t_3a82e677d2a0bd 16-17
+application/views/components/booking_type_step.php
+  s_0b46cbe83a43bb::t_92aa3f4b926814 11,16-27
+application/views/layouts/account_layout.php
+  s_0b46cbe83a43bb::t_a1807f1a3d7dfd 17
+application/views/layouts/backend_layout.php
+  s_0b46cbe83a43bb::t_8224e7a0c64223 21
+application/views/layouts/booking_layout.php
+  s_0b46cbe83a43bb::t_9dacfe38b2294c 26
+application/views/layouts/message_layout.php
+  s_0b46cbe83a43bb::t_2577c24cccb63e 17
+application/views/pages/booking_confirmation.php
+  s_0b46cbe83a43bb::t_db0a5ed0f2b75e 21-26,28
+application/views/pages/booking_settings.php
+  s_0b46cbe83a43bb::t_126f0543d80225 397-413,416-420,426
+application/views/pages/business_settings.php
+  s_0b46cbe83a43bb::t_6ee80244a9e6b8 33-48
+application/views/pages/calendar.php
+  s_0b46cbe83a43bb::t_8d141642fb1e7e 129-160,163-166,176,185
+application/views/pages/general_settings.php
+  s_0b46cbe83a43bb::t_78025c267efdb2 119
+application/views/pages/in_person_appointments.php
+  s_0b46cbe83a43bb::t_63cbcaeb141f35 1,3,5-6,8-11,13,15-18,20-23,25-29,31,33-36
+application/views/pages/installation.php
+  s_0b46cbe83a43bb::t_4e908b772d0f71 10
+application/views/pages/providers.php
+  s_0b46cbe83a43bb::t_6762e4560eb076 293-308
+application/views/pages/services.php
+  s_0b46cbe83a43bb::t_5af5c11e2add1d 162-171
+application/views/pages/turnos.php
+  s_0b46cbe83a43bb::t_972ff0c33c9cfe 1-63
+assets/css/backend.css
+  s_0b46cbe83a43bb::t_bd142cc26aaa3f 11-14,16-29,31-34,36-39,41-45,47-49,51-52,55-61,63-68,70-73,75-79,81-83,85-94,96-102,105-108,110-112,114-116,118-151,154-155,158-161,163-165,168-170,172-175,177-182,184-186,188-194,196-203,206-209,211-212,215-216,219-221,223-225,227-233,235-237,240-242,245-247,250-251,254-257,260-262,265-267,269-273,275-282,284-289,292-297,299-304,307-314,316-318,321-323,325-327,329-333,335-338,340-344,346-350,353-357,359-367,370-375,378-386,388-390,392-398,400-403,405-408,410-414,417-418,421-427,430-436,438-441,444-636
+assets/css/backend.min.css
+  s_0b46cbe83a43bb::t_c9070624da0271 1
+assets/css/backend.scss
+  s_0b46cbe83a43bb::t_139abb0f6df7a3 629-658
+assets/css/calendar_active_calls.css
+  s_0b46cbe83a43bb::t_004d1a249b9004 1-158
+assets/css/frontend.css
+  s_0b46cbe83a43bb::t_ca9ee9e601defb 11-26,28-31,33-40,43-46,48-50,53-57,59-62,65-67,69-72,74-75,77-80
+assets/css/frontend.min.css
+  s_0b46cbe83a43bb::t_a3412ccf03eda5 1
+assets/css/general.css
+  s_0b46cbe83a43bb::t_cd3e1d4545a13c 11-14,17-18,21-24,26-29,32-35,37-41,43-45,47-48,51-56,58-60,62-64,66-68,70-72,74-78,80-81,83-208,211-220,222-227,229-231,233-240,242-246,248-253,255-324,327-331,334-347,349-359,361-369,371-395,397-403,405-414,416-419,422-431,433-473
+assets/css/general.min.css
+  s_0b46cbe83a43bb::t_b17b89f7791315 1
+assets/css/themes/minty.css
+  s_0b46cbe83a43bb::t_dfea2df7f03043 1-12184
+assets/css/themes/minty.scss
+  s_0b46cbe83a43bb::t_c8b0ab6f9f0a26 45
+assets/css/turnos.css
+  s_0b46cbe83a43bb::t_73958af346bd33 1-271
+assets/js/app.min.js
+  s_0b46cbe83a43bb::t_9791fff9fcd19d 1
+assets/js/components/appointment_status_options.min.js
+  s_0b46cbe83a43bb::t_ded0214a356449 1
+assets/js/components/appointments_modal.min.js
+  s_0b46cbe83a43bb::t_e87fed9c994d11 1
+assets/js/components/color_selection.min.js
+  s_0b46cbe83a43bb::t_415ad6be409115 1
+assets/js/components/ldap_import_modal.min.js
+  s_0b46cbe83a43bb::t_7d088195fe4c3d 1
+assets/js/components/unavailabilities_modal.min.js
+  s_0b46cbe83a43bb::t_1379ce12d1001f 1
+assets/js/components/working_plan_exceptions_modal.min.js
+  s_0b46cbe83a43bb::t_d57eabca4c5003 1
+assets/js/http/account_http_client.min.js
+  s_0b46cbe83a43bb::t_a2d1ab164212b0 1
+assets/js/http/admins_http_client.min.js
+  s_0b46cbe83a43bb::t_72e163e7a274ae 1
+assets/js/http/altcha_settings_http_client.min.js
+  s_0b46cbe83a43bb::t_b2f4d3668b12af 1
+assets/js/http/api_settings_http_client.min.js
+  s_0b46cbe83a43bb::t_1bdab4043f0859 1
+assets/js/http/appointments_http_client.min.js
+  s_0b46cbe83a43bb::t_a1765329f0d708 1
+assets/js/http/blocked_periods_http_client.min.js
+  s_0b46cbe83a43bb::t_0f1160a2c700ce 1
+assets/js/http/booking_http_client.js
+  s_0b46cbe83a43bb::t_0a60e9ef9ecb7f 73,143-147,257-261,300
+assets/js/http/booking_http_client.min.js
+  s_0b46cbe83a43bb::t_fd58c8ac0c8163 1
+assets/js/http/booking_settings_http_client.min.js
+  s_0b46cbe83a43bb::t_bd1e69b98f3c97 1
+assets/js/http/business_settings_http_client.js
+  s_0b46cbe83a43bb::t_297bc71dea823e 43,49
+assets/js/http/business_settings_http_client.min.js
+  s_0b46cbe83a43bb::t_c8002fee0be29d 1
+assets/js/http/caldav_http_client.min.js
+  s_0b46cbe83a43bb::t_4ff18319c500f1 1
+assets/js/http/calendar_http_client.js
+  s_0b46cbe83a43bb::t_a4341b736f4179 90-107,324-382,387,394-396
+assets/js/http/calendar_http_client.min.js
+  s_0b46cbe83a43bb::t_d722af4bb9e73a 1
+assets/js/http/customers_http_client.min.js
+  s_0b46cbe83a43bb::t_02a52b979114f8 1
+assets/js/http/general_settings_http_client.min.js
+  s_0b46cbe83a43bb::t_7faf063e1a39ea 1
+assets/js/http/google_analytics_settings_http_client.min.js
+  s_0b46cbe83a43bb::t_d68829b15928fd 1
+assets/js/http/google_calendar_settings_http_client.min.js
+  s_0b46cbe83a43bb::t_d9f6aaffd16b45 1
+assets/js/http/google_http_client.min.js
+  s_0b46cbe83a43bb::t_29b5b85463ab66 1
+assets/js/http/in_person_appointments_http_client.js
+  s_0b46cbe83a43bb::t_2275f7171f1820 1-16
+assets/js/http/jitsi_settings_http_client.min.js
+  s_0b46cbe83a43bb::t_1162c0987db626 1
+assets/js/http/ldap_settings_http_client.min.js
+  s_0b46cbe83a43bb::t_a28584cfd54269 1
+assets/js/http/legal_settings_http_client.min.js
+  s_0b46cbe83a43bb::t_ff5fc784f39bf1 1
+assets/js/http/localization_http_client.min.js
+  s_0b46cbe83a43bb::t_ca53a7e54fdc81 1
+assets/js/http/login_http_client.min.js
+  s_0b46cbe83a43bb::t_e954252122cee2 1
+assets/js/http/matomo_analytics_settings_http_client.min.js
+  s_0b46cbe83a43bb::t_8510153aab462c 1
+assets/js/http/password_reset_http_client.min.js
+  s_0b46cbe83a43bb::t_7ae87886c31893 1
+assets/js/http/providers_http_client.min.js
+  s_0b46cbe83a43bb::t_7c67671628ca40 1
+assets/js/http/recovery_http_client.min.js
+  s_0b46cbe83a43bb::t_8e017837922f90 1
+assets/js/http/secretaries_http_client.min.js
+  s_0b46cbe83a43bb::t_795ac5d4153169 1
+assets/js/http/service_categories_http_client.min.js
+  s_0b46cbe83a43bb::t_dffc1ec22e92ea 1
+assets/js/http/services_http_client.min.js
+  s_0b46cbe83a43bb::t_4bebc78bcd412a 1
+assets/js/http/settings_http_client.min.js
+  s_0b46cbe83a43bb::t_3e79da821a1c4b 1
+assets/js/http/turnos_http_client.js
+  s_0b46cbe83a43bb::t_aa0917e56cbcef 1-16
+assets/js/http/unavailabilities_http_client.min.js
+  s_0b46cbe83a43bb::t_214c1d4c51689a 1
+assets/js/http/webhooks_http_client.min.js
+  s_0b46cbe83a43bb::t_8cc3de6579f7e7 1
+assets/js/layouts/account_layout.min.js
+  s_0b46cbe83a43bb::t_792f7e161cecf5 1
+assets/js/layouts/backend_layout.min.js
+  s_0b46cbe83a43bb::t_cf95b6419a0c43 1
+assets/js/layouts/booking_layout.min.js
+  s_0b46cbe83a43bb::t_24657a518dcc59 1
+assets/js/layouts/message_layout.min.js
+  s_0b46cbe83a43bb::t_e64dc22a10236c 1
+assets/js/pages/account.min.js
+  s_0b46cbe83a43bb::t_010b95f5798b69 1
+assets/js/pages/admins.min.js
+  s_0b46cbe83a43bb::t_42c186b21b287b 1
+assets/js/pages/altcha_settings.min.js
+  s_0b46cbe83a43bb::t_de5ad1b63eb855 1
+assets/js/pages/api_settings.min.js
+  s_0b46cbe83a43bb::t_349cb448e0f2b8 1
+assets/js/pages/blocked_periods.min.js
+  s_0b46cbe83a43bb::t_a842ce2aecbf52 1
+assets/js/pages/booking.js
+  s_0b46cbe83a43bb::t_0b93d594c6091c 180,195-196,198,200-207,209-210,212-213,216-226,230,233-234,237-238,325-397,423-430,437,439,456-457,551-554,733,736,739,771-775,780,783,789-792,877,938-939,1025-1038
+assets/js/pages/booking.min.js
+  s_0b46cbe83a43bb::t_2d934bf78c498a 1
+assets/js/pages/booking_settings.js
+  s_0b46cbe83a43bb::t_fbeca8d87e2fec 20,74-76,78-86,100-103,180,224,235
+assets/js/pages/booking_settings.min.js
+  s_0b46cbe83a43bb::t_ed7b54ad3230be 1
+assets/js/pages/business_settings.js
+  s_0b46cbe83a43bb::t_385c2f17fec597 18-20,23,25-57,114,116-119,125,129-130,178-181,204,210-211,213,216-224,233-239
+assets/js/pages/business_settings.min.js
+  s_0b46cbe83a43bb::t_7b07e0c405997b 1
+assets/js/pages/calendar.js
+  s_0b46cbe83a43bb::t_d71f6488d8a35f 153-156
+assets/js/pages/calendar.min.js
+  s_0b46cbe83a43bb::t_d683334b619900 12-60,62-63,65-67,69-71,73-75,77-104,107-133,135,138-151,153-155,157,160-166
+assets/js/pages/calendar_active_calls.js
+  s_0b46cbe83a43bb::t_41e383c8121eb4 1-296
+assets/js/pages/customers.min.js
+  s_0b46cbe83a43bb::t_16b172a3597f08 1
+assets/js/pages/general_settings.min.js
+  s_0b46cbe83a43bb::t_beb7fe7b726c4e 1
+assets/js/pages/google_analytics_settings.min.js
+  s_0b46cbe83a43bb::t_88fbf6226395b4 1
+assets/js/pages/google_calendar_settings.min.js
+  s_0b46cbe83a43bb::t_828ecdde584285 1
+assets/js/pages/in_person_appointments.js
+  s_0b46cbe83a43bb::t_25d1f51a15df20 1-118
+assets/js/pages/installation.min.js
+  s_0b46cbe83a43bb::t_c0e970ea3666da 1
+assets/js/pages/jitsi_settings.min.js
+  s_0b46cbe83a43bb::t_58027f4cdb373a 1
+assets/js/pages/ldap_settings.min.js
+  s_0b46cbe83a43bb::t_dd4ae8fda31e6b 1
+assets/js/pages/legal_settings.min.js
+  s_0b46cbe83a43bb::t_c0f2e77a5ed85c 1
+assets/js/pages/login.min.js
+  s_0b46cbe83a43bb::t_076e76ee7cfcd7 1
+assets/js/pages/matomo_analytics_settings.min.js
+  s_0b46cbe83a43bb::t_b6030c53153c38 1
+assets/js/pages/password_reset.min.js
+  s_0b46cbe83a43bb::t_fa618cc25d19a6 1
+assets/js/pages/providers.js
+  s_0b46cbe83a43bb::t_337c48d5c6f4e6 18-20,43,47-102,154,185,188-189,207,246-249,251,272-279,328-329,334-346,482,502-504,533,548-564,566,603-620,729-730
+assets/js/pages/providers.min.js
+  s_0b46cbe83a43bb::t_e20f510e0e917e 1
+assets/js/pages/recovery.min.js
+  s_0b46cbe83a43bb::t_696f61eedf87d7 1
+assets/js/pages/secretaries.min.js
+  s_0b46cbe83a43bb::t_25f096a5b5bc69 1
+assets/js/pages/service_categories.min.js
+  s_0b46cbe83a43bb::t_18548f7702e112 1
+assets/js/pages/services.js
+  s_0b46cbe83a43bb::t_9dfcc2c17743f9 30,159,349
+assets/js/pages/services.min.js
+  s_0b46cbe83a43bb::t_ef5eac380208b6 1
+assets/js/pages/turnos.js
+  s_0b46cbe83a43bb::t_abe3b7f1f9bce0 5-28,30-32,34-35,37-39,41,44-46,49-52,55-56,59-64,66-67,69,71-73,75,78-100,103-104,106,108-109,111-115,117-119,121-123,125-130,132-137,139,141-144,146-150,152-156,159-162,164-166,168,170-172,174-177,180,182-186
+assets/js/pages/webhooks.min.js
+  s_0b46cbe83a43bb::t_5f19ab522491cf 1
+assets/js/utils/altcha.min.js
+  s_0b46cbe83a43bb::t_6c70a14f03fd22 1
+assets/js/utils/calendar_default_view.js
+  s_0b46cbe83a43bb::t_f6c74e1a24eae1 136-178,226,388-405,1271-1273,1410,1471
+assets/js/utils/calendar_default_view.min.js
+  s_0b46cbe83a43bb::t_ac51a79c115595 1
+assets/js/utils/calendar_event_popover.js
+  s_0b46cbe83a43bb::t_6ad00f94b6d302 152,155-166,169,307
+assets/js/utils/calendar_event_popover.min.js
+  s_0b46cbe83a43bb::t_37e53362b7eeaf 1
+assets/js/utils/calendar_realtime.js
+  s_0b46cbe83a43bb::t_0d614ded87ee5c 5-11,13,15-17,19-22,24-28,30-35,37-39,42-43,46-49,51-72,75-78,80-90,93-104,106-114,118-123,126-129,131-166,168-173
+assets/js/utils/calendar_realtime.min.js
+  s_0b46cbe83a43bb::t_f2ee2c7b39e531 5-20,22-26,28-30,32-34,36-37,39-42,44-47,49-60,63-64,66-68,71-73,76-77,79-82,84-86,88-91,93-96,98-102,104-106,108-110,112-115,117-122,124-129,131,133-136,138-142,144-146,148,151-152,155-158
+assets/js/utils/calendar_sync.min.js
+  s_0b46cbe83a43bb::t_c172d3f08382cc 1
+assets/js/utils/calendar_table_view.js
+  s_0b46cbe83a43bb::t_0bb2c847192024 220,1676
+assets/js/utils/calendar_table_view.min.js
+  s_0b46cbe83a43bb::t_9f3a0d6720592d 1
+assets/js/utils/date.min.js
+  s_0b46cbe83a43bb::t_caf5e2b10c9cd8 1
+assets/js/utils/file.min.js
+  s_0b46cbe83a43bb::t_c9a816255a9c75 1
+assets/js/utils/http.min.js
+  s_0b46cbe83a43bb::t_97cbee1003fa64 1
+assets/js/utils/lang.min.js
+  s_0b46cbe83a43bb::t_bef928f5566189 1
+assets/js/utils/message.min.js
+  s_0b46cbe83a43bb::t_d4d42ffc5d278f 1
+assets/js/utils/string.min.js
+  s_0b46cbe83a43bb::t_f4a26154156dc9 1
+assets/js/utils/ui.min.js
+  s_0b46cbe83a43bb::t_021d6205581b6f 1
+assets/js/utils/url.min.js
+  s_0b46cbe83a43bb::t_1bdd4f59ae5b22 1
+assets/js/utils/validation.min.js
+  s_0b46cbe83a43bb::t_2c90e806d0d870 1
+assets/js/utils/working_plan.min.js
+  s_0b46cbe83a43bb::t_a177ae029b52b2 1
+assets/vendor/@fortawesome-fontawesome-free/fontawesome.min.js
+  s_0b46cbe83a43bb::t_e5764e5b01cb62 1-6
+assets/vendor/@fortawesome-fontawesome-free/solid.min.js
+  s_0b46cbe83a43bb::t_3aa87b838b2906 1-6
+assets/vendor/@popperjs-core/popper.min.js
+  s_0b46cbe83a43bb::t_fadeddda0cb03c 1-6
+assets/vendor/bootstrap/bootstrap.min.css
+  s_0b46cbe83a43bb::t_a25f19d1c0a37c 1-6
+assets/vendor/bootstrap/bootstrap.min.js
+  s_0b46cbe83a43bb::t_a5d7b0880e690e 1-7
+assets/vendor/cookieconsent/cookieconsent.min.css
+  s_0b46cbe83a43bb::t_26edb0513c87d2 1-6
+assets/vendor/cookieconsent/cookieconsent.min.js
+  s_0b46cbe83a43bb::t_a24d348bf60528 1
+assets/vendor/flatpickr/flatpickr.min.css
+  s_0b46cbe83a43bb::t_0280f92523daab 1-13
+assets/vendor/flatpickr/flatpickr.min.js
+  s_0b46cbe83a43bb::t_a7929f916a375a 1-2
+assets/vendor/flatpickr/material_green.min.css
+  s_0b46cbe83a43bb::t_7a604793f5f8f8 1
+assets/vendor/fullcalendar-moment/index.global.min.js
+  s_0b46cbe83a43bb::t_0a815060bf66c0 1-6
+assets/vendor/fullcalendar/index.global.min.js
+  s_0b46cbe83a43bb::t_40c62f1151a4a6 1-6
+assets/vendor/jquery-jeditable/jquery.jeditable.min.js
+  s_0b46cbe83a43bb::t_3cd67f2f1ef9a5 1-3
+assets/vendor/jquery/jquery.min.js
+  s_0b46cbe83a43bb::t_829659542dfee3 1-2
+assets/vendor/moment-timezone/moment-timezone-with-data.min.js
+  s_0b46cbe83a43bb::t_fc86acaa731c35 1
+assets/vendor/moment/moment.min.js
+  s_0b46cbe83a43bb::t_1e8a40d5191f31 1-2
+assets/vendor/select2/select2.min.css
+  s_0b46cbe83a43bb::t_8167db4a3ffc6f 1
+assets/vendor/select2/select2.min.js
+  s_0b46cbe83a43bb::t_299c725312de04 1-2
+assets/vendor/tippy.js/tippy-bundle.umd.min.js
+  s_0b46cbe83a43bb::t_aaa3796c2f064a 1-2
+assets/vendor/trumbowyg/trumbowyg.min.css
+  s_0b46cbe83a43bb::t_9f0aea1919c199 1-3
+assets/vendor/trumbowyg/trumbowyg.min.js
+  s_0b46cbe83a43bb::t_c636b8e4b89a68 1-2
+assets/vendor/trumbowyg/ui/icons.svg
+  s_0b46cbe83a43bb::t_ec685f7d131506 1
+realtime-server/README.md
+  s_0b46cbe83a43bb::t_09b83683a4f915 1-38
+realtime-server/package-lock.json
+  s_0b46cbe83a43bb::t_a6914ba0ce70df 1-36
+realtime-server/package.json
+  s_0b46cbe83a43bb::t_27bfab9ecccc38 2-8,11
+realtime-server/server.js
+  s_0b46cbe83a43bb::t_5dbe6b74ddd71c 1-89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d24bfae01ee29b1bdddf638c83c2a9ae15efb119",
+  "prompts": {},
+  "sessions": {
+    "s_0b46cbe83a43bb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dfbe29dd-20dd-459c-84f3-fd926ea53327",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Guillermo López <willyaranda@gmail.com>"
+    }
+  }
+}
