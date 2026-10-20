@@ -1,0 +1,113 @@
+.editorconfig
+  s_0b46cbe83a43bb::t_0efe8ecb585a9b 1-10
+.gitattributes
+  s_0b46cbe83a43bb::t_dc2ae9e3b4d29e 1
+.github/CODE_OF_CONDUCT.md
+  s_0b46cbe83a43bb::t_3d091350a314e9 1-58
+.github/CONTRIBUTING.md
+  s_0b46cbe83a43bb::t_8d10af6b102e5f 1-17
+.github/SECURITY.md
+  s_0b46cbe83a43bb::t_89a8d178ed9704 1-4
+.github/copilot-instructions.md
+  s_0b46cbe83a43bb::t_ba388825e3d41d 1-79
+.github/workflows/ci.yml
+  s_0b46cbe83a43bb::t_37c882984172ba 1-23
+.gitignore
+  s_0b46cbe83a43bb::t_305498739772b9 50-62
+.prettierignore
+  s_0b46cbe83a43bb::t_6c08968c5c805f 1-11
+.prettierrc.json
+  s_0b46cbe83a43bb::t_effac5796aae6a 1-12
+.run/Build.run.xml
+  s_0b46cbe83a43bb::t_57e47df58aafdd 1-17
+.run/SSH.run.xml
+  s_0b46cbe83a43bb::t_cdf33246c045e4 1-17
+.run/Start.run.xml
+  s_0b46cbe83a43bb::t_ed819ef1b373a6 1-17
+.run/Stop.run.xml
+  s_0b46cbe83a43bb::t_8b4c1c44e60123 1-17
+assets/css/themes/cosmo.scss
+  s_0b46cbe83a43bb::t_ca51139ad67d2a 1-128
+assets/css/themes/darkly.scss
+  s_0b46cbe83a43bb::t_bc53224febcb47 1-273
+assets/css/themes/default.scss
+  s_0b46cbe83a43bb::t_6e175e26257ad9 1-755
+assets/css/themes/flatly.scss
+  s_0b46cbe83a43bb::t_d4fe6922849e91 1-226
+assets/css/themes/litera.scss
+  s_0b46cbe83a43bb::t_fdcc3116adcda3 1-227
+assets/css/themes/lumen.scss
+  s_0b46cbe83a43bb::t_7ebd6cd4fe541f 1-444
+assets/css/themes/materia.scss
+  s_0b46cbe83a43bb::t_23b09ab83b8ec4 1-806
+assets/css/themes/sketchy.scss
+  s_0b46cbe83a43bb::t_d884cb63c61934 1-645
+assets/css/themes/zephyr.scss
+  s_0b46cbe83a43bb::t_609dd66b43d3cc 1-396
+composer.lock
+  s_0b46cbe83a43bb::t_49b265b1df912c 1-3581
+config-sample.php
+  s_0b46cbe83a43bb::t_b9509976bfeaf1 1-56
+docker-compose.yml
+  s_0b46cbe83a43bb::t_a77d9804264a23 1-96
+docker/nginx/nginx.conf
+  s_0b46cbe83a43bb::t_1e5b29d41b3d0b 1-32
+docker/php-fpm/Dockerfile
+  s_0b46cbe83a43bb::t_1cbb245197451c 1-29
+docker/php-fpm/php-ini-overrides.ini
+  s_0b46cbe83a43bb::t_9b33456e4036ee 1-17
+docker/php-fpm/start-container
+  s_0b46cbe83a43bb::t_b33bcde78cdade 1-19
+docs/caldav-calendar-sync.md
+  s_0b46cbe83a43bb::t_698782443a3001 1-38
+docs/console.md
+  s_0b46cbe83a43bb::t_e55b41cc682e7e 1-99
+docs/docker.md
+  s_0b46cbe83a43bb::t_fdaed5e84d51c9 1-67
+docs/faq.md
+  s_0b46cbe83a43bb::t_5868d0255ab7b1 1-110
+docs/get-involved.md
+  s_0b46cbe83a43bb::t_f4d1d775975858 1-23
+docs/google-calendar-sync.md
+  s_0b46cbe83a43bb::t_f70ecbd74b3894 1-59
+docs/installation-guide.md
+  s_0b46cbe83a43bb::t_99b22c987697cc 1-89
+docs/ldap.md
+  s_0b46cbe83a43bb::t_47ca784ea225d7 1-106
+docs/manage-translations.md
+  s_0b46cbe83a43bb::t_f5c3cc21feef85 1-47
+docs/readme.md
+  s_0b46cbe83a43bb::t_1f6604576ebc19 1-18
+docs/rest-api.md
+  s_0b46cbe83a43bb::t_08acb791456b9d 1-427
+docs/update-guide.md
+  s_0b46cbe83a43bb::t_ebb36132162b2f 1-77
+openapi.yml
+  s_0b46cbe83a43bb::t_7554c15e59b35b 1-3198
+phpunit.xml
+  s_0b46cbe83a43bb::t_c9f9c363c14d5a 1-16
+storage/index.html
+  s_0b46cbe83a43bb::t_32a939b4101755 1-10
+tests/TestCase.php
+  s_0b46cbe83a43bb::t_7c75da9171153d 1-27
+tests/Unit/Helper/ArrayHelperTest.php
+  s_0b46cbe83a43bb::t_054f9d710d18ab 1-53
+tests/Unit/Helper/ValidationHelperTest.php
+  s_0b46cbe83a43bb::t_19963f099894e1 1-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "29b7e949bc4425e811ff33afcd87ff813b00877b",
+  "prompts": {},
+  "sessions": {
+    "s_0b46cbe83a43bb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dfbe29dd-20dd-459c-84f3-fd926ea53327",
+        "model": "unknown"
+      },
+      "human_author": "Guillermo López <willyaranda@gmail.com>"
+    }
+  }
+}
