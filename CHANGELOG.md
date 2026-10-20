@@ -3,6 +3,16 @@
 This file contains the code changes that were introduced into each release (starting from v1.1.0) so that is easy for 
 developers to maintain and readjust their custom modifications on the main project codebase.
 
+## [Unreleased]
+
+### Added
+
+- Add the Aranda de Duero customization: walk-in appointments from a paired kiosk, public queue display, call management from the calendar, shared capacity per department, reports, local ticket printing and realtime calendar updates (see docs/aranda-cambios.md)
+
+### Changed
+
+- Read the SMTP password from the SMTP_PASSWORD variable of the root .env file instead of application/config/email.php (see .env.example)
+
 ## [1.6.0] - 2026-05-27
 
 ### Added

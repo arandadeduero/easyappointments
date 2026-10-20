@@ -15,4 +15,9 @@ Welcome to the documentation pages of Easy!Appointments. Navigate through the av
 - [Get Involved](get-involved.md)
 - [FAQ](faq.md)
 
+Personalización del Ayuntamiento de Aranda de Duero:
+
+- [Cambios respecto al original](aranda-cambios.md)
+- [Revisión del código](aranda-revision.md)
+
 *This document applies to Easy!Appointments v1.6.0.*
