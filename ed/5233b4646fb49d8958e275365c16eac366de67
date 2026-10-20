@@ -1,0 +1,25 @@
+docs/aranda-cambios.md
+  s_0b46cbe83a43bb::t_bdf109b072ee91 1-193
+docs/aranda-revision.md
+  s_0b46cbe83a43bb::t_4471d149438ae8 1-99
+CHANGELOG.md
+  s_0b46cbe83a43bb::t_7a5fe4fcf27b97 6-15
+docs/readme.md
+  s_0b46cbe83a43bb::t_7a5fe4fcf27b97 18-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ed5233b4646fb49d8958e275365c16eac366de67",
+  "prompts": {},
+  "sessions": {
+    "s_0b46cbe83a43bb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dfbe29dd-20dd-459c-84f3-fd926ea53327",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Guillermo López <willyaranda@gmail.com>"
+    }
+  }
+}
