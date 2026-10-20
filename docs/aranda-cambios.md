@@ -45,6 +45,9 @@ cp .env.example .env
 Las variables definidas en el entorno real (servidor web, shell, contenedor) tienen prioridad sobre el fichero. El
 resto de la configuración SMTP (servidor, usuario, puerto, cifrado) sigue en `application/config/email.php`.
 
+El servidor web no debe servir nunca el fichero `.env`: el `.htaccess` de la raíz y la configuración nginx de docker ya
+lo deniegan; en cualquier otro servidor hay que comprobar la configuración.
+
 ### Constantes nuevas en `config.php`
 
 El contratista añadió constantes opcionales a la clase `Config` del fichero raíz `config.php`. No están en
