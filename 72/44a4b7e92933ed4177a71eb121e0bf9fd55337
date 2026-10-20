@@ -1,0 +1,25 @@
+.env.example
+  s_0b46cbe83a43bb::t_ac6ebad35a4cf6 8-10
+.htaccess
+  s_0b46cbe83a43bb::t_0fb479222ab8ce 1-9
+docker/nginx/nginx.conf
+  s_0b46cbe83a43bb::t_e5e011fb7c3ba2 32-35
+docs/aranda-cambios.md
+  s_0b46cbe83a43bb::t_1367e6dda86a41 48-50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7244a4b7e92933ed4177a71eb121e0bf9fd55337",
+  "prompts": {},
+  "sessions": {
+    "s_0b46cbe83a43bb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dfbe29dd-20dd-459c-84f3-fd926ea53327",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Guillermo López <willyaranda@gmail.com>"
+    }
+  }
+}
