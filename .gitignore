@@ -47,3 +47,16 @@ Desktop.ini
 *.swp
 *~
 node_modules
+
+# Build and docker output (upstream Easy!Appointments)
+/*.zip
+/.tmp-package/
+/build/
+/docs/apigen/html
+/docs/jsdoc/html
+/docs/plato/html
+/docker/mysql/
+/docker/baikal/
+/docker/openldap/
+/npm-debug.log
+/metafile
